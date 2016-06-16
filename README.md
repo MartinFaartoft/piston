@@ -8,4 +8,4 @@ A game engine for making 2D games using HTML5 Canvas
 * Resource loading (currently images) before game start
 
 ### Example games
-* Asteroids [source] (https://github.com/MartinFaartoft/asteroids)
+* Asteroids [play] (http://ftft.dk/asteroids/) [source] (https://github.com/MartinFaartoft/asteroids)
