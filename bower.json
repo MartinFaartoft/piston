@@ -18,15 +18,13 @@
   ],
   "license": "MIT",
   "ignore": [
-    "**/.*",
     "node_modules",
     "bower_components",
-    "src/",
-    "*.md",
+    "src",
+    "build",
     "gruntfile.js",
     "package.json",
     "tslint.json",
-    ".gitignore",
-    "README.md"
+    ".gitignore"
   ]
 }
