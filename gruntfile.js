@@ -73,7 +73,7 @@ module.exports = function (grunt) {
          // Typescript Compile engine 
          //
          tsc: {
-            command: '<%= tscCmd %> --sourcemap --declaration "./src/main/engine.ts" --out "./dist/<%= pkg.name %>-<%= version %>.js"',               
+            command: '<%= tscCmd %> --sourcemap --declaration "./src/main/export.ts" --out "./dist/<%= pkg.name %>-<%= version %>.js"',               
             options: {
                stdout: true,
                failOnError: true

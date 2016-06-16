@@ -5,6 +5,7 @@
         "target": "es5"
     }, 
     "files": [
-        "engine.ts"
+        "engine.ts",
+        "sprite.ts"
     ]
 }

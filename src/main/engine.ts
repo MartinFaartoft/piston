@@ -1,16 +1,32 @@
-/// <reference path="sprite.ts" />
-
+/// <reference path="basegamestate.ts" />
 
 namespace ps {
     export class Engine {
-        constructor(public dimensions: number[]) {}
+        public lastTime: number = Date.now();
 
-        sum(a: number, b: number) {
-            return a + b;
+        constructor(public state: BaseGameState, public ctx: CanvasRenderingContext2D, public debug: boolean) { }
+
+        run() {
+            let now = Date.now();
+            let dt = (now - this.lastTime) / 1000.0;
+
+            this.state.update(dt);
+            this.state.render(this.ctx);
+            this.lastTime = now;
+            this.requestAnimationFrame.call(window, this.run.bind(this));
         }
 
-        subtract(a: number, b: number): number {
-            return 1;
-        }
+        // A cross-browser requestAnimationFrame
+        // See https://hacks.mozilla.org/2011/08/animating-with-javascript-from-setinterval-to-requestanimationframe/
+        private requestAnimationFrame = (function(){
+            return window.requestAnimationFrame       ||
+                (<any>window).webkitRequestAnimationFrame ||
+                (<any>window).mozRequestAnimationFrame    ||
+                (<any>window).oRequestAnimationFrame      ||
+                (<any>window).msRequestAnimationFrame     ||
+                function(callback){
+                    window.setTimeout(callback, 1000 / 60);
+                };
+        })();
     }
 }
