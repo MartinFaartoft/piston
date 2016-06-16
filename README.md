@@ -6,3 +6,6 @@ A game engine for making 2D games using HTML5 Canvas
 * Sprite animation
 * Reading input from keyboard
 * Resource loading (currently images) before game start
+
+### Example games
+* Asteroids [source] (https://github.com/MartinFaartoft/asteroids)
