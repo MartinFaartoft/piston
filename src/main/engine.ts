@@ -1,3 +1,6 @@
+/// <reference path="sprite.ts" />
+
+
 namespace ps {
     export class Engine {
         constructor(public dimensions: number[]) {}

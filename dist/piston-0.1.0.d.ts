@@ -1,4 +1,9 @@
 declare namespace ps {
+    class Sprite {
+        value(): number;
+    }
+}
+declare namespace ps {
     class Engine {
         dimensions: number[];
         constructor(dimensions: number[]);

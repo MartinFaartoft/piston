@@ -87,7 +87,7 @@ module.exports = function (grunt) {
             command: function () {
             	var files = grunt.file.expand("./src/test/*.ts");
 
-            	return '<%= tscCmd %> ' + files.join(' ') + ' --out ./src/test/test.js'
+            	return '<%= tscCmd %> ' + files.join(' ') + ' --out ./build/test/test.js'
             },
             options: {
                stdout: true,
@@ -130,7 +130,6 @@ module.exports = function (grunt) {
    grunt.loadNpmTasks('grunt-shell');
    grunt.loadNpmTasks('grunt-minified');
    grunt.loadNpmTasks('grunt-contrib-concat');
-   grunt.loadNpmTasks('grunt-contrib-copy');
    grunt.loadNpmTasks('grunt-tslint');
    grunt.loadNpmTasks('grunt-contrib-watch');
    
@@ -141,11 +140,11 @@ module.exports = function (grunt) {
    // Run tests quickly
    grunt.registerTask('tests', ['shell:specs', 'shell:tests']);
 
-   grunt.registerTask('compile', ['shell:tsc', 'minified', 'concat', 'copy'])
+   grunt.registerTask('compile', ['shell:tsc', 'minified', 'concat'])
 
    grunt.registerTask('server', [])
    
    // Default task - compile, test, build dists
-   grunt.registerTask('default', ['tslint:src', 'shell:specs', 'shell:tests', 'shell:tsc', 'minified', 'concat', 'copy']);
+   grunt.registerTask('default', ['tslint:src', 'shell:specs', 'shell:tests', 'shell:tsc', 'minified', 'concat']);
 
 };
