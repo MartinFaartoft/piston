@@ -1,8 +1,10 @@
-/// <reference path="entity.ts" />
 /// <reference path="basegamestate.ts" />
 
 namespace ps {
     export interface Collidable {
-        collideWith(other: Entity, state: BaseGameState);
+        pos: number[];
+        radius: number;
+
+        collideWith(other: Collidable, state: BaseGameState);
     }
 }

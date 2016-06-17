@@ -1,7 +1,7 @@
 # Piston
 A game engine for making 2D games using HTML5 Canvas
 
-## Features (Piston 0.1.0)
+## Features (Piston 0.1)
 * Collision detection (circular)
 * Sprite animation
 * Reading input from keyboard

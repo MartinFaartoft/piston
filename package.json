@@ -1,8 +1,8 @@
 {
   "name": "piston",
   "description": "Piston.js is a JavaScript / Typescript game engine for 2D Canvas games.",
-  "main": "dist/piston-0.1.0.js",
-  "version": "0.1.0",
+  "main": "dist/piston-0.1.1.js",
+  "version": "0.1.1",
   "author": "martin.faartoft@gmail.com",
   "homepage": "https://github.com/martinfaartoft/piston/",
   "repository": {

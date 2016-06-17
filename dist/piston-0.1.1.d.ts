@@ -65,6 +65,11 @@ declare namespace ps {
 }
 declare namespace ps {
     interface Collidable {
-        collideWith(other: Entity, state: BaseGameState): any;
+        pos: number[];
+        radius: number;
+        collideWith(other: Collidable, state: BaseGameState): any;
     }
+}
+declare namespace ps {
+    function detectCircularCollision(a: Collidable, b: Collidable, state: BaseGameState): boolean;
 }

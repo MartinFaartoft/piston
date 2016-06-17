@@ -1,4 +1,4 @@
-/*! piston - v0.1.0 - 2016-06-16
+/*! piston - v0.1.1 - 2016-06-17
 * https://github.com/martinfaartoft/piston/
 * Copyright (c) 2016 Piston.js <martin.faartoft@gmail.com>; Licensed MIT*/
 var __extends = (this && this.__extends) || function (d, b) {
@@ -254,11 +254,27 @@ var ps;
         });
     })();
 })(ps || (ps = {}));
-/// <reference path="entity.ts" />
 /// <reference path="basegamestate.ts" />
+/// <reference path="collidable.ts" />
+var ps;
+(function (ps) {
+    function detectCircularCollision(a, b, state) {
+        // circle collision
+        var dx = a.pos[0] - b.pos[0];
+        var dy = a.pos[1] - b.pos[1];
+        var distance = Math.sqrt(dx * dx + dy * dy);
+        var collision = distance < a.radius + b.radius;
+        if (collision) {
+            a.collideWith(b, state);
+            b.collideWith(a, state);
+        }
+        return collision;
+    }
+    ps.detectCircularCollision = detectCircularCollision;
+})(ps || (ps = {}));
 /// <reference path="engine.ts" />
 /// <reference path="entitywithsprites.ts" />
 /// <reference path="input.ts" />
 /// <reference path="sprite.ts" />
-/// <reference path="collidable.ts" />
-//# sourceMappingURL=piston-0.1.0.js.map
+/// <reference path="collisiondetector.ts" />
+//# sourceMappingURL=piston-0.1.1.js.map
