@@ -1,4 +1,4 @@
-/*! piston - v0.1.1 - 2016-06-17
+/*! piston - v0.1.1 - 2016-06-18
 * https://github.com/martinfaartoft/piston/
 * Copyright (c) 2016 Piston.js <martin.faartoft@gmail.com>; Licensed MIT*/
 var __extends = (this && this.__extends) || function (d, b) {
@@ -272,9 +272,43 @@ var ps;
     }
     ps.detectCircularCollision = detectCircularCollision;
 })(ps || (ps = {}));
+var ps;
+(function (ps) {
+    var Vector = (function () {
+        function Vector(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+        Vector.prototype.add = function (v) {
+            return new Vector(this.x + v.x, this.y + v.y);
+        };
+        Vector.prototype.subtract = function (v) {
+            return new Vector(this.x - v.x, this.y - v.y);
+        };
+        Vector.prototype.multiply = function (scalar) {
+            return new Vector(this.x * scalar, this.y * scalar);
+        };
+        Vector.prototype.magnitude = function () {
+            return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
+        };
+        Vector.prototype.unit = function () {
+            return this.multiply(1 / this.magnitude());
+        };
+        Vector.prototype.tangent = function () {
+            //avoid negative zero complications
+            return new Vector(this.y === 0 ? 0 : this.y * -1, this.x);
+        };
+        Vector.prototype.dot = function (v) {
+            return this.x * v.x + this.y * v.y;
+        };
+        return Vector;
+    }());
+    ps.Vector = Vector;
+})(ps || (ps = {}));
 /// <reference path="engine.ts" />
 /// <reference path="entitywithsprites.ts" />
 /// <reference path="input.ts" />
 /// <reference path="sprite.ts" />
 /// <reference path="collisiondetector.ts" />
+/// <reference path="vector.ts" />
 //# sourceMappingURL=piston-0.1.1.js.map

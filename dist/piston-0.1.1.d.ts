@@ -73,3 +73,17 @@ declare namespace ps {
 declare namespace ps {
     function detectCircularCollision(a: Collidable, b: Collidable, state: BaseGameState): boolean;
 }
+declare namespace ps {
+    class Vector {
+        x: number;
+        y: number;
+        constructor(x: number, y: number);
+        add(v: Vector): Vector;
+        subtract(v: Vector): Vector;
+        multiply(scalar: number): Vector;
+        magnitude(): number;
+        unit(): Vector;
+        tangent(): Vector;
+        dot(v: Vector): number;
+    }
+}

@@ -3,5 +3,4 @@
 /// <reference path="input.ts" />
 /// <reference path="sprite.ts" />
 /// <reference path="collisiondetector.ts" />
-
-
+/// <reference path="vector.ts" />
