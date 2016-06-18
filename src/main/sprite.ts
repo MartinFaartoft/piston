@@ -1,11 +1,12 @@
 /// <reference path="resourcemanager.ts" />
+/// <reference path="point.ts" />
 
 
 namespace ps {
     export class Sprite {
         index: number = 0;
 
-        constructor(public spriteSheetCoordinates: number[], 
+        constructor(public spriteSheetCoordinates: Point, 
                     public spriteSize: number[], 
                     public frames: number[], 
                     public speed: number, 
@@ -19,7 +20,7 @@ namespace ps {
 
         render(ctx: CanvasRenderingContext2D, 
                 resourceManager: ResourceManager, 
-                pos: number[], 
+                pos: Point, 
                 size: number[],
                 rotation: number) {
             let frame = 0;

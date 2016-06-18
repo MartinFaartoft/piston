@@ -68,6 +68,9 @@ module.exports = function (grunt) {
       // Shell Commands
       //
       shell: {
+         clean: {
+             command: 'rm -rf dist/* && rm -rf build/*'
+         },
 
          //
          // Typescript Compile engine 
@@ -138,6 +141,8 @@ module.exports = function (grunt) {
    //
 
    // Run tests quickly
+   grunt.registerTask('clean', ['shell:clean']);
+   
    grunt.registerTask('tests', ['shell:specs', 'shell:tests']);
 
    grunt.registerTask('compile', ['shell:tsc', 'minified', 'concat'])
@@ -145,6 +150,6 @@ module.exports = function (grunt) {
    grunt.registerTask('server', [])
    
    // Default task - compile, test, build dists
-   grunt.registerTask('default', ['tslint:src', 'shell:specs', 'shell:tests', 'shell:tsc', 'minified', 'concat']);
+   grunt.registerTask('default', ['shell:clean', 'tslint:src', 'shell:specs', 'shell:tests', 'shell:tsc', 'minified', 'concat']);
 
 };

@@ -9,9 +9,23 @@ declare namespace ps {
     }
 }
 declare namespace ps {
+    class Vector {
+        x: number;
+        y: number;
+        constructor(x: number, y: number);
+        add(v: Vector): Vector;
+        subtract(v: Vector): Vector;
+        multiply(scalar: number): Vector;
+        magnitude(): number;
+        unit(): Vector;
+        tangent(): Vector;
+        dot(v: Vector): number;
+    }
+}
+declare namespace ps {
     abstract class BaseGameState {
-        dimensions: number[];
-        constructor(dimensions: number[]);
+        dimensions: Vector;
+        constructor(dimensions: Vector);
         abstract update(dt: number): any;
         abstract render(ctx: CanvasRenderingContext2D): any;
     }
@@ -29,34 +43,43 @@ declare namespace ps {
 }
 declare namespace ps {
     abstract class Entity {
-        pos: number[];
-        speed: number[];
+        pos: Point;
+        speed: Vector;
         radius: number;
         destroyed: boolean;
-        constructor(pos: number[], speed: number[], radius: number);
+        isWrapping: boolean;
+        constructor(pos: Point, speed: Vector, radius: number);
         update(dt: number, state: BaseGameState): void;
         private wrap(dimensions);
-        getWrappedBoundingCircles(dimensions: number[]): any[];
+        getWrappedBoundingCircles(dimensions: Vector): any[];
         abstract render(ctx: CanvasRenderingContext2D, state: BaseGameState): any;
     }
 }
 declare namespace ps {
+    class Point {
+        x: number;
+        y: number;
+        constructor(x: number, y: number);
+        add(v: Vector): Point;
+        distanceTo(p: Point): number;
+    }
+}
+declare namespace ps {
     class Sprite {
-        spriteSheetCoordinates: number[];
+        spriteSheetCoordinates: Point;
         spriteSize: number[];
         frames: number[];
         speed: number;
         url: string;
         index: number;
-        constructor(spriteSheetCoordinates: number[], spriteSize: number[], frames: number[], speed: number, url: string);
+        constructor(spriteSheetCoordinates: Point, spriteSize: number[], frames: number[], speed: number, url: string);
         update(dt: number): void;
-        render(ctx: CanvasRenderingContext2D, resourceManager: ResourceManager, pos: number[], size: number[], rotation: number): void;
+        render(ctx: CanvasRenderingContext2D, resourceManager: ResourceManager, pos: Point, size: number[], rotation: number): void;
     }
 }
 declare namespace ps {
     abstract class EntityWithSprites extends Entity {
         sprites: Sprite[];
-        constructor(pos: number[], speed: number[], radius: number);
         update(dt: any, state: any): void;
     }
 }
@@ -65,25 +88,13 @@ declare namespace ps {
 }
 declare namespace ps {
     interface Collidable {
-        pos: number[];
+        pos: Point;
+        speed: Vector;
         radius: number;
+        mass: number;
         collideWith(other: Collidable, state: BaseGameState): any;
     }
 }
 declare namespace ps {
     function detectCircularCollision(a: Collidable, b: Collidable, state: BaseGameState): boolean;
-}
-declare namespace ps {
-    class Vector {
-        x: number;
-        y: number;
-        constructor(x: number, y: number);
-        add(v: Vector): Vector;
-        subtract(v: Vector): Vector;
-        multiply(scalar: number): Vector;
-        magnitude(): number;
-        unit(): Vector;
-        tangent(): Vector;
-        dot(v: Vector): number;
-    }
 }

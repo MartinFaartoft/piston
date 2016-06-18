@@ -2,8 +2,10 @@
 
 namespace ps {
     export interface Collidable {
-        pos: number[];
+        pos: Point;
+        speed: Vector;
         radius: number;
+        mass: number;
 
         collideWith(other: Collidable, state: BaseGameState);
     }

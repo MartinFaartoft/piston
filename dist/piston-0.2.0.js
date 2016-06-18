@@ -1,4 +1,4 @@
-/*! piston - v0.1.1 - 2016-06-18
+/*! piston - v0.2.0 - 2016-06-18
 * https://github.com/martinfaartoft/piston/
 * Copyright (c) 2016 Piston.js <martin.faartoft@gmail.com>; Licensed MIT*/
 var __extends = (this && this.__extends) || function (d, b) {
@@ -55,7 +55,41 @@ var ps;
     }());
     ps.ResourceManager = ResourceManager;
 })(ps || (ps = {}));
+var ps;
+(function (ps) {
+    var Vector = (function () {
+        function Vector(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+        Vector.prototype.add = function (v) {
+            return new Vector(this.x + v.x, this.y + v.y);
+        };
+        Vector.prototype.subtract = function (v) {
+            return new Vector(this.x - v.x, this.y - v.y);
+        };
+        Vector.prototype.multiply = function (scalar) {
+            return new Vector(this.x * scalar, this.y * scalar);
+        };
+        Vector.prototype.magnitude = function () {
+            return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
+        };
+        Vector.prototype.unit = function () {
+            return this.multiply(1 / this.magnitude());
+        };
+        Vector.prototype.tangent = function () {
+            //avoid negative zero complications
+            return new Vector(this.y === 0 ? 0 : this.y * -1, this.x);
+        };
+        Vector.prototype.dot = function (v) {
+            return this.x * v.x + this.y * v.y;
+        };
+        return Vector;
+    }());
+    ps.Vector = Vector;
+})(ps || (ps = {}));
 /// <reference path="resourcemanager.ts" />
+/// <reference path="vector.ts" />
 var ps;
 (function (ps) {
     var BaseGameState = (function () {
@@ -109,28 +143,30 @@ var ps;
             this.speed = speed;
             this.radius = radius;
             this.destroyed = false;
+            this.isWrapping = false;
         }
         Entity.prototype.update = function (dt, state) {
-            this.pos[0] += this.speed[0] * dt;
-            this.pos[1] += this.speed[1] * dt;
-            this.wrap(state.dimensions);
+            this.pos = this.pos.add(this.speed.multiply(dt));
+            if (this.isWrapping) {
+                this.wrap(state.dimensions);
+            }
         };
         Entity.prototype.wrap = function (dimensions) {
             // exit right edge
-            if (this.pos[0] > dimensions[0]) {
-                this.pos[0] -= dimensions[0];
+            if (this.pos.x > dimensions.x) {
+                this.pos.x -= dimensions.x;
             }
             // exit left edge
-            if (this.pos[0] < 0) {
-                this.pos[0] += dimensions[0];
+            if (this.pos.x < 0) {
+                this.pos.x += dimensions.x;
             }
             // exit top
-            if (this.pos[1] < 0) {
-                this.pos[1] += dimensions[1];
+            if (this.pos.y < 0) {
+                this.pos.y += dimensions.y;
             }
             // exit bottom
-            if (this.pos[1] > dimensions[1]) {
-                this.pos[1] -= dimensions[1];
+            if (this.pos.y > dimensions.y) {
+                this.pos.y -= dimensions.y;
             }
         };
         Entity.prototype.getWrappedBoundingCircles = function (dimensions) {
@@ -150,7 +186,25 @@ var ps;
     }());
     ps.Entity = Entity;
 })(ps || (ps = {}));
+var ps;
+(function (ps) {
+    var Point = (function () {
+        function Point(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+        Point.prototype.add = function (v) {
+            return new Point(this.x + v.x, this.y + v.y);
+        };
+        Point.prototype.distanceTo = function (p) {
+            return Math.sqrt(Math.pow(this.x - p.x, 2) + Math.pow(this.y - p.y, 2));
+        };
+        return Point;
+    }());
+    ps.Point = Point;
+})(ps || (ps = {}));
 /// <reference path="resourcemanager.ts" />
+/// <reference path="point.ts" />
 var ps;
 (function (ps) {
     var Sprite = (function () {
@@ -195,8 +249,8 @@ var ps;
 (function (ps) {
     var EntityWithSprites = (function (_super) {
         __extends(EntityWithSprites, _super);
-        function EntityWithSprites(pos, speed, radius) {
-            _super.call(this, pos, speed, radius);
+        function EntityWithSprites() {
+            _super.apply(this, arguments);
             this.sprites = [];
         }
         EntityWithSprites.prototype.update = function (dt, state) {
@@ -259,10 +313,8 @@ var ps;
 var ps;
 (function (ps) {
     function detectCircularCollision(a, b, state) {
-        // circle collision
-        var dx = a.pos[0] - b.pos[0];
-        var dy = a.pos[1] - b.pos[1];
-        var distance = Math.sqrt(dx * dx + dy * dy);
+        // circle collision        
+        var distance = a.pos.distanceTo(b.pos);
         var collision = distance < a.radius + b.radius;
         if (collision) {
             a.collideWith(b, state);
@@ -272,43 +324,11 @@ var ps;
     }
     ps.detectCircularCollision = detectCircularCollision;
 })(ps || (ps = {}));
-var ps;
-(function (ps) {
-    var Vector = (function () {
-        function Vector(x, y) {
-            this.x = x;
-            this.y = y;
-        }
-        Vector.prototype.add = function (v) {
-            return new Vector(this.x + v.x, this.y + v.y);
-        };
-        Vector.prototype.subtract = function (v) {
-            return new Vector(this.x - v.x, this.y - v.y);
-        };
-        Vector.prototype.multiply = function (scalar) {
-            return new Vector(this.x * scalar, this.y * scalar);
-        };
-        Vector.prototype.magnitude = function () {
-            return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
-        };
-        Vector.prototype.unit = function () {
-            return this.multiply(1 / this.magnitude());
-        };
-        Vector.prototype.tangent = function () {
-            //avoid negative zero complications
-            return new Vector(this.y === 0 ? 0 : this.y * -1, this.x);
-        };
-        Vector.prototype.dot = function (v) {
-            return this.x * v.x + this.y * v.y;
-        };
-        return Vector;
-    }());
-    ps.Vector = Vector;
-})(ps || (ps = {}));
 /// <reference path="engine.ts" />
 /// <reference path="entitywithsprites.ts" />
 /// <reference path="input.ts" />
 /// <reference path="sprite.ts" />
 /// <reference path="collisiondetector.ts" />
 /// <reference path="vector.ts" />
-//# sourceMappingURL=piston-0.1.1.js.map
+/// <reference path="point.ts" /> 
+//# sourceMappingURL=piston-0.2.0.js.map

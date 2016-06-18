@@ -1,8 +1,14 @@
 /// <reference path="../main/collisiondetector.ts" />
+/// <reference path="../main/vector.ts" />
+/// <reference path="../main/point.ts" />
 /// <reference path="jasmine.d.ts" />
 
+let Point = ps.Point;
+
 class Ball implements ps.Collidable {
-    constructor(public pos: number[], public radius: number) {
+    speed: ps.Vector;
+    mass: number;
+    constructor(public pos: ps.Point, public radius: number) {
 
     }
 
@@ -18,12 +24,12 @@ let s: StateMock;
 let a, b, nextToA, farAway: Ball;
 
 beforeEach(() =>  {
-    s = new StateMock([0, 0]);
+    s = new StateMock(new ps.Vector(0, 0));
 
-    a = new Ball([0, 0], 10);
-    b = new Ball([0, 10], 10);
-    nextToA = new Ball([0, 20], 10);
-    farAway = new Ball([100, 100], 10);
+    a = new Ball(new Point(0, 0), 10);
+    b = new Ball(new Point(0, 10), 10);
+    nextToA = new Ball(new Point(0, 20), 10);
+    farAway = new Ball(new Point(100, 100), 10);
 });
 
 describe("Circular collision detection", () => {

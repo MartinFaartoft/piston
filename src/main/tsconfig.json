@@ -1,11 +1,12 @@
 {
     "compilerOptions": {
-        "out": "../dist/piston.js", 
+        "out": "../../build/piston.js", 
         "sourceMap": true, 
         "target": "es5"
     }, 
     "files": [
         "engine.ts",
-        "sprite.ts"
+        "sprite.ts",
+        "export.ts"
     ]
 }
