@@ -82,6 +82,13 @@ module.exports = function (grunt) {
                failOnError: true
             }
          },
+
+         //
+         // Typescript Compile Sample Game
+         //
+         sample: {
+            command: '<%= tscCmd %> --p "./src/sample"'
+         },
          
          //
          // TypeScript Compile Jasmine tests
@@ -145,11 +152,11 @@ module.exports = function (grunt) {
    
    grunt.registerTask('tests', ['shell:specs', 'shell:tests']);
 
-   grunt.registerTask('compile', ['shell:tsc', 'minified', 'concat'])
+   grunt.registerTask('compile', ['shell:tsc', 'shell:sample', 'minified', 'concat'])
 
    grunt.registerTask('server', [])
    
    // Default task - compile, test, build dists
-   grunt.registerTask('default', ['shell:clean', 'tslint:src', 'shell:specs', 'shell:tests', 'shell:tsc', 'minified', 'concat']);
+   grunt.registerTask('default', ['shell:clean', 'tslint:src', 'shell:specs', 'shell:tests', 'compile']);
 
 };

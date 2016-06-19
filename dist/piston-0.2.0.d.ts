@@ -32,14 +32,34 @@ declare namespace ps {
     }
 }
 declare namespace ps {
-    class Engine {
+    interface Runnable {
+        run(): any;
+    }
+}
+declare namespace ps {
+    interface AnimationFrameProvider {
+        animate(runnable: Runnable): void;
+    }
+}
+declare namespace ps {
+    class BrowserAnimationFrameProvider {
+        animate(runnable: Runnable): void;
+        private requestAnimationFrame;
+    }
+}
+declare namespace ps {
+    class Engine implements Runnable {
         state: BaseGameState;
         ctx: CanvasRenderingContext2D;
         debug: boolean;
+        animator: AnimationFrameProvider;
         lastTime: number;
-        constructor(state: BaseGameState, ctx: CanvasRenderingContext2D, debug: boolean);
+        constructor(state: BaseGameState, ctx: CanvasRenderingContext2D, debug: boolean, animator: AnimationFrameProvider);
+        registerEntity(entity: Entity): void;
         run(): void;
-        private requestAnimationFrame;
+    }
+    class BrowserEngine extends Engine {
+        constructor(state: BaseGameState, ctx: CanvasRenderingContext2D, debug: boolean);
     }
 }
 declare namespace ps {

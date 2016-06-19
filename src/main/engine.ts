@@ -1,10 +1,17 @@
 /// <reference path="basegamestate.ts" />
+/// <reference path="animationframeprovider.ts" />
+/// <reference path="browseranimationframeprovider.ts" />
+
 
 namespace ps {
-    export class Engine {
-        public lastTime: number = Date.now();
+    export class Engine implements Runnable {
+        lastTime: number = Date.now();
 
-        constructor(public state: BaseGameState, public ctx: CanvasRenderingContext2D, public debug: boolean) { }
+        constructor(public state: BaseGameState, public ctx: CanvasRenderingContext2D, public debug: boolean, public animator: AnimationFrameProvider) { }
+
+        registerEntity(entity: Entity): void {
+
+        }
 
         run() {
             let now = Date.now();
@@ -13,20 +20,14 @@ namespace ps {
             this.state.update(dt);
             this.state.render(this.ctx);
             this.lastTime = now;
-            this.requestAnimationFrame.call(window, this.run.bind(this));
+            this.animator.animate(this);
         }
+    }
 
-        // A cross-browser requestAnimationFrame
-        // See https://hacks.mozilla.org/2011/08/animating-with-javascript-from-setinterval-to-requestanimationframe/
-        private requestAnimationFrame = (function(){
-            return window.requestAnimationFrame       ||
-                (<any>window).webkitRequestAnimationFrame ||
-                (<any>window).mozRequestAnimationFrame    ||
-                (<any>window).oRequestAnimationFrame      ||
-                (<any>window).msRequestAnimationFrame     ||
-                function(callback){
-                    window.setTimeout(callback, 1000 / 60);
-                };
-        })();
+    export class BrowserEngine extends Engine {
+
+        constructor(state: BaseGameState, ctx: CanvasRenderingContext2D, debug: boolean) {
+            super(state, ctx, debug, new BrowserAnimationFrameProvider());
+        }
     }
 }

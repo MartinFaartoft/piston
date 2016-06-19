@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "out": "./sample/game.js", 
+        "sourceMap": true, 
+        "target": "es5"
+    }, 
+    "files": [
+        "game.ts"
+    ]
+}

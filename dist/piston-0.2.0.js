@@ -103,15 +103,12 @@ var ps;
     }());
     ps.BaseGameState = BaseGameState;
 })(ps || (ps = {}));
-/// <reference path="basegamestate.ts" />
+/// <reference path="runnable.ts" />
+/// <reference path="runnable.ts" />
 var ps;
 (function (ps) {
-    var Engine = (function () {
-        function Engine(state, ctx, debug) {
-            this.state = state;
-            this.ctx = ctx;
-            this.debug = debug;
-            this.lastTime = Date.now();
+    var BrowserAnimationFrameProvider = (function () {
+        function BrowserAnimationFrameProvider() {
             // A cross-browser requestAnimationFrame
             // See https://hacks.mozilla.org/2011/08/animating-with-javascript-from-setinterval-to-requestanimationframe/
             this.requestAnimationFrame = (function () {
@@ -125,17 +122,47 @@ var ps;
                     };
             })();
         }
+        BrowserAnimationFrameProvider.prototype.animate = function (runnable) {
+            var f = requestAnimationFrame.call(window, runnable.run.bind(runnable));
+        };
+        return BrowserAnimationFrameProvider;
+    }());
+    ps.BrowserAnimationFrameProvider = BrowserAnimationFrameProvider;
+})(ps || (ps = {}));
+/// <reference path="basegamestate.ts" />
+/// <reference path="animationframeprovider.ts" />
+/// <reference path="browseranimationframeprovider.ts" />
+var ps;
+(function (ps) {
+    var Engine = (function () {
+        function Engine(state, ctx, debug, animator) {
+            this.state = state;
+            this.ctx = ctx;
+            this.debug = debug;
+            this.animator = animator;
+            this.lastTime = Date.now();
+        }
+        Engine.prototype.registerEntity = function (entity) {
+        };
         Engine.prototype.run = function () {
             var now = Date.now();
             var dt = (now - this.lastTime) / 1000.0;
             this.state.update(dt);
             this.state.render(this.ctx);
             this.lastTime = now;
-            this.requestAnimationFrame.call(window, this.run.bind(this));
+            this.animator.animate(this);
         };
         return Engine;
     }());
     ps.Engine = Engine;
+    var BrowserEngine = (function (_super) {
+        __extends(BrowserEngine, _super);
+        function BrowserEngine(state, ctx, debug) {
+            _super.call(this, state, ctx, debug, new ps.BrowserAnimationFrameProvider());
+        }
+        return BrowserEngine;
+    }(Engine));
+    ps.BrowserEngine = BrowserEngine;
 })(ps || (ps = {}));
 /// <reference path="basegamestate.ts" />
 var ps;
