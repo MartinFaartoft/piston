@@ -9,5 +9,9 @@ namespace ps {
         distanceTo(p: Point): number {
             return Math.sqrt(Math.pow(this.x - p.x, 2) + Math.pow(this.y - p.y, 2));
         }
+
+        toVector(): Vector {
+            return new Vector(this.x, this.y);
+        }
     }
 }

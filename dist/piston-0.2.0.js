@@ -1,4 +1,4 @@
-/*! piston - v0.2.0 - 2016-06-18
+/*! piston - v0.2.0 - 2016-06-19
 * https://github.com/martinfaartoft/piston/
 * Copyright (c) 2016 Piston.js <martin.faartoft@gmail.com>; Licensed MIT*/
 var __extends = (this && this.__extends) || function (d, b) {
@@ -83,6 +83,9 @@ var ps;
         };
         Vector.prototype.dot = function (v) {
             return this.x * v.x + this.y * v.y;
+        };
+        Vector.prototype.toPoint = function () {
+            return new ps.Point(this.x, this.y);
         };
         return Vector;
     }());
@@ -198,6 +201,9 @@ var ps;
         };
         Point.prototype.distanceTo = function (p) {
             return Math.sqrt(Math.pow(this.x - p.x, 2) + Math.pow(this.y - p.y, 2));
+        };
+        Point.prototype.toVector = function () {
+            return new ps.Vector(this.x, this.y);
         };
         return Point;
     }());

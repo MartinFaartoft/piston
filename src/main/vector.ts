@@ -30,5 +30,9 @@ namespace ps {
         dot(v: Vector): number {
             return this.x * v.x + this.y * v.y;
         }
+
+        toPoint(): Point {
+            return new Point(this.x, this.y);
+        }
     }
 }

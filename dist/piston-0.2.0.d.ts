@@ -20,6 +20,7 @@ declare namespace ps {
         unit(): Vector;
         tangent(): Vector;
         dot(v: Vector): number;
+        toPoint(): Point;
     }
 }
 declare namespace ps {
@@ -62,6 +63,7 @@ declare namespace ps {
         constructor(x: number, y: number);
         add(v: Vector): Point;
         distanceTo(p: Point): number;
+        toVector(): Vector;
     }
 }
 declare namespace ps {
