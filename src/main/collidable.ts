@@ -4,6 +4,6 @@ namespace ps {
         radius: number;
         mass: number;
 
-        collideWith(other: Collidable);
+        collideWith(other: Collidable): void;
     }
 }

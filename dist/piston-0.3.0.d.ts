@@ -1,6 +1,6 @@
 declare namespace ps {
     interface Runnable {
-        run(): any;
+        run(): void;
     }
 }
 declare namespace ps {
@@ -51,16 +51,18 @@ declare namespace ps {
         constructor(pos: Point);
         update(dt: number, dims: Vector): void;
         private wrap(dimensions);
-        abstract render(ctx: CanvasRenderingContext2D): any;
+        abstract render(ctx: CanvasRenderingContext2D): void;
     }
 }
 declare namespace ps {
     class ResourceManager {
-        cache: {};
-        readyCallbacks: any[];
+        private cache;
+        private readyCallbacks;
         preload(urls: string[]): void;
-        get(url: string): any;
-        onReady(callback: any): void;
+        get(url: string): HTMLImageElement;
+        onReady(callback: {
+            (): void;
+        }): void;
         private isReady();
     }
 }
@@ -90,18 +92,18 @@ declare namespace ps {
 declare namespace ps {
     abstract class EntityWithSprites extends Entity {
         sprites: Sprite[];
-        update(dt: any, state: any): void;
+        update(dt: number, dims: Vector): void;
     }
 }
 declare namespace ps {
-    function isKeyDown(key: string): any;
+    function isKeyDown(key: string): boolean;
 }
 declare namespace ps {
     interface Collidable {
         pos: Point;
         radius: number;
         mass: number;
-        collideWith(other: Collidable): any;
+        collideWith(other: Collidable): void;
     }
 }
 declare namespace ps {

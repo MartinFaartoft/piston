@@ -4,6 +4,8 @@
 /// <reference path="../main/animationframeprovider.ts" />
 /// <reference path="../main/entity.ts" />
 /// <reference path="../main/point.ts" />
+/// <reference path="../main/vector.ts" />
+
 
 namespace EngineTest {
     class InMemoryAnimator implements ps.AnimationFrameProvider {
@@ -31,7 +33,6 @@ namespace EngineTest {
         let engine = new ps.HeadlessEngine(new ps.Vector(100, 100), mockCtx, animator);
         engine.registerEntity(mockEntity);
         
-
         afterEach( () => {
             animator.reset();
             mockCtx.fillRect.calls.reset();

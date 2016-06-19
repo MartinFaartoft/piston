@@ -1,7 +1,7 @@
 namespace ps {
     export class ResourceManager {
-        cache = {};
-        readyCallbacks = [];
+        private cache = {};
+        private readyCallbacks: { (): void }[] = [];
 
         preload(urls: string[]) {
             for (let url of urls) {
@@ -23,11 +23,11 @@ namespace ps {
             }
         }
 
-        get(url: string) {
+        get(url: string): HTMLImageElement {
             return this.cache[url];
         }
 
-        onReady(callback) {
+        onReady(callback: { (): void }) {
             this.readyCallbacks.push(callback);
         }
 

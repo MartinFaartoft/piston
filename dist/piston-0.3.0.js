@@ -254,8 +254,8 @@ var ps;
             _super.apply(this, arguments);
             this.sprites = [];
         }
-        EntityWithSprites.prototype.update = function (dt, state) {
-            _super.prototype.update.call(this, dt, state);
+        EntityWithSprites.prototype.update = function (dt, dims) {
+            _super.prototype.update.call(this, dt, dims);
             for (var _i = 0, _a = this.sprites; _i < _a.length; _i++) {
                 var sprite = _a[_i];
                 sprite.update(dt);

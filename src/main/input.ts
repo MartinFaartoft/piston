@@ -1,9 +1,9 @@
 namespace ps {
-    export function isKeyDown(key: string) {
+    export function isKeyDown(key: string): boolean {
         return pressedKeys[key.toUpperCase()];
     }
 
-    let pressedKeys = {};
+    let pressedKeys: { [keys: string]: boolean} = {};
 
     (function() {
         function setKey(event, status) {
