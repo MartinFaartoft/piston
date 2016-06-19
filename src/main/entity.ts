@@ -1,18 +1,22 @@
-/// <reference path="basegamestate.ts" />
-
 namespace ps {
     export abstract class Entity {
+        vel: Vector = new Vector(0, 0);
+        acc: Vector = new Vector(0, 0);
+
+        mass: number = 100;
+        
         destroyed: boolean = false;
         isWrapping: boolean = false;
-        constructor(public pos: Point, public speed: Vector, public radius: number) {
+        
+        private engine: Engine;
+        
+        constructor(public pos: Point) {}
 
-        }
-
-        update(dt: number, state: BaseGameState): void {
-            this.pos = this.pos.add(this.speed.multiply(dt));
+        update(dt: number, dims: Vector): void {
+            this.pos = this.pos.add(this.vel.multiply(dt));
             
             if (this.isWrapping) {
-                this.wrap(state.dimensions);
+                this.wrap(dims);
             }
         }
 
@@ -38,20 +42,6 @@ namespace ps {
             }
         }
 
-        getWrappedBoundingCircles(dimensions: Vector) {
-            let boundingCircles: any[] = [this];
-            for (let i = -1; i <= 1; i++) {
-                for (let j = -1; j <= 1; j++) {
-                    boundingCircles.push({
-                        pos: [this.pos[0] + i * dimensions[0], this.pos[1] + j * dimensions[1]],
-                        radius: this.radius,
-                        entity: this
-                    });
-                }
-            }
-            return boundingCircles;
-        }
-
-        abstract render(ctx: CanvasRenderingContext2D, state: BaseGameState);
+        abstract render(ctx: CanvasRenderingContext2D);
     }
 }

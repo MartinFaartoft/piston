@@ -1,16 +1,13 @@
-/// <reference path="../../dist/piston-0.2.0.d.ts" />
+/// <reference path="../../dist/piston-0.3.0.d.ts" />
 
 namespace SampleGame {
-    export class Ball extends ps.Entity {
+    export class Ball extends ps.RoundEntity {
         constructor() {
-            super(new ps.Point(100, 100), new ps.Vector(50, 50), 10);
+            super(new ps.Point(100, 100), 100);
+            this.vel = new ps.Vector(500, 500);
         }
 
-        update(dt: number, state: GameState) {
-            super.update(dt, state);
-        }
-
-        render(ctx: CanvasRenderingContext2D, state: GameState) {
+        render(ctx: CanvasRenderingContext2D) {
             ctx.fillStyle = "orange";
             ctx.beginPath();
             ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);

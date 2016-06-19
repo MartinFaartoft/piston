@@ -1,6 +1,5 @@
-/// <reference path="../../dist/piston-0.2.0.d.ts" />
-
-/// <reference path="gamestate.ts" />
+/// <reference path="../../dist/piston-0.3.0.d.ts" />
+/// <reference path="ball.ts" />
 
 
 namespace SampleGame {
@@ -13,8 +12,8 @@ namespace SampleGame {
     let debug = false;
 
     let dimensions = new ps.Vector(canvas.width, canvas.height);
-    let state = new GameState(dimensions);
-    let engine = new ps.BrowserEngine(state, ctx, debug);
+    let engine = new ps.Engine(dimensions, ctx);
+    engine.registerEntity(new Ball());
 
     engine.run();
 }

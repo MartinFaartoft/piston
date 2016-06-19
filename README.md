@@ -9,6 +9,11 @@ A game engine for making 2D games using HTML5 Canvas
 
 ## Changelog
 
+### 0.3
+* Cleaned up Engine API
+* Cleaned up Entity hiearchy
+* Removed BaseGameState - Engine takes over responsibilities
+
 ### 0.2
 * Replaced number[] with ps.Vector 
 

@@ -2,40 +2,77 @@
 
 /// <reference path="../main/engine.ts" />
 /// <reference path="../main/animationframeprovider.ts" />
-
 /// <reference path="../main/entity.ts" />
 /// <reference path="../main/point.ts" />
 
-
-
 namespace EngineTest {
-    class MockBaseGameState extends ps.BaseGameState {
-        dimensions: ps.Vector;
-        render() {}
-        update() {}
-    }
-
     class InMemoryAnimator implements ps.AnimationFrameProvider {
+        initialFrameToAnimate: number;
 
-        constructor(public framesToAnimate: number) {}
+        constructor(public framesToAnimate: number) {
+            this.initialFrameToAnimate = framesToAnimate;
+        }
 
         animate(runnable: ps.Runnable) {
             if (this.framesToAnimate-- > 0) {
                 runnable.run();
             }
         }
+
+        reset() {
+            this.framesToAnimate = this.initialFrameToAnimate;
+        }
     }
 
-    class MockEntity extends ps.Entity {
-        render() {}
-    }
-    
-    let mockState = new MockBaseGameState(new ps.Vector(0, 0));
+    describe("An engine running a single main loop", () => {
+        let mockCtx = jasmine.createSpyObj("CanvasRenderingContext2D", ["fillRect"]);
+        let mockEntity = jasmine.createSpyObj("Entity", ["render", "update"]);
+        let animator = new InMemoryAnimator(1);
+        let engine = new ps.HeadlessEngine(new ps.Vector(100, 100), mockCtx, animator);
+        engine.registerEntity(mockEntity);
+        
 
-    describe("An engine", () => {
-        it("should be possible to register an Entity", () => {
-            let engine = new ps.Engine(mockState, null, false, new InMemoryAnimator(1));
-            engine.registerEntity(new MockEntity(new ps.Point(0, 0), new ps.Vector(0, 0), 0));
+        afterEach( () => {
+            animator.reset();
+            mockCtx.fillRect.calls.reset();
+            mockEntity.update.calls.reset();
+            mockEntity.render.calls.reset();
+            mockEntity.destroyed = false;
+        })
+        
+        it("should call update on a registered Entity", () => {
+            //when
+            engine.start();
+
+            //then
+            expect(mockEntity.update).toHaveBeenCalledTimes(1);
         });
+
+        it("should call render on a registered Entity", () => {
+            //when
+            engine.start();
+
+            //then
+            expect(mockEntity.render).toHaveBeenCalledTimes(1);
+        });
+
+        it("shold clear the frame on each render", () => {
+            //when
+            engine.start();
+
+            //then
+            expect(mockCtx.fillRect).toHaveBeenCalledTimes(1);
+        });
+
+        it("should not call update on a destroyed entity", () => {
+            //given
+            mockEntity.destroyed = true;
+
+            //when
+            engine.start();
+
+            //then
+            expect(mockEntity.update).not.toHaveBeenCalled();
+        })
     });
 }

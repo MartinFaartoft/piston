@@ -9,13 +9,13 @@ namespace ps {
         constructor(public spriteSheetCoordinates: Point, 
                     public spriteSize: number[], 
                     public frames: number[], 
-                    public speed: number, 
+                    public animationSpeed: number, 
                     public url: string) {
                         this.index = Math.random() * frames.length;
                         }
 
         update(dt: number) {
-            this.index = this.index + this.speed * dt % this.frames.length;
+            this.index = this.index + this.animationSpeed * dt % this.frames.length;
         }
 
         render(ctx: CanvasRenderingContext2D, 
@@ -25,7 +25,7 @@ namespace ps {
                 rotation: number) {
             let frame = 0;
 
-            if (this.speed > 0) {
+            if (this.animationSpeed > 0) {
                 let idx = Math.floor(this.index);
                 frame = this.frames[idx % this.frames.length];
             }
