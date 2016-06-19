@@ -21,12 +21,15 @@ declare namespace ps {
         animator: AnimationFrameProvider;
         debug: boolean;
         backgroundFillStyle: string;
+        collisionDetector: CollisionDetector;
         lastTime: number;
         entities: Entity[];
         constructor(dims: Vector, ctx: CanvasRenderingContext2D, animator: AnimationFrameProvider);
-        registerEntity(entity: Entity): void;
+        registerEntity(...entities: Entity[]): void;
         run(): void;
         start(): void;
+        private getCollidables(entities);
+        private checkCollisions(collidables);
         private update(dt, entities);
         private render(entities);
         private clearFrame(ctx);
@@ -102,12 +105,21 @@ declare namespace ps {
     interface Collidable {
         pos: Point;
         radius: number;
-        mass: number;
         collideWith(other: Collidable): void;
+    }
+    class Collision {
+        a: Collidable;
+        b: Collidable;
+        constructor(a: Collidable, b: Collidable);
     }
 }
 declare namespace ps {
-    function detectCircularCollision(a: Collidable, b: Collidable): boolean;
+    interface CollisionDetector {
+        collides(a: Collidable, b: Collidable): any;
+    }
+    class CircularCollisionDetector implements CollisionDetector {
+        collides(a: Collidable, b: Collidable): boolean;
+    }
 }
 declare namespace ps {
     class Vector {

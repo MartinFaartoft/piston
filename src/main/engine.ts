@@ -3,16 +3,19 @@
 
 namespace ps {
     export class HeadlessEngine implements Runnable {
-        public debug: boolean = false;
-        public backgroundFillStyle: string = "black";
+        debug: boolean = false;
+        backgroundFillStyle: string = "black";
+        collisionDetector: CollisionDetector = new CircularCollisionDetector();
 
         lastTime: number = Date.now();
         entities: Entity[] = [];
         
         constructor(public dims: Vector, public ctx: CanvasRenderingContext2D, public animator: AnimationFrameProvider) { }
 
-        registerEntity(entity: Entity): void {
-            this.entities.push(entity);
+        registerEntity(...entities: Entity[]): void {
+            for (let entity of entities) {
+                this.entities.push(entity);
+            }
         }
 
         run() {
@@ -21,6 +24,7 @@ namespace ps {
 
             this.garbageCollect();
             this.update(dt, this.entities);
+            this.checkCollisions(this.getCollidables(this.entities));
             this.render(this.entities);
 
             this.lastTime = now;
@@ -30,6 +34,24 @@ namespace ps {
 
         start() {
             this.animator.animate(this);
+        }
+
+        private getCollidables(entities: Entity[]): Collidable[] {
+            //nasty reference to "radius" and cast to "any" because TypeScript does not support interface casting
+            return entities.filter(e => "radius" in e).map( (e: any) => e as Collidable);
+        } 
+
+        private checkCollisions(collidables: Collidable[]): Collision[] {
+            let collisions: Collision[] = [];
+            for (let i = 0; i < collidables.length - 1; i++) {
+                for (let j = i; j < collidables.length; j++) {
+                    if (this.collisionDetector.collides(collidables[i], collidables[j])) {
+                        collisions.push(new Collision(collidables[i], collidables[j]));
+                    }
+                }
+            }
+
+            return collisions;
         }
 
         private update(dt: number, entities: Entity[]): void {

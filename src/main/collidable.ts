@@ -2,8 +2,11 @@ namespace ps {
     export interface Collidable {
         pos: Point;
         radius: number;
-        mass: number;
 
         collideWith(other: Collidable): void;
+    }
+
+    export class Collision {
+        constructor(public a: Collidable, public b: Collidable) {}
     }
 }

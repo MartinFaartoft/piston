@@ -1,7 +1,8 @@
-/// <reference path="../main/collisiondetector.ts" />
-/// <reference path="../main/vector.ts" />
-/// <reference path="../main/point.ts" />
 /// <reference path="jasmine.d.ts" />
+/// <reference path="../main/testexport.ts" />
+
+
+
 
 namespace CollisionDetectorTest {
     let Point = ps.Point;
@@ -18,6 +19,7 @@ namespace CollisionDetectorTest {
     }
 
     let a, b, nextToA, farAway: Ball;
+    let collisionDetector = new ps.CircularCollisionDetector();
 
     beforeEach(() =>  {
         a = new Ball(new Point(0, 0), 10);
@@ -28,23 +30,23 @@ namespace CollisionDetectorTest {
 
     describe("Circular collision detection", () => {
         it("should return true for identical Collidables", () => {
-            expect(ps.detectCircularCollision(a, a)).toBe(true);
+            expect(collisionDetector.collides(a, a)).toBe(true);
         });
 
         it("should return true for very close Collidables", () => {
-            expect(ps.detectCircularCollision(a, b)).toBe(true);
+            expect(collisionDetector.collides(a, b)).toBe(true);
         });
 
         it("should return true for very close Collidables", () => {
-            expect(ps.detectCircularCollision(a, b)).toBe(true);
+            expect(collisionDetector.collides(a, b)).toBe(true);
         });
 
         it("should return false for Collidables precisely next to each other", () => {
-            expect(ps.detectCircularCollision(a, nextToA)).toBe(false);
+            expect(collisionDetector.collides(a, nextToA)).toBe(false);
         });
 
         it("should return false for Collidables far from each other", () => {
-            expect(ps.detectCircularCollision(a, farAway)).toBe(false);
+            expect(collisionDetector.collides(a, farAway)).toBe(false);
         });
     });
 }

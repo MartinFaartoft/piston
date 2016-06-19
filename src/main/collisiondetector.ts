@@ -1,11 +1,14 @@
 /// <reference path="collidable.ts" />
 
 namespace ps {
-    export function detectCircularCollision(a: Collidable, b: Collidable) {
-        let distance = a.pos.distanceTo(b.pos);
-        
-        let collision = distance < a.radius + b.radius;
+    export interface CollisionDetector {
+        collides(a: Collidable, b: Collidable);
+    }
 
-        return collision;
+    export class CircularCollisionDetector implements CollisionDetector {
+        
+        collides(a: Collidable, b: Collidable) {
+            return a.pos.distanceTo(b.pos) < a.radius + b.radius;
+        }
     }
 }

@@ -43,17 +43,26 @@ var ps;
             this.animator = animator;
             this.debug = false;
             this.backgroundFillStyle = "black";
+            this.collisionDetector = new ps.CircularCollisionDetector();
             this.lastTime = Date.now();
             this.entities = [];
         }
-        HeadlessEngine.prototype.registerEntity = function (entity) {
-            this.entities.push(entity);
+        HeadlessEngine.prototype.registerEntity = function () {
+            var entities = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                entities[_i - 0] = arguments[_i];
+            }
+            for (var _a = 0, entities_1 = entities; _a < entities_1.length; _a++) {
+                var entity = entities_1[_a];
+                this.entities.push(entity);
+            }
         };
         HeadlessEngine.prototype.run = function () {
             var now = Date.now();
             var dt = (now - this.lastTime) / 1000.0;
             this.garbageCollect();
             this.update(dt, this.entities);
+            this.checkCollisions(this.getCollidables(this.entities));
             this.render(this.entities);
             this.lastTime = now;
             this.animator.animate(this);
@@ -61,16 +70,31 @@ var ps;
         HeadlessEngine.prototype.start = function () {
             this.animator.animate(this);
         };
+        HeadlessEngine.prototype.getCollidables = function (entities) {
+            //nasty reference to "radius" and cast to "any" because TypeScript does not support interface casting
+            return entities.filter(function (e) { return "radius" in e; }).map(function (e) { return e; });
+        };
+        HeadlessEngine.prototype.checkCollisions = function (collidables) {
+            var collisions = [];
+            for (var i = 0; i < collidables.length - 1; i++) {
+                for (var j = i; j < collidables.length; j++) {
+                    if (this.collisionDetector.collides(collidables[i], collidables[j])) {
+                        collisions.push(new ps.Collision(collidables[i], collidables[j]));
+                    }
+                }
+            }
+            return collisions;
+        };
         HeadlessEngine.prototype.update = function (dt, entities) {
-            for (var _i = 0, entities_1 = entities; _i < entities_1.length; _i++) {
-                var entity = entities_1[_i];
+            for (var _i = 0, entities_2 = entities; _i < entities_2.length; _i++) {
+                var entity = entities_2[_i];
                 entity.update(dt, this.dims);
             }
         };
         HeadlessEngine.prototype.render = function (entities) {
             this.clearFrame(this.ctx);
-            for (var _i = 0, entities_2 = entities; _i < entities_2.length; _i++) {
-                var entity = entities_2[_i];
+            for (var _i = 0, entities_3 = entities; _i < entities_3.length; _i++) {
+                var entity = entities_3[_i];
                 entity.render(this.ctx);
             }
         };
@@ -309,15 +333,29 @@ var ps;
         });
     })();
 })(ps || (ps = {}));
+var ps;
+(function (ps) {
+    var Collision = (function () {
+        function Collision(a, b) {
+            this.a = a;
+            this.b = b;
+        }
+        return Collision;
+    }());
+    ps.Collision = Collision;
+})(ps || (ps = {}));
 /// <reference path="collidable.ts" />
 var ps;
 (function (ps) {
-    function detectCircularCollision(a, b) {
-        var distance = a.pos.distanceTo(b.pos);
-        var collision = distance < a.radius + b.radius;
-        return collision;
-    }
-    ps.detectCircularCollision = detectCircularCollision;
+    var CircularCollisionDetector = (function () {
+        function CircularCollisionDetector() {
+        }
+        CircularCollisionDetector.prototype.collides = function (a, b) {
+            return a.pos.distanceTo(b.pos) < a.radius + b.radius;
+        };
+        return CircularCollisionDetector;
+    }());
+    ps.CircularCollisionDetector = CircularCollisionDetector;
 })(ps || (ps = {}));
 var ps;
 (function (ps) {
