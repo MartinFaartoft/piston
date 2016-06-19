@@ -1,10 +1,11 @@
 /// <reference path="../../dist/piston-0.3.0.d.ts" />
 
 namespace SampleGame {
-    export class Ball extends ps.RoundEntity {
+    export class Ball extends ps.Entity {
         constructor() {
-            super(new ps.Point(100, 100), 100);
+            super(new ps.Point(100, 100));
             this.vel = new ps.Vector(500, 500);
+            this.radius = 50;
         }
 
         render(ctx: CanvasRenderingContext2D) {

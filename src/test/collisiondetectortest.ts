@@ -8,17 +8,17 @@ namespace CollisionDetectorTest {
     let Point = ps.Point;
     let Vector = ps.Vector;
 
-    class Ball implements ps.Collidable {
-        vel: ps.Vector;
-        mass: number;
-        constructor(public pos: ps.Point, public radius: number) {
-
+    class Ball extends ps.Entity {
+        constructor(pos: ps.Point, radius: number) {
+            super(pos);
+            this.radius = radius;
         }
-
+        
+        render() {}
         collideWith() {}
     }
 
-    let a, b, nextToA, farAway: Ball;
+    let a: Ball, b: Ball, nextToA: Ball, farAway: Ball;
     let collisionDetector = new ps.CircularCollisionDetector();
 
     beforeEach(() =>  {

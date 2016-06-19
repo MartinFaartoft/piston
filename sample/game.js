@@ -9,8 +9,9 @@ var SampleGame;
     var Ball = (function (_super) {
         __extends(Ball, _super);
         function Ball() {
-            _super.call(this, new ps.Point(100, 100), 100);
+            _super.call(this, new ps.Point(100, 100));
             this.vel = new ps.Vector(500, 500);
+            this.radius = 50;
         }
         Ball.prototype.render = function (ctx) {
             ctx.fillStyle = "orange";
@@ -19,7 +20,7 @@ var SampleGame;
             ctx.fill();
         };
         return Ball;
-    }(ps.RoundEntity));
+    }(ps.Entity));
     SampleGame.Ball = Ball;
 })(SampleGame || (SampleGame = {}));
 /// <reference path="../../dist/piston-0.3.0.d.ts" />

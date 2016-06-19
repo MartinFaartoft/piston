@@ -1,5 +1,7 @@
 /// <reference path="animationframeprovider.ts" />
 /// <reference path="browseranimationframeprovider.ts" />
+/// <reference path="circularcollisiondetector.ts" />
+
 
 namespace ps {
     export class HeadlessEngine implements Runnable {
@@ -24,7 +26,7 @@ namespace ps {
 
             this.garbageCollect();
             this.update(dt, this.entities);
-            this.checkCollisions(this.getCollidables(this.entities));
+            this.checkCollisions(this.entities);
             this.render(this.entities);
 
             this.lastTime = now;
@@ -36,22 +38,8 @@ namespace ps {
             this.animator.animate(this);
         }
 
-        private getCollidables(entities: Entity[]): Collidable[] {
-            //nasty reference to "radius" and cast to "any" because TypeScript does not support interface casting
-            return entities.filter(e => "radius" in e).map( (e: any) => e as Collidable);
-        } 
-
-        private checkCollisions(collidables: Collidable[]): Collision[] {
-            let collisions: Collision[] = [];
-            for (let i = 0; i < collidables.length - 1; i++) {
-                for (let j = i; j < collidables.length; j++) {
-                    if (this.collisionDetector.collides(collidables[i], collidables[j])) {
-                        collisions.push(new Collision(collidables[i], collidables[j]));
-                    }
-                }
-            }
-
-            return collisions;
+        private checkCollisions(entities: Entity[]): void {
+            let collisions: Collision[] = this.collisionDetector.findCollisions(entities);
         }
 
         private update(dt: number, entities: Entity[]): void {

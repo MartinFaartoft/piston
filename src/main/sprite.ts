@@ -1,7 +1,6 @@
 /// <reference path="resourcemanager.ts" />
 /// <reference path="point.ts" />
 
-
 namespace ps {
     export class Sprite {
         index: number = 0;
@@ -30,8 +29,8 @@ namespace ps {
                 frame = this.frames[idx % this.frames.length];
             }
 
-            let sprite_x = this.spriteSheetCoordinates[0] + frame * this.spriteSize[0];
-            let sprite_y = this.spriteSheetCoordinates[1];
+            let sprite_x = this.spriteSheetCoordinates.x + frame * this.spriteSize[0];
+            let sprite_y = this.spriteSheetCoordinates.y;
 
             if (rotation === 0) {
                 ctx.drawImage(resourceManager.get(this.url),
@@ -53,8 +52,6 @@ namespace ps {
                 ctx.rotate(-rotation);
                 ctx.translate(-pos[0], -pos[1]);
             }
-
-            
         }
-}
+    }
 }

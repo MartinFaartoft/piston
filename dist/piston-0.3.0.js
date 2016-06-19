@@ -32,8 +32,99 @@ var ps;
     }());
     ps.BrowserAnimationFrameProvider = BrowserAnimationFrameProvider;
 })(ps || (ps = {}));
+var ps;
+(function (ps) {
+    var Entity = (function () {
+        function Entity(pos) {
+            this.pos = pos;
+            this.vel = new ps.Vector(0, 0);
+            this.acc = new ps.Vector(0, 0);
+            this.isCollisionDetectionEnabled = false;
+            this.isAccelerationEnabled = false;
+            this.mass = 100;
+            this.destroyed = false;
+            this.isWrapping = false;
+        }
+        Entity.prototype.update = function (dt, dims) {
+            if (this.isAccelerationEnabled) {
+                this.vel = this.vel.add(this.acc.multiply(dt));
+            }
+            this.pos = this.pos.add(this.vel.multiply(dt));
+            if (this.isWrapping) {
+                this.wrap(dims);
+            }
+        };
+        Entity.prototype.wrap = function (dimensions) {
+            // exit right edge
+            if (this.pos.x > dimensions.x) {
+                this.pos.x -= dimensions.x;
+            }
+            // exit left edge
+            if (this.pos.x < 0) {
+                this.pos.x += dimensions.x;
+            }
+            // exit top
+            if (this.pos.y < 0) {
+                this.pos.y += dimensions.y;
+            }
+            // exit bottom
+            if (this.pos.y > dimensions.y) {
+                this.pos.y -= dimensions.y;
+            }
+        };
+        return Entity;
+    }());
+    ps.Entity = Entity;
+})(ps || (ps = {}));
+/// <reference path="entity.ts" />
+var ps;
+(function (ps) {
+    var Collision = (function () {
+        function Collision() {
+            var entities = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                entities[_i - 0] = arguments[_i];
+            }
+            this.entities = entities;
+        }
+        return Collision;
+    }());
+    ps.Collision = Collision;
+})(ps || (ps = {}));
+/// <reference path="entity.ts" />
+/// <reference path="collision.ts" />
+/// <reference path="collisiondetector.ts" />
+/// <reference path="collision.ts" />
+var ps;
+(function (ps) {
+    var CircularCollisionDetector = (function () {
+        function CircularCollisionDetector() {
+        }
+        CircularCollisionDetector.prototype.findCollisions = function (entities) {
+            var collidables = this.getCollisionEnabledEntities(entities);
+            var collisions = [];
+            for (var i = 0; i < collidables.length - 1; i++) {
+                for (var j = i + 1; j < collidables.length; j++) {
+                    if (this.collides(collidables[i], collidables[j])) {
+                        collisions.push(new ps.Collision(collidables[i], collidables[j]));
+                    }
+                }
+            }
+            return collisions;
+        };
+        CircularCollisionDetector.prototype.collides = function (a, b) {
+            return a.pos.distanceTo(b.pos) < a.radius + b.radius;
+        };
+        CircularCollisionDetector.prototype.getCollisionEnabledEntities = function (entities) {
+            return entities.filter(function (e) { return e.isCollisionDetectionEnabled; });
+        };
+        return CircularCollisionDetector;
+    }());
+    ps.CircularCollisionDetector = CircularCollisionDetector;
+})(ps || (ps = {}));
 /// <reference path="animationframeprovider.ts" />
 /// <reference path="browseranimationframeprovider.ts" />
+/// <reference path="circularcollisiondetector.ts" />
 var ps;
 (function (ps) {
     var HeadlessEngine = (function () {
@@ -62,7 +153,7 @@ var ps;
             var dt = (now - this.lastTime) / 1000.0;
             this.garbageCollect();
             this.update(dt, this.entities);
-            this.checkCollisions(this.getCollidables(this.entities));
+            this.checkCollisions(this.entities);
             this.render(this.entities);
             this.lastTime = now;
             this.animator.animate(this);
@@ -70,20 +161,8 @@ var ps;
         HeadlessEngine.prototype.start = function () {
             this.animator.animate(this);
         };
-        HeadlessEngine.prototype.getCollidables = function (entities) {
-            //nasty reference to "radius" and cast to "any" because TypeScript does not support interface casting
-            return entities.filter(function (e) { return "radius" in e; }).map(function (e) { return e; });
-        };
-        HeadlessEngine.prototype.checkCollisions = function (collidables) {
-            var collisions = [];
-            for (var i = 0; i < collidables.length - 1; i++) {
-                for (var j = i; j < collidables.length; j++) {
-                    if (this.collisionDetector.collides(collidables[i], collidables[j])) {
-                        collisions.push(new ps.Collision(collidables[i], collidables[j]));
-                    }
-                }
-            }
-            return collisions;
+        HeadlessEngine.prototype.checkCollisions = function (entities) {
+            var collisions = this.collisionDetector.findCollisions(entities);
         };
         HeadlessEngine.prototype.update = function (dt, entities) {
             for (var _i = 0, entities_2 = entities; _i < entities_2.length; _i++) {
@@ -119,45 +198,6 @@ var ps;
         return Engine;
     }(HeadlessEngine));
     ps.Engine = Engine;
-})(ps || (ps = {}));
-var ps;
-(function (ps) {
-    var Entity = (function () {
-        function Entity(pos) {
-            this.pos = pos;
-            this.vel = new ps.Vector(0, 0);
-            this.acc = new ps.Vector(0, 0);
-            this.mass = 100;
-            this.destroyed = false;
-            this.isWrapping = false;
-        }
-        Entity.prototype.update = function (dt, dims) {
-            this.pos = this.pos.add(this.vel.multiply(dt));
-            if (this.isWrapping) {
-                this.wrap(dims);
-            }
-        };
-        Entity.prototype.wrap = function (dimensions) {
-            // exit right edge
-            if (this.pos.x > dimensions.x) {
-                this.pos.x -= dimensions.x;
-            }
-            // exit left edge
-            if (this.pos.x < 0) {
-                this.pos.x += dimensions.x;
-            }
-            // exit top
-            if (this.pos.y < 0) {
-                this.pos.y += dimensions.y;
-            }
-            // exit bottom
-            if (this.pos.y > dimensions.y) {
-                this.pos.y -= dimensions.y;
-            }
-        };
-        return Entity;
-    }());
-    ps.Entity = Entity;
 })(ps || (ps = {}));
 var ps;
 (function (ps) {
@@ -251,8 +291,8 @@ var ps;
                 var idx = Math.floor(this.index);
                 frame = this.frames[idx % this.frames.length];
             }
-            var sprite_x = this.spriteSheetCoordinates[0] + frame * this.spriteSize[0];
-            var sprite_y = this.spriteSheetCoordinates[1];
+            var sprite_x = this.spriteSheetCoordinates.x + frame * this.spriteSize[0];
+            var sprite_y = this.spriteSheetCoordinates.y;
             if (rotation === 0) {
                 ctx.drawImage(resourceManager.get(this.url), sprite_x, sprite_y, this.spriteSize[0], this.spriteSize[1], pos[0] - size[0] / 2.0, pos[1] - size[1] / 2.0, size[0], size[1]);
             }
@@ -335,30 +375,6 @@ var ps;
 })(ps || (ps = {}));
 var ps;
 (function (ps) {
-    var Collision = (function () {
-        function Collision(a, b) {
-            this.a = a;
-            this.b = b;
-        }
-        return Collision;
-    }());
-    ps.Collision = Collision;
-})(ps || (ps = {}));
-/// <reference path="collidable.ts" />
-var ps;
-(function (ps) {
-    var CircularCollisionDetector = (function () {
-        function CircularCollisionDetector() {
-        }
-        CircularCollisionDetector.prototype.collides = function (a, b) {
-            return a.pos.distanceTo(b.pos) < a.radius + b.radius;
-        };
-        return CircularCollisionDetector;
-    }());
-    ps.CircularCollisionDetector = CircularCollisionDetector;
-})(ps || (ps = {}));
-var ps;
-(function (ps) {
     var Vector = (function () {
         function Vector(x, y) {
             this.x = x;
@@ -393,26 +409,11 @@ var ps;
     }());
     ps.Vector = Vector;
 })(ps || (ps = {}));
-/// <reference path="entity.ts" />
-/// <reference path="point.ts" />
-var ps;
-(function (ps) {
-    var RoundEntity = (function (_super) {
-        __extends(RoundEntity, _super);
-        function RoundEntity(pos, radius) {
-            _super.call(this, pos);
-            this.radius = radius;
-        }
-        return RoundEntity;
-    }(ps.Entity));
-    ps.RoundEntity = RoundEntity;
-})(ps || (ps = {}));
 /// <reference path="engine.ts" />
 /// <reference path="entitywithsprites.ts" />
 /// <reference path="input.ts" />
 /// <reference path="sprite.ts" />
 /// <reference path="collisiondetector.ts" />
 /// <reference path="vector.ts" />
-/// <reference path="point.ts" />
-/// <reference path="roundentity.ts" />
+/// <reference path="point.ts" /> 
 //# sourceMappingURL=piston-0.3.0.js.map

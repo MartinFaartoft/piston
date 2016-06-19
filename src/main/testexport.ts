@@ -4,4 +4,3 @@
 /// <reference path="collisiondetector.ts" />
 /// <reference path="vector.ts" />
 /// <reference path="point.ts" />
-/// <reference path="roundentity.ts" />

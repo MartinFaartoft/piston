@@ -1,5 +1,4 @@
 /// <reference path="jasmine.d.ts" />
-
 /// <reference path="../main/testexport.ts" />
 
 namespace EngineTest {
@@ -21,11 +20,17 @@ namespace EngineTest {
         }
     }
 
-    class Ball extends ps.RoundEntity implements ps.Collidable {
+    class Ball extends ps.Entity {
         constructor(pos: ps.Point) {
-            super(pos, 10);
+            super(pos);
+            this.isCollisionDetectionEnabled = true;
+            this.radius = 10;
         }
-        collideWith(other: ps.Collidable) {}
+        collideWith() {}
+        render() {}
+    }
+
+    class TestEntity extends ps.Entity {
         render() {}
     }
 
@@ -33,9 +38,14 @@ namespace EngineTest {
         let mockCtx = jasmine.createSpyObj("CanvasRenderingContext2D", ["fillRect"]);
         let mockEntity = jasmine.createSpyObj("Entity", ["render", "update", "remove"]);
         let animator = new InMemoryAnimator(1);
-        let engine = new ps.HeadlessEngine(new ps.Vector(100, 100), mockCtx, animator);
-        engine.registerEntity(mockEntity);
+        let engine: ps.HeadlessEngine;
         
+        
+        beforeEach( () => {
+            engine = new ps.HeadlessEngine(new ps.Vector(100, 100), mockCtx, animator); 
+            engine.registerEntity(mockEntity);
+        });
+
         afterEach( () => {
             animator.reset();
             mockCtx.fillRect.calls.reset();
@@ -43,6 +53,8 @@ namespace EngineTest {
             mockEntity.render.calls.reset();
             mockEntity.remove.calls.reset();
             mockEntity.destroyed = false;
+
+            engine.entities = [];
         });
         
         it("should call update on a registered Entity", () => {
@@ -88,11 +100,10 @@ namespace EngineTest {
             expect(mockEntity.update).not.toHaveBeenCalled();
         });
 
-        it("should check for collisions between all Collidable entities", () => {
+        it("should check for collisions between all Collidable entities with collision detection enabled", () => {
             //given
             let engine = new ps.HeadlessEngine(new ps.Vector(100, 100), mockCtx, animator);
-            let collisionDetectorMock = jasmine.createSpyObj("CollisionDetector", ["collides"]);
-            engine.collisionDetector = collisionDetectorMock;
+            spyOn(engine.collisionDetector, "collides");
             let b1 = new Ball(new ps.Point(0, 0));
             let b2 = new Ball(new ps.Point(20, 20));
             let b3 = new Ball(new ps.Point(40, 40));
@@ -102,13 +113,22 @@ namespace EngineTest {
             engine.start();
 
             //then
-            expect(collisionDetectorMock.collides).toHaveBeenCalledWith(b1, b2);
-            expect(collisionDetectorMock.collides).toHaveBeenCalledWith(b1, b3);
-            expect(collisionDetectorMock.collides).toHaveBeenCalledWith(b2, b3);
+            expect(engine.collisionDetector.collides).toHaveBeenCalledTimes(3);
+            expect(engine.collisionDetector.collides).toHaveBeenCalledWith(b1, b2);
+            expect(engine.collisionDetector.collides).toHaveBeenCalledWith(b1, b3);
+            expect(engine.collisionDetector.collides).toHaveBeenCalledWith(b2, b3);
         });
 
+
+        //TODO REFACTOR TO USE NESTED DESCRIBES
+        it("should not check collisions with entities with collision detection disabled", () => {
+            
+        });
+        
         it("should call collideWith on colliding entities", () => {
             
         });
+
+        
     });
 }
