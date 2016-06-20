@@ -2,7 +2,7 @@
 /// <reference path="collision.ts" />
 
 
-namespace ps {
+namespace ps.collision {
     export class CircularCollisionDetector implements CollisionDetector {
         findCollisions(entities: Entity[]): Collision[] {
             let collidables = this.getCollisionEnabledEntities(entities);

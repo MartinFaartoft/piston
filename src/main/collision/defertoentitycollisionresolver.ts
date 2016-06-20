@@ -2,7 +2,7 @@
 /// <reference path="collisionresolver.ts" />
 
 
-namespace ps {
+namespace ps.collision {
     export class DeferToEntityCollisionResolver implements CollisionResolver {
         resolve(collisions: Collision[]): void {
             for (let collision of collisions) {

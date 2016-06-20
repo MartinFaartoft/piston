@@ -1,4 +1,4 @@
-/*! piston - v0.3.0 - 2016-06-19
+/*! piston - v0.3.0 - 2016-06-20
 * https://github.com/martinfaartoft/piston/
 * Copyright (c) 2016 Piston.js <martin.faartoft@gmail.com>; Licensed MIT*/
 var __extends = (this && this.__extends) || function (d, b) {
@@ -72,61 +72,101 @@ var ps;
                 this.pos.y -= dimensions.y;
             }
         };
+        Entity.prototype.collideWith = function (other) { };
         return Entity;
     }());
     ps.Entity = Entity;
 })(ps || (ps = {}));
-/// <reference path="entity.ts" />
+/// <reference path="../entity.ts" />
 var ps;
 (function (ps) {
-    var Collision = (function () {
-        function Collision() {
-            var entities = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                entities[_i - 0] = arguments[_i];
+    var collision;
+    (function (collision) {
+        var Collision = (function () {
+            function Collision() {
+                var entities = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    entities[_i - 0] = arguments[_i];
+                }
+                this.entities = entities;
             }
-            this.entities = entities;
-        }
-        return Collision;
-    }());
-    ps.Collision = Collision;
+            return Collision;
+        }());
+        collision.Collision = Collision;
+    })(collision = ps.collision || (ps.collision = {}));
 })(ps || (ps = {}));
-/// <reference path="entity.ts" />
+/// <reference path="../entity.ts" />
 /// <reference path="collision.ts" />
 /// <reference path="collisiondetector.ts" />
 /// <reference path="collision.ts" />
 var ps;
 (function (ps) {
-    var CircularCollisionDetector = (function () {
-        function CircularCollisionDetector() {
-        }
-        CircularCollisionDetector.prototype.findCollisions = function (entities) {
-            var collidables = this.getCollisionEnabledEntities(entities);
-            var collisions = [];
-            for (var i = 0; i < collidables.length - 1; i++) {
-                for (var j = i + 1; j < collidables.length; j++) {
-                    if (this.collides(collidables[i], collidables[j])) {
-                        collisions.push(new ps.Collision(collidables[i], collidables[j]));
+    var collision;
+    (function (collision) {
+        var CircularCollisionDetector = (function () {
+            function CircularCollisionDetector() {
+            }
+            CircularCollisionDetector.prototype.findCollisions = function (entities) {
+                var collidables = this.getCollisionEnabledEntities(entities);
+                var collisions = [];
+                for (var i = 0; i < collidables.length - 1; i++) {
+                    for (var j = i + 1; j < collidables.length; j++) {
+                        if (this.collides(collidables[i], collidables[j])) {
+                            collisions.push(new collision.Collision(collidables[i], collidables[j]));
+                        }
                     }
                 }
+                return collisions;
+            };
+            CircularCollisionDetector.prototype.collides = function (a, b) {
+                return a.pos.distanceTo(b.pos) < a.radius + b.radius;
+            };
+            CircularCollisionDetector.prototype.getCollisionEnabledEntities = function (entities) {
+                return entities.filter(function (e) { return e.isCollisionDetectionEnabled; });
+            };
+            return CircularCollisionDetector;
+        }());
+        collision.CircularCollisionDetector = CircularCollisionDetector;
+    })(collision = ps.collision || (ps.collision = {}));
+})(ps || (ps = {}));
+/// <reference path="collision.ts" />
+/// <reference path="collision.ts" />
+/// <reference path="collisionresolver.ts" />
+var ps;
+(function (ps) {
+    var collision;
+    (function (collision_1) {
+        var DeferToEntityCollisionResolver = (function () {
+            function DeferToEntityCollisionResolver() {
             }
-            return collisions;
-        };
-        CircularCollisionDetector.prototype.collides = function (a, b) {
-            return a.pos.distanceTo(b.pos) < a.radius + b.radius;
-        };
-        CircularCollisionDetector.prototype.getCollisionEnabledEntities = function (entities) {
-            return entities.filter(function (e) { return e.isCollisionDetectionEnabled; });
-        };
-        return CircularCollisionDetector;
-    }());
-    ps.CircularCollisionDetector = CircularCollisionDetector;
+            DeferToEntityCollisionResolver.prototype.resolve = function (collisions) {
+                for (var _i = 0, collisions_1 = collisions; _i < collisions_1.length; _i++) {
+                    var collision_2 = collisions_1[_i];
+                    this.resolveSingleCollision(collision_2);
+                }
+            };
+            DeferToEntityCollisionResolver.prototype.resolveSingleCollision = function (collision) {
+                var entities = collision.entities;
+                for (var i = 0; i < entities.length - 1; i++) {
+                    for (var j = i + 1; j < entities.length; j++) {
+                        entities[i].collideWith(entities[j]);
+                        entities[j].collideWith(entities[i]);
+                    }
+                }
+            };
+            return DeferToEntityCollisionResolver;
+        }());
+        collision_1.DeferToEntityCollisionResolver = DeferToEntityCollisionResolver;
+    })(collision = ps.collision || (ps.collision = {}));
 })(ps || (ps = {}));
 /// <reference path="animationframeprovider.ts" />
 /// <reference path="browseranimationframeprovider.ts" />
-/// <reference path="circularcollisiondetector.ts" />
+/// <reference path="collision/collisiondetector.ts" />
+/// <reference path="collision/circularcollisiondetector.ts" />
+/// <reference path="collision/defertoentitycollisionresolver.ts" />
 var ps;
 (function (ps) {
+    var c = ps.collision;
     var HeadlessEngine = (function () {
         function HeadlessEngine(dims, ctx, animator) {
             this.dims = dims;
@@ -134,7 +174,8 @@ var ps;
             this.animator = animator;
             this.debug = false;
             this.backgroundFillStyle = "black";
-            this.collisionDetector = new ps.CircularCollisionDetector();
+            this.collisionDetector = new ps.collision.CircularCollisionDetector();
+            this.collisionResolver = new ps.collision.DeferToEntityCollisionResolver();
             this.lastTime = Date.now();
             this.entities = [];
         }
@@ -163,6 +204,7 @@ var ps;
         };
         HeadlessEngine.prototype.checkCollisions = function (entities) {
             var collisions = this.collisionDetector.findCollisions(entities);
+            this.collisionResolver.resolve(collisions);
         };
         HeadlessEngine.prototype.update = function (dt, entities) {
             for (var _i = 0, entities_2 = entities; _i < entities_2.length; _i++) {
@@ -413,7 +455,9 @@ var ps;
 /// <reference path="entitywithsprites.ts" />
 /// <reference path="input.ts" />
 /// <reference path="sprite.ts" />
-/// <reference path="collisiondetector.ts" />
+/// <reference path="collision/collisiondetector.ts" />
+/// <reference path="collision/collisionresolver.ts" />
+/// <reference path="collision/defertoentitycollisionresolver.ts" />
 /// <reference path="vector.ts" />
 /// <reference path="point.ts" /> 
 //# sourceMappingURL=piston-0.3.0.js.map

@@ -29,26 +29,38 @@ declare namespace ps {
         constructor(pos: Point);
         update(dt: number, dims: Vector): void;
         private wrap(dimensions);
+        collideWith(other: Entity): void;
         abstract render(ctx: CanvasRenderingContext2D): void;
     }
 }
-declare namespace ps {
+declare namespace ps.collision {
     class Collision {
         entities: Entity[];
         constructor(...entities: Entity[]);
     }
 }
-declare namespace ps {
+declare namespace ps.collision {
     interface CollisionDetector {
         findCollisions(entities: Entity[]): Collision[];
         collides(a: Entity, b: Entity): any;
     }
 }
-declare namespace ps {
+declare namespace ps.collision {
     class CircularCollisionDetector implements CollisionDetector {
         findCollisions(entities: Entity[]): Collision[];
         collides(a: Entity, b: Entity): boolean;
         private getCollisionEnabledEntities(entities);
+    }
+}
+declare namespace ps.collision {
+    interface CollisionResolver {
+        resolve(collisions: Collision[]): void;
+    }
+}
+declare namespace ps.collision {
+    class DeferToEntityCollisionResolver implements CollisionResolver {
+        resolve(collisions: Collision[]): void;
+        private resolveSingleCollision(collision);
     }
 }
 declare namespace ps {
@@ -58,7 +70,8 @@ declare namespace ps {
         animator: AnimationFrameProvider;
         debug: boolean;
         backgroundFillStyle: string;
-        collisionDetector: CollisionDetector;
+        collisionDetector: collision.CollisionDetector;
+        collisionResolver: collision.CollisionResolver;
         lastTime: number;
         entities: Entity[];
         constructor(dims: Vector, ctx: CanvasRenderingContext2D, animator: AnimationFrameProvider);

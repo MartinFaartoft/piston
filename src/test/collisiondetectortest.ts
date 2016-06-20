@@ -16,7 +16,7 @@ namespace CollisionDetectorTest {
     }
 
     let a: Ball, b: Ball, nextToA: Ball, farAway: Ball;
-    let collisionDetector = new ps.CircularCollisionDetector();
+    let collisionDetector = new ps.collision.CircularCollisionDetector();
 
     beforeEach(() =>  {
         a = new Ball(new Point(0, 0), 10);

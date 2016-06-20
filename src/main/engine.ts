@@ -1,14 +1,17 @@
 /// <reference path="animationframeprovider.ts" />
 /// <reference path="browseranimationframeprovider.ts" />
-/// <reference path="circularcollisiondetector.ts" />
-
+/// <reference path="collision/collisiondetector.ts" />
+/// <reference path="collision/circularcollisiondetector.ts" />
+/// <reference path="collision/defertoentitycollisionresolver.ts" />
 
 namespace ps {
+    let c = collision;
+
     export class HeadlessEngine implements Runnable {
         debug: boolean = false;
         backgroundFillStyle: string = "black";
-        collisionDetector: CollisionDetector = new CircularCollisionDetector();
-        collisionResolver: CollisionResolver = new DeferToEntityCollisionResolver();
+        collisionDetector: collision.CollisionDetector = new collision.CircularCollisionDetector();
+        collisionResolver: collision.CollisionResolver = new collision.DeferToEntityCollisionResolver();
 
         lastTime: number = Date.now();
         entities: Entity[] = [];
@@ -40,7 +43,7 @@ namespace ps {
         }
 
         private checkCollisions(entities: Entity[]): void {
-            let collisions: Collision[] = this.collisionDetector.findCollisions(entities);
+            let collisions: collision.Collision[] = this.collisionDetector.findCollisions(entities);
             this.collisionResolver.resolve(collisions);
         }
 

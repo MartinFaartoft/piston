@@ -1,6 +1,6 @@
 /// <reference path="collision.ts" />
 
-namespace ps {
+namespace ps.collision {
     export interface CollisionResolver {
         resolve(collisions: Collision[]): void;
     }
