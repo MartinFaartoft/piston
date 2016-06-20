@@ -66,15 +66,16 @@ declare namespace ps.collision {
 declare namespace ps {
     class HeadlessEngine implements Runnable {
         dims: Vector;
-        ctx: CanvasRenderingContext2D;
+        canvas: HTMLCanvasElement;
         animator: AnimationFrameProvider;
+        ctx: CanvasRenderingContext2D;
         debug: boolean;
         backgroundFillStyle: string;
         collisionDetector: collision.CollisionDetector;
         collisionResolver: collision.CollisionResolver;
         lastTime: number;
         entities: Entity[];
-        constructor(dims: Vector, ctx: CanvasRenderingContext2D, animator: AnimationFrameProvider);
+        constructor(dims: Vector, canvas: HTMLCanvasElement, animator: AnimationFrameProvider);
         registerEntity(...entities: Entity[]): void;
         run(): void;
         start(): void;
@@ -88,7 +89,7 @@ declare namespace ps {
      * Default engine for running in-browser
      */
     class Engine extends HeadlessEngine {
-        constructor(dims: Vector, ctx: CanvasRenderingContext2D);
+        constructor(dims: Vector, canvas: HTMLCanvasElement);
     }
 }
 declare namespace ps {

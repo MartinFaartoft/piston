@@ -36,13 +36,16 @@ namespace EngineTest {
 
     describe("An engine running a single main loop", () => {
         let mockCtx: any;
+        let mockCanvas: any;
         let animator: InMemoryAnimator;
         let engine: ps.HeadlessEngine;
 
         beforeEach(() => {
             mockCtx = jasmine.createSpyObj("CanvasRenderingContext2D", ["fillRect"]);
+            mockCanvas = jasmine.createSpyObj("HTMLCanvasElement", ["getContext"]);
             animator = new InMemoryAnimator(1);
-            engine = new ps.HeadlessEngine(new ps.Vector(100, 100), mockCtx, animator);
+            engine = new ps.HeadlessEngine(new ps.Vector(100, 100), mockCanvas, animator);
+            engine.ctx = mockCtx;
         });
 
         it("shold clear the frame on each render", () => {

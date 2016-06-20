@@ -8,6 +8,7 @@ namespace ps {
     let c = collision;
 
     export class HeadlessEngine implements Runnable {
+        ctx: CanvasRenderingContext2D;
         debug: boolean = false;
         backgroundFillStyle: string = "black";
         collisionDetector: collision.CollisionDetector = new collision.CircularCollisionDetector();
@@ -16,7 +17,9 @@ namespace ps {
         lastTime: number = Date.now();
         entities: Entity[] = [];
         
-        constructor(public dims: Vector, public ctx: CanvasRenderingContext2D, public animator: AnimationFrameProvider) { }
+        constructor(public dims: Vector, public canvas: HTMLCanvasElement, public animator: AnimationFrameProvider) {
+            this.ctx = canvas.getContext("2d"); 
+        }
 
         registerEntity(...entities: Entity[]): void {
             for (let entity of entities) {
@@ -75,8 +78,8 @@ namespace ps {
      * Default engine for running in-browser
      */
     export class Engine extends HeadlessEngine {
-        constructor(dims: Vector, ctx: CanvasRenderingContext2D) {
-            super(dims, ctx, new BrowserAnimationFrameProvider());
+        constructor(dims: Vector, canvas: HTMLCanvasElement) {
+            super(dims, canvas, new BrowserAnimationFrameProvider());
         }
     }
 }

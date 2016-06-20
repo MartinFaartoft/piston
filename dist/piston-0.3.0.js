@@ -168,9 +168,9 @@ var ps;
 (function (ps) {
     var c = ps.collision;
     var HeadlessEngine = (function () {
-        function HeadlessEngine(dims, ctx, animator) {
+        function HeadlessEngine(dims, canvas, animator) {
             this.dims = dims;
-            this.ctx = ctx;
+            this.canvas = canvas;
             this.animator = animator;
             this.debug = false;
             this.backgroundFillStyle = "black";
@@ -178,6 +178,7 @@ var ps;
             this.collisionResolver = new ps.collision.DeferToEntityCollisionResolver();
             this.lastTime = Date.now();
             this.entities = [];
+            this.ctx = canvas.getContext("2d");
         }
         HeadlessEngine.prototype.registerEntity = function () {
             var entities = [];
@@ -234,8 +235,8 @@ var ps;
      */
     var Engine = (function (_super) {
         __extends(Engine, _super);
-        function Engine(dims, ctx) {
-            _super.call(this, dims, ctx, new ps.BrowserAnimationFrameProvider());
+        function Engine(dims, canvas) {
+            _super.call(this, dims, canvas, new ps.BrowserAnimationFrameProvider());
         }
         return Engine;
     }(HeadlessEngine));
