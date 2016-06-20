@@ -1,9 +1,6 @@
 /// <reference path="jasmine.d.ts" />
 /// <reference path="../main/testexport.ts" />
 
-
-
-
 namespace CollisionDetectorTest {
     let Point = ps.Point;
     let Vector = ps.Vector;
@@ -28,7 +25,7 @@ namespace CollisionDetectorTest {
         farAway = new Ball(new Point(100, 100), 10);
     });
 
-    describe("Circular collision detection", () => {
+    describe("A collision detector", () => {
         it("should return true for identical Collidables", () => {
             expect(collisionDetector.collides(a, a)).toBe(true);
         });
@@ -41,7 +38,7 @@ namespace CollisionDetectorTest {
             expect(collisionDetector.collides(a, b)).toBe(true);
         });
 
-        it("should return false for Collidables precisely next to each other", () => {
+        it("should return false for Collidables almost, but not quite, touching", () => {
             expect(collisionDetector.collides(a, nextToA)).toBe(false);
         });
 

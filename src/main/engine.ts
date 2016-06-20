@@ -8,6 +8,7 @@ namespace ps {
         debug: boolean = false;
         backgroundFillStyle: string = "black";
         collisionDetector: CollisionDetector = new CircularCollisionDetector();
+        collisionResolver: CollisionResolver = new DeferToEntityCollisionResolver();
 
         lastTime: number = Date.now();
         entities: Entity[] = [];
@@ -40,6 +41,7 @@ namespace ps {
 
         private checkCollisions(entities: Entity[]): void {
             let collisions: Collision[] = this.collisionDetector.findCollisions(entities);
+            this.collisionResolver.resolve(collisions);
         }
 
         private update(dt: number, entities: Entity[]): void {

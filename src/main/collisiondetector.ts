@@ -5,7 +5,5 @@ namespace ps {
     export interface CollisionDetector {
         findCollisions(entities: Entity[]): Collision[];
         collides(a: Entity, b: Entity);
-    }
-
-    
+    }   
 }

@@ -49,6 +49,8 @@ namespace ps {
             }
         }
 
+        collideWith(other: Entity): void { }
+
         abstract render(ctx: CanvasRenderingContext2D): void;
     }
 }
