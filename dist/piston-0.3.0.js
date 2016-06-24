@@ -316,6 +316,22 @@ var ps;
         input.Mouse = Mouse;
     })(input = ps.input || (ps.input = {}));
 })(ps || (ps = {}));
+var ps;
+(function (ps) {
+    var DateNowStopwatch = (function () {
+        function DateNowStopwatch() {
+            this.start();
+        }
+        DateNowStopwatch.prototype.start = function () {
+            this.startTime = Date.now();
+        };
+        DateNowStopwatch.prototype.stop = function () {
+            return (Date.now() - this.startTime) / 1000.0;
+        };
+        return DateNowStopwatch;
+    }());
+    ps.DateNowStopwatch = DateNowStopwatch;
+})(ps || (ps = {}));
 /// <reference path="animationframeprovider.ts" />
 /// <reference path="browseranimationframeprovider.ts" />
 /// <reference path="collision/collisiondetector.ts" />
@@ -323,6 +339,7 @@ var ps;
 /// <reference path="collision/defertoentitycollisionresolver.ts" />
 /// <reference path="input/keyboard.ts" />
 /// <reference path="input/mouse.ts" />
+/// <reference path="stopwatch.ts" />
 var ps;
 (function (ps) {
     var c = ps.collision;
@@ -337,7 +354,7 @@ var ps;
             this.backgroundFillStyle = "black";
             this.collisionDetector = new ps.collision.CircularCollisionDetector();
             this.collisionResolver = new ps.collision.DeferToEntityCollisionResolver();
-            this.lastTime = Date.now();
+            this.stopwatch = new ps.DateNowStopwatch();
             this.entities = [];
             this.ctx = canvas.getContext("2d");
             if (this.mouse) {
@@ -359,12 +376,12 @@ var ps;
         };
         HeadlessEngine.prototype.run = function () {
             var now = Date.now();
-            var dt = (now - this.lastTime) / 1000.0;
+            var dt = this.stopwatch.stop();
             this.garbageCollect();
             this.update(dt, this.entities);
             this.checkCollisions(this.entities);
             this.render(this.entities);
-            this.lastTime = now;
+            this.stopwatch.start();
             this.animator.animate(this);
         };
         HeadlessEngine.prototype.start = function () {

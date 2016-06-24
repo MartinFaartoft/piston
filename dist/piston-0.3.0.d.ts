@@ -108,6 +108,18 @@ declare namespace ps.input {
     }
 }
 declare namespace ps {
+    interface Stopwatch {
+        start(): void;
+        stop(): number;
+    }
+    class DateNowStopwatch implements Stopwatch {
+        private startTime;
+        constructor();
+        start(): void;
+        stop(): number;
+    }
+}
+declare namespace ps {
     class HeadlessEngine implements Runnable {
         dims: Vector;
         canvas: HTMLCanvasElement;
@@ -119,7 +131,7 @@ declare namespace ps {
         backgroundFillStyle: string;
         collisionDetector: collision.CollisionDetector;
         collisionResolver: collision.CollisionResolver;
-        lastTime: number;
+        stopwatch: Stopwatch;
         entities: Entity[];
         constructor(dims: Vector, canvas: HTMLCanvasElement, mouse: input.Mouse, keyboard: input.Keyboard, animator: AnimationFrameProvider);
         registerEntity(...entities: Entity[]): void;

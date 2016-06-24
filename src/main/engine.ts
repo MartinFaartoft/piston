@@ -5,6 +5,8 @@
 /// <reference path="collision/defertoentitycollisionresolver.ts" />
 /// <reference path="input/keyboard.ts" />
 /// <reference path="input/mouse.ts" />
+/// <reference path="stopwatch.ts" />
+
 
 namespace ps {
     let c = collision;
@@ -15,8 +17,7 @@ namespace ps {
         backgroundFillStyle: string = "black";
         collisionDetector: collision.CollisionDetector = new collision.CircularCollisionDetector();
         collisionResolver: collision.CollisionResolver = new collision.DeferToEntityCollisionResolver();
-
-        lastTime: number = Date.now();
+        stopwatch: Stopwatch = new DateNowStopwatch();
         entities: Entity[] = [];
         
         constructor(public dims: Vector, 
@@ -44,14 +45,14 @@ namespace ps {
 
         run() {
             let now = Date.now();
-            let dt = (now - this.lastTime) / 1000.0;
+            let dt = this.stopwatch.stop();
 
             this.garbageCollect();
             this.update(dt, this.entities);
             this.checkCollisions(this.entities);
             this.render(this.entities);
 
-            this.lastTime = now;
+            this.stopwatch.start();
 
             this.animator.animate(this);
         }
