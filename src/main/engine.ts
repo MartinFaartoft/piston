@@ -3,6 +3,8 @@
 /// <reference path="collision/collisiondetector.ts" />
 /// <reference path="collision/circularcollisiondetector.ts" />
 /// <reference path="collision/defertoentitycollisionresolver.ts" />
+/// <reference path="input/keyboard.ts" />
+/// <reference path="input/mouse.ts" />
 
 namespace ps {
     let c = collision;
@@ -17,8 +19,21 @@ namespace ps {
         lastTime: number = Date.now();
         entities: Entity[] = [];
         
-        constructor(public dims: Vector, public canvas: HTMLCanvasElement, public animator: AnimationFrameProvider) {
-            this.ctx = canvas.getContext("2d"); 
+        constructor(public dims: Vector, 
+                    public canvas: HTMLCanvasElement, 
+                    public mouse: input.Mouse,
+                    public keyboard: input.Keyboard,
+                    public animator: AnimationFrameProvider) {
+            
+            this.ctx = canvas.getContext("2d");
+
+            if (this.mouse) {
+                this.mouse.enable();
+            }
+
+            if (this.keyboard) {
+                this.keyboard.enable();
+            }
         }
 
         registerEntity(...entities: Entity[]): void {
@@ -79,7 +94,7 @@ namespace ps {
      */
     export class Engine extends HeadlessEngine {
         constructor(dims: Vector, canvas: HTMLCanvasElement) {
-            super(dims, canvas, new BrowserAnimationFrameProvider());
+            super(dims, canvas, new input.Mouse(canvas), new input.Keyboard(document, window), new BrowserAnimationFrameProvider());
         }
     }
 }

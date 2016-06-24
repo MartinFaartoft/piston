@@ -64,9 +64,55 @@ declare namespace ps.collision {
     }
 }
 declare namespace ps {
+    class Point {
+        x: number;
+        y: number;
+        constructor(x: number, y: number);
+        add(v: Vector): Point;
+        subtract(p: Point): Point;
+        distanceTo(p: Point): number;
+        toVector(): Vector;
+    }
+}
+declare namespace ps.input {
+    class Keyboard {
+        private pressedKeys;
+        private document;
+        private keyDownDelegate;
+        private keyUpDelegate;
+        private blurDelegate;
+        constructor(document: Document, window: Window);
+        enable(): void;
+        disable(): void;
+        isKeyDown(key: string): boolean;
+        private setKey(event, status);
+    }
+}
+declare namespace ps.input {
+    class Mouse {
+        pos: Point;
+        isLeftButtonDown: boolean;
+        isRightButtonDown: boolean;
+        isMiddleButtonDown: boolean;
+        private canvas;
+        private mouseMoveDelegate;
+        private mouseDownDelegate;
+        private mouseUpDelegate;
+        constructor(canvas: HTMLCanvasElement);
+        enable(): void;
+        disable(): void;
+        private onMouseMove(e);
+        private onMouseDown(e);
+        private onMouseUp(e);
+        private findPos(obj);
+    }
+}
+declare namespace ps {
     class HeadlessEngine implements Runnable {
         dims: Vector;
         canvas: HTMLCanvasElement;
+        mouse: input.Mouse;
+        keyboard: input.Keyboard;
         animator: AnimationFrameProvider;
         ctx: CanvasRenderingContext2D;
         debug: boolean;
@@ -75,7 +121,7 @@ declare namespace ps {
         collisionResolver: collision.CollisionResolver;
         lastTime: number;
         entities: Entity[];
-        constructor(dims: Vector, canvas: HTMLCanvasElement, animator: AnimationFrameProvider);
+        constructor(dims: Vector, canvas: HTMLCanvasElement, mouse: input.Mouse, keyboard: input.Keyboard, animator: AnimationFrameProvider);
         registerEntity(...entities: Entity[]): void;
         run(): void;
         start(): void;
@@ -105,16 +151,6 @@ declare namespace ps {
     }
 }
 declare namespace ps {
-    class Point {
-        x: number;
-        y: number;
-        constructor(x: number, y: number);
-        add(v: Vector): Point;
-        distanceTo(p: Point): number;
-        toVector(): Vector;
-    }
-}
-declare namespace ps {
     class Sprite {
         spriteSheetCoordinates: Point;
         spriteSize: number[];
@@ -132,9 +168,6 @@ declare namespace ps {
         sprites: Sprite[];
         update(dt: number, dims: Vector): void;
     }
-}
-declare namespace ps {
-    function isKeyDown(key: string): boolean;
 }
 declare namespace ps {
     class Vector {

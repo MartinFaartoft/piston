@@ -44,7 +44,7 @@ namespace EngineTest {
             mockCtx = jasmine.createSpyObj("CanvasRenderingContext2D", ["fillRect"]);
             mockCanvas = jasmine.createSpyObj("HTMLCanvasElement", ["getContext"]);
             animator = new InMemoryAnimator(1);
-            engine = new ps.HeadlessEngine(new ps.Vector(100, 100), mockCanvas, animator);
+            engine = new ps.HeadlessEngine(new ps.Vector(100, 100), mockCanvas, null, null, animator);
             engine.ctx = mockCtx;
         });
 

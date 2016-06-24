@@ -1,4 +1,4 @@
-/*! piston - v0.3.0 - 2016-06-20
+/*! piston - v0.3.0 - 2016-06-24
 * https://github.com/martinfaartoft/piston/
 * Copyright (c) 2016 Piston.js <martin.faartoft@gmail.com>; Licensed MIT*/
 var __extends = (this && this.__extends) || function (d, b) {
@@ -159,18 +159,179 @@ var ps;
         collision_1.DeferToEntityCollisionResolver = DeferToEntityCollisionResolver;
     })(collision = ps.collision || (ps.collision = {}));
 })(ps || (ps = {}));
+var ps;
+(function (ps) {
+    var Point = (function () {
+        function Point(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+        Point.prototype.add = function (v) {
+            return new Point(this.x + v.x, this.y + v.y);
+        };
+        Point.prototype.subtract = function (p) {
+            return new Point(this.x - p.x, this.y - p.y);
+        };
+        Point.prototype.distanceTo = function (p) {
+            return Math.sqrt(Math.pow(this.x - p.x, 2) + Math.pow(this.y - p.y, 2));
+        };
+        Point.prototype.toVector = function () {
+            return new ps.Vector(this.x, this.y);
+        };
+        return Point;
+    }());
+    ps.Point = Point;
+})(ps || (ps = {}));
+/// <reference path="../point.ts" />
+var ps;
+(function (ps) {
+    var input;
+    (function (input) {
+        var Keyboard = (function () {
+            function Keyboard(document, window) {
+                var _this = this;
+                this.pressedKeys = {};
+                this.document = document;
+                this.keyDownDelegate = (function (e) { return _this.setKey(e, true); }).bind(this);
+                this.keyUpDelegate = (function (e) { return _this.setKey(e, false); }).bind(this);
+                this.blurDelegate = (function (e) { return _this.pressedKeys = {}; }).bind(this);
+            }
+            Keyboard.prototype.enable = function () {
+                document.addEventListener("keydown", this.keyDownDelegate);
+                document.addEventListener("keyup", this.keyUpDelegate);
+                window.addEventListener("blur", this.keyUpDelegate);
+            };
+            Keyboard.prototype.disable = function () {
+                document.removeEventListener("keydown", this.keyDownDelegate);
+                document.removeEventListener("keyup", this.keyUpDelegate);
+                window.removeEventListener("blur", this.keyUpDelegate);
+            };
+            Keyboard.prototype.isKeyDown = function (key) {
+                return this.pressedKeys[key.toUpperCase()];
+            };
+            Keyboard.prototype.setKey = function (event, status) {
+                var code = event.keyCode;
+                var key;
+                switch (code) {
+                    case 32:
+                        key = "SPACE";
+                        break;
+                    case 37:
+                        key = "LEFT";
+                        break;
+                    case 38:
+                        key = "UP";
+                        break;
+                    case 39:
+                        key = "RIGHT";
+                        break;
+                    case 40:
+                        key = "DOWN";
+                        break;
+                    default:
+                        // Convert ASCII codes to letters
+                        key = String.fromCharCode(code);
+                }
+                this.pressedKeys[key] = status;
+            };
+            return Keyboard;
+        }());
+        input.Keyboard = Keyboard;
+    })(input = ps.input || (ps.input = {}));
+})(ps || (ps = {}));
+/// <reference path="../point.ts" />
+var ps;
+(function (ps) {
+    var input;
+    (function (input) {
+        var Mouse = (function () {
+            function Mouse(canvas) {
+                this.pos = new ps.Point(0, 0);
+                this.isLeftButtonDown = false;
+                this.isRightButtonDown = false;
+                this.isMiddleButtonDown = false;
+                this.canvas = canvas;
+                this.mouseMoveDelegate = this.onMouseMove.bind(this);
+                this.mouseDownDelegate = this.onMouseDown.bind(this);
+                this.mouseUpDelegate = this.onMouseUp.bind(this);
+            }
+            Mouse.prototype.enable = function () {
+                //disable context menu on rightclick, to allow using mouse2
+                document.body.oncontextmenu = function (e) { return false; };
+                //hide system cursor when mouse is over canvas
+                this.canvas.style.cursor = "none";
+                this.canvas.addEventListener("mousemove", this.mouseMoveDelegate, false);
+                this.canvas.addEventListener("mousedown", this.mouseDownDelegate, false);
+                this.canvas.addEventListener("mouseup", this.mouseUpDelegate, false);
+            };
+            Mouse.prototype.disable = function () {
+                document.body.oncontextmenu = function (e) { return true; };
+                this.canvas.style.cursor = "default";
+                this.canvas.removeEventListener("mousemove", this.mouseMoveDelegate, false);
+                this.canvas.removeEventListener("mousedown", this.mouseDownDelegate, false);
+                this.canvas.removeEventListener("mouseup", this.mouseUpDelegate, false);
+            };
+            Mouse.prototype.onMouseMove = function (e) {
+                var newPos = new ps.Point(e.clientX, e.clientY);
+                this.pos = newPos.subtract(this.findPos(this.canvas));
+            };
+            Mouse.prototype.onMouseDown = function (e) {
+                e.stopImmediatePropagation();
+                if (e.button === 0) {
+                    this.isLeftButtonDown = true;
+                }
+                else if (e.button === 1) {
+                    this.isRightButtonDown = true;
+                }
+                else if (e.button === 2) {
+                    this.isMiddleButtonDown = true;
+                }
+            };
+            Mouse.prototype.onMouseUp = function (e) {
+                e.stopImmediatePropagation();
+                if (e.button === 0) {
+                    this.isLeftButtonDown = false;
+                }
+                else if (e.button === 1) {
+                    this.isRightButtonDown = false;
+                }
+                else if (e.button === 2) {
+                    this.isMiddleButtonDown = false;
+                }
+            };
+            // Find out where an element is on the page
+            // From http://www.quirksmode.org/js/findpos.html
+            Mouse.prototype.findPos = function (obj) {
+                var curleft = 0, curtop = 0;
+                if (obj.offsetParent) {
+                    do {
+                        curleft += obj.offsetLeft;
+                        curtop += obj.offsetTop;
+                    } while (obj = obj.offsetParent);
+                }
+                return new ps.Point(curleft, curtop);
+            };
+            return Mouse;
+        }());
+        input.Mouse = Mouse;
+    })(input = ps.input || (ps.input = {}));
+})(ps || (ps = {}));
 /// <reference path="animationframeprovider.ts" />
 /// <reference path="browseranimationframeprovider.ts" />
 /// <reference path="collision/collisiondetector.ts" />
 /// <reference path="collision/circularcollisiondetector.ts" />
 /// <reference path="collision/defertoentitycollisionresolver.ts" />
+/// <reference path="input/keyboard.ts" />
+/// <reference path="input/mouse.ts" />
 var ps;
 (function (ps) {
     var c = ps.collision;
     var HeadlessEngine = (function () {
-        function HeadlessEngine(dims, canvas, animator) {
+        function HeadlessEngine(dims, canvas, mouse, keyboard, animator) {
             this.dims = dims;
             this.canvas = canvas;
+            this.mouse = mouse;
+            this.keyboard = keyboard;
             this.animator = animator;
             this.debug = false;
             this.backgroundFillStyle = "black";
@@ -179,6 +340,12 @@ var ps;
             this.lastTime = Date.now();
             this.entities = [];
             this.ctx = canvas.getContext("2d");
+            if (this.mouse) {
+                this.mouse.enable();
+            }
+            if (this.keyboard) {
+                this.keyboard.enable();
+            }
         }
         HeadlessEngine.prototype.registerEntity = function () {
             var entities = [];
@@ -236,7 +403,7 @@ var ps;
     var Engine = (function (_super) {
         __extends(Engine, _super);
         function Engine(dims, canvas) {
-            _super.call(this, dims, canvas, new ps.BrowserAnimationFrameProvider());
+            _super.call(this, dims, canvas, new ps.input.Mouse(canvas), new ps.input.Keyboard(document, window), new ps.BrowserAnimationFrameProvider());
         }
         return Engine;
     }(HeadlessEngine));
@@ -290,26 +457,6 @@ var ps;
         return ResourceManager;
     }());
     ps.ResourceManager = ResourceManager;
-})(ps || (ps = {}));
-var ps;
-(function (ps) {
-    var Point = (function () {
-        function Point(x, y) {
-            this.x = x;
-            this.y = y;
-        }
-        Point.prototype.add = function (v) {
-            return new Point(this.x + v.x, this.y + v.y);
-        };
-        Point.prototype.distanceTo = function (p) {
-            return Math.sqrt(Math.pow(this.x - p.x, 2) + Math.pow(this.y - p.y, 2));
-        };
-        Point.prototype.toVector = function () {
-            return new ps.Vector(this.x, this.y);
-        };
-        return Point;
-    }());
-    ps.Point = Point;
 })(ps || (ps = {}));
 /// <reference path="resourcemanager.ts" />
 /// <reference path="point.ts" />
@@ -374,50 +521,6 @@ var ps;
 })(ps || (ps = {}));
 var ps;
 (function (ps) {
-    function isKeyDown(key) {
-        return pressedKeys[key.toUpperCase()];
-    }
-    ps.isKeyDown = isKeyDown;
-    var pressedKeys = {};
-    (function () {
-        function setKey(event, status) {
-            var code = event.keyCode;
-            var key;
-            switch (code) {
-                case 32:
-                    key = "SPACE";
-                    break;
-                case 37:
-                    key = "LEFT";
-                    break;
-                case 38:
-                    key = "UP";
-                    break;
-                case 39:
-                    key = "RIGHT";
-                    break;
-                case 40:
-                    key = "DOWN";
-                    break;
-                default:
-                    // Convert ASCII codes to letters
-                    key = String.fromCharCode(code);
-            }
-            pressedKeys[key] = status;
-        }
-        document.addEventListener("keydown", function (e) {
-            setKey(e, true);
-        });
-        document.addEventListener("keyup", function (e) {
-            setKey(e, false);
-        });
-        window.addEventListener("blur", function () {
-            pressedKeys = {};
-        });
-    })();
-})(ps || (ps = {}));
-var ps;
-(function (ps) {
     var Vector = (function () {
         function Vector(x, y) {
             this.x = x;
@@ -454,7 +557,6 @@ var ps;
 })(ps || (ps = {}));
 /// <reference path="engine.ts" />
 /// <reference path="entitywithsprites.ts" />
-/// <reference path="input.ts" />
 /// <reference path="sprite.ts" />
 /// <reference path="collision/collisiondetector.ts" />
 /// <reference path="collision/collisionresolver.ts" />
