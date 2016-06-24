@@ -7,7 +7,7 @@
   "homepage": "https://github.com/martinfaartoft/piston/",
   "repository": {
     "type": "git",
-    "url": "git://github.com/martinfaartoft/Piston.git"
+    "url": "git://github.com/martinfaartoft/piston.git"
   },
   "bugs": {
     "url": "https://github.com/martinfaartoft/piston/issues"
@@ -24,7 +24,6 @@
   ],
   "devDependencies": {
     "grunt": "1.0.1",
-    "grunt-contrib-concat": "1.0.1",
     "grunt-contrib-copy": "1.0.0",
     "grunt-contrib-watch": "1.0.0",
     "grunt-minified": "0.0.6",

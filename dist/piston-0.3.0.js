@@ -1,6 +1,3 @@
-/*! piston - v0.3.0 - 2016-06-24
-* https://github.com/martinfaartoft/piston/
-* Copyright (c) 2016 Piston.js <martin.faartoft@gmail.com>; Licensed MIT*/
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }

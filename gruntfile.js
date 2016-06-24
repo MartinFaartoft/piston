@@ -14,29 +14,6 @@ module.exports = function (grunt) {
       jasmineJs: path.join('node_modules', 'jasmine', 'bin', 'jasmine.js'),
       
       //
-      // Concatenate build files
-      // Add banner to files
-      //
-      concat: {
-         main: {
-            src: ['dist/<%= pkg.name %>-<%= version %>.js'],
-            dest: 'dist/<%= pkg.name %>-<%= version %>.js'
-         },
-         minified: {
-            src: ['dist/<%= pkg.name %>-<%= version %>.min.js'],
-            dest: 'dist/<%= pkg.name %>-<%= version %>.min.js'
-         },
-         options: {
-            separator: '\n;\n',
-            banner: '/*! <%= pkg.title || pkg.name %> - v<%= version %> - ' +
-                    '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
-                    '<%= pkg.homepage ? "* " + pkg.homepage + "\\n" : "" %>' +
-                    '* Copyright (c) <%= grunt.template.today("yyyy") %> Piston.js <<%= pkg.author %>>;' +
-                    ' Licensed <%= pkg.license %>*/\n'
-         }
-      },
-
-      //
       // Minify files
       //
       minified: {
@@ -140,7 +117,6 @@ module.exports = function (grunt) {
    //
    grunt.loadNpmTasks('grunt-shell');
    grunt.loadNpmTasks('grunt-minified');
-   grunt.loadNpmTasks('grunt-contrib-concat');
    grunt.loadNpmTasks('grunt-tslint');
    grunt.loadNpmTasks('grunt-contrib-watch');
    
@@ -155,7 +131,7 @@ module.exports = function (grunt) {
 
    grunt.registerTask('compile', ['tslint:src', 'shell:tsc', 'shell:sample'])
 
-   grunt.registerTask('release', ['clean', 'compile', 'test', 'minified', 'concat'])
+   grunt.registerTask('release', ['clean', 'compile', 'test', 'minified'])
 
    grunt.registerTask('server', [])
    
