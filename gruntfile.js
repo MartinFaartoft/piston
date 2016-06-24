@@ -56,11 +56,12 @@ module.exports = function (grunt) {
       //
       watch: {
          scripts: {
-            files: ['src/main/*.ts', 'src/main/*/*.ts', 'src/test/*.ts'],
-            tasks: ['tslint:src', 'shell:specs', 'shell:tests'/*, 'jasmine_node'*/],
-            options: {
-               interrupt: true
-            }
+            files: ['src/**/*.ts'],
+            tasks: ['release'],
+         },
+         livereload: {
+             options: { livereload: true },
+             files: ['sample/game.js', 'dist/piston-0.3.0.js']
          }
       },
 
@@ -69,7 +70,7 @@ module.exports = function (grunt) {
       //
       shell: {
          clean: {
-             command: 'rm -rf dist/* && rm -rf build/*'
+             command: 'rm -rf dist/* && rm -rf build/* && rm -rf sample/*'
          },
 
          //
@@ -150,13 +151,15 @@ module.exports = function (grunt) {
    // Run tests quickly
    grunt.registerTask('clean', ['shell:clean']);
    
-   grunt.registerTask('tests', ['shell:specs', 'shell:tests']);
+   grunt.registerTask('test', ['shell:specs', 'shell:tests']);
 
-   grunt.registerTask('compile', ['shell:tsc', 'shell:sample', 'minified', 'concat'])
+   grunt.registerTask('compile', ['tslint:src', 'shell:tsc', 'shell:sample'])
+
+   grunt.registerTask('release', ['clean', 'compile', 'test', 'minified', 'concat'])
 
    grunt.registerTask('server', [])
    
    // Default task - compile, test, build dists
-   grunt.registerTask('default', ['shell:clean', 'tslint:src', 'shell:specs', 'shell:tests', 'compile']);
+   grunt.registerTask('default', ['release']);
 
 };
