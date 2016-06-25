@@ -52,6 +52,7 @@ var SampleGame;
     };
     var dimensions = new ps.Vector(canvas.width, canvas.height);
     var engine = new ps.Engine(dimensions, canvas);
+    engine.mouse.setCustomCursor("assets/crosshairs.png", new ps.Point(10, 10));
     engine.registerEntity(new SampleGame.Ball(), ball);
     engine.run();
 })(SampleGame || (SampleGame = {}));

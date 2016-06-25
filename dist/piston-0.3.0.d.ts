@@ -101,6 +101,7 @@ declare namespace ps.input {
         constructor(canvas: HTMLCanvasElement);
         enable(): void;
         disable(): void;
+        setCustomCursor(url: string, hotspot: Point): void;
         private onMouseMove(e);
         private onMouseDown(e);
         private onMouseUp(e);

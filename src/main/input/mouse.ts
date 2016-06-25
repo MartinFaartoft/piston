@@ -41,6 +41,10 @@ namespace ps.input {
             this.canvas.removeEventListener("mouseup", this.mouseUpDelegate, false);
         }
 
+        setCustomCursor(url: string, hotspot: Point) {
+            this.canvas.style.cursor = "url(" + url + ") " + hotspot.x + " " + hotspot.y + ", auto";
+        }
+
         private onMouseMove(e: MouseEvent) {
             let newPos = new Point(e.clientX, e.clientY);
             this.pos = newPos.subtract(this.findPos(this.canvas));

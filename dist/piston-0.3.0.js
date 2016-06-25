@@ -268,6 +268,9 @@ var ps;
                 this.canvas.removeEventListener("mousedown", this.mouseDownDelegate, false);
                 this.canvas.removeEventListener("mouseup", this.mouseUpDelegate, false);
             };
+            Mouse.prototype.setCustomCursor = function (url, hotspot) {
+                this.canvas.style.cursor = "url(" + url + ") " + hotspot.x + " " + hotspot.y + ", auto";
+            };
             Mouse.prototype.onMouseMove = function (e) {
                 var newPos = new ps.Point(e.clientX, e.clientY);
                 this.pos = newPos.subtract(this.findPos(this.canvas));

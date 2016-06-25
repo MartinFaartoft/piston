@@ -26,9 +26,8 @@ namespace SampleGame {
 
     let dimensions = new ps.Vector(canvas.width, canvas.height);
     let engine = new ps.Engine(dimensions, canvas);
+    engine.mouse.setCustomCursor("assets/crosshairs.png", new ps.Point(10, 10));
     engine.registerEntity(new Ball(), ball);
 
     engine.run();
-
-
 }
