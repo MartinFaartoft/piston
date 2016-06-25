@@ -3,7 +3,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-/// <reference path="../../dist/piston-0.3.0.d.ts" />
+/// <reference path="../../dist/piston-0.4.0.d.ts" />
 var SampleGame;
 (function (SampleGame) {
     var Ball = (function (_super) {
@@ -24,7 +24,7 @@ var SampleGame;
     }(ps.Entity));
     SampleGame.Ball = Ball;
 })(SampleGame || (SampleGame = {}));
-/// <reference path="../../dist/piston-0.3.0.d.ts" />
+/// <reference path="../../dist/piston-0.4.0.d.ts" />
 /// <reference path="ball.ts" />
 var SampleGame;
 (function (SampleGame) {

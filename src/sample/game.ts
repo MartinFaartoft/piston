@@ -1,4 +1,4 @@
-/// <reference path="../../dist/piston-0.3.0.d.ts" />
+/// <reference path="../../dist/piston-0.4.0.d.ts" />
 /// <reference path="ball.ts" />
 
 

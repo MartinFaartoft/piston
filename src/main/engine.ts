@@ -19,13 +19,13 @@ namespace ps {
         collisionResolver: collision.CollisionResolver = new collision.DeferToEntityCollisionResolver();
         stopwatch: Stopwatch = new DateNowStopwatch();
         entities: Entity[] = [];
-        
-        constructor(public dims: Vector, 
-                    public canvas: HTMLCanvasElement, 
+
+        constructor(public dims: Vector,
+                    public canvas: HTMLCanvasElement,
                     public mouse: input.Mouse,
                     public keyboard: input.Keyboard,
                     public animator: AnimationFrameProvider) {
-            
+
             this.ctx = canvas.getContext("2d");
 
             if (this.mouse) {
@@ -43,17 +43,27 @@ namespace ps {
             }
         }
 
+        //the main loop of the piston engine
         run() {
-            let now = Date.now();
+            //measure time taken since last frame was processed
             let dt = this.stopwatch.stop();
 
+            //remove all destroyed entities
             this.garbageCollect();
+
+            //update entities
             this.update(dt, this.entities);
+
+            //detect and resolve any collisions between entities
             this.checkCollisions(this.entities);
+
+            //render the frame
             this.render(this.entities);
 
+            //start measuring time since this frame finished
             this.stopwatch.start();
 
+            //request next animation frame
             this.animator.animate(this);
         }
 

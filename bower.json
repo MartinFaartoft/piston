@@ -8,7 +8,7 @@
     }
   ],
   "description": "Piston.js is a JavaScript / Typescript game engine for 2D Canvas games.",
-  "main": "dist/piston-0.3.0.js",
+  "main": "dist/piston-0.4.0.js",
   "keywords": [
     "piston",
     "game",

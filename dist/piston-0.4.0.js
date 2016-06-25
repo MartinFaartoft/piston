@@ -374,14 +374,21 @@ var ps;
                 this.entities.push(entity);
             }
         };
+        //the main loop of the piston engine
         HeadlessEngine.prototype.run = function () {
-            var now = Date.now();
+            //measure time taken since last frame was processed
             var dt = this.stopwatch.stop();
+            //remove all destroyed entities
             this.garbageCollect();
+            //update entities
             this.update(dt, this.entities);
+            //detect and resolve any collisions between entities
             this.checkCollisions(this.entities);
+            //render the frame
             this.render(this.entities);
+            //start measuring time since this frame finished
             this.stopwatch.start();
+            //request next animation frame
             this.animator.animate(this);
         };
         HeadlessEngine.prototype.start = function () {
@@ -580,4 +587,4 @@ var ps;
 /// <reference path="collision/defertoentitycollisionresolver.ts" />
 /// <reference path="vector.ts" />
 /// <reference path="point.ts" /> 
-//# sourceMappingURL=piston-0.3.0.js.map
+//# sourceMappingURL=piston-0.4.0.js.map

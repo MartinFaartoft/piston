@@ -17,7 +17,7 @@ module.exports = function (grunt) {
         // Uglify files
         //
         uglify: {
-            my_target: {
+            piston: {
                 files: {
                     'dist/<%= pkg.name %>-<%= version %>.min.js': ['dist/<%= pkg.name %>-<%= version %>.js']
                 }
@@ -37,7 +37,7 @@ module.exports = function (grunt) {
             },
             livereload: {
                 options: { livereload: true },
-                files: ['sample/game.js', 'dist/piston-0.3.0.js']
+                files: ['sample/game.js', 'dist/piston-0.4.0.js']
             }
         },
 
@@ -50,7 +50,7 @@ module.exports = function (grunt) {
             },
 
             //
-            // Typescript Compile engine 
+            // Typescript Compile engine
             //
             tsc: {
                 command: '<%= tscCmd %> --sourcemap --declaration "./src/main/export.ts" --out "./dist/<%= pkg.name %>-<%= version %>.js"',
