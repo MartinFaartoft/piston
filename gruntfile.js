@@ -129,6 +129,8 @@ module.exports = function (grunt) {
    
    grunt.registerTask('test', ['shell:specs', 'shell:tests']);
 
+   grunt.registerTask('travis', ['compile', 'test']);
+
    grunt.registerTask('compile', ['tslint:src', 'shell:tsc', 'shell:sample'])
 
    grunt.registerTask('release', ['clean', 'compile', 'test', 'minified'])
