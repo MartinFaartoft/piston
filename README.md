@@ -1,5 +1,4 @@
-[![Build Status](https://travis-ci.org/MartinFaartoft/piston.svg?branch=master)](https://travis-ci.org/MartinFaartoft/piston)
-# Piston
+# Piston [![Build Status](https://travis-ci.org/MartinFaartoft/piston.svg?branch=master)](https://travis-ci.org/MartinFaartoft/piston)
 A game engine for making 2D games using HTML5 Canvas
 
 ## Features
