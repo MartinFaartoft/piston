@@ -2,11 +2,11 @@ namespace ps {
     export class Point {
         constructor(public x: number, public y: number) {}
 
-        add(v: Vector): Point {
+        add(v: Vector | Point): Point {
             return new Point(this.x + v.x, this.y + v.y);
         }
 
-        subtract(p: Point): Point {
+        subtract(p: Vector | Point): Point {
             return new Point(this.x - p.x, this.y - p.y);
         }
 

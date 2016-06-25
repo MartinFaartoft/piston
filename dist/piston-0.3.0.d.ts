@@ -68,8 +68,8 @@ declare namespace ps {
         x: number;
         y: number;
         constructor(x: number, y: number);
-        add(v: Vector): Point;
-        subtract(p: Point): Point;
+        add(v: Vector | Point): Point;
+        subtract(p: Vector | Point): Point;
         distanceTo(p: Point): number;
         toVector(): Vector;
     }
