@@ -1,5 +1,7 @@
 /// <reference path="../../dist/piston-0.4.0.d.ts" />
 /// <reference path="ball.ts" />
+/// <reference path="box.ts" />
+
 
 
 namespace SampleGame {
@@ -27,7 +29,7 @@ namespace SampleGame {
     let dimensions = new ps.Vector(canvas.width, canvas.height);
     let engine = new ps.Engine(dimensions, canvas);
     engine.mouse.setCustomCursor("assets/crosshairs.png", new ps.Point(10, 10));
-    engine.registerEntity(new Ball(), ball);
+    engine.registerEntity(new Ball(), new Box(), ball);
 
     engine.run();
 }

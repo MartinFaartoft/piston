@@ -6,6 +6,8 @@
 /// <reference path="input/keyboard.ts" />
 /// <reference path="input/mouse.ts" />
 /// <reference path="stopwatch.ts" />
+/// <reference path="camera.ts" />
+/// <reference path="coordinateconverter.ts" />
 
 
 namespace ps {
@@ -24,7 +26,8 @@ namespace ps {
                     public canvas: HTMLCanvasElement,
                     public mouse: input.Mouse,
                     public keyboard: input.Keyboard,
-                    public animator: AnimationFrameProvider) {
+                    public animator: AnimationFrameProvider,
+                    public camera: Camera) {
 
             this.ctx = canvas.getContext("2d");
 
@@ -58,7 +61,7 @@ namespace ps {
             this.checkCollisions(this.entities);
 
             //render the frame
-            this.render(this.entities);
+            this.camera.render(this.entities);
 
             //start measuring time since this frame finished
             this.stopwatch.start();
@@ -82,19 +85,6 @@ namespace ps {
             }
         }
 
-        private render(entities: Entity[]): void {
-            this.clearFrame(this.ctx);
-
-            for (let entity of entities) {
-                entity.render(this.ctx);
-            }
-        }
-
-        private clearFrame(ctx: CanvasRenderingContext2D) {
-            ctx.fillStyle = this.backgroundFillStyle;
-            ctx.fillRect(0, 0, this.dims.x, this.dims.y);
-        }
-
         private garbageCollect() {
             this.entities = this.entities.filter(e => !e.destroyed);
         }
@@ -105,7 +95,12 @@ namespace ps {
      */
     export class Engine extends HeadlessEngine {
         constructor(dims: Vector, canvas: HTMLCanvasElement) {
-            super(dims, canvas, new input.Mouse(canvas), new input.Keyboard(document, window), new BrowserAnimationFrameProvider());
+            super(dims, 
+                  canvas, 
+                  new input.Mouse(canvas, new DefaultCoordinateConverter(dims)), 
+                  new input.Keyboard(document, window), 
+                  new BrowserAnimationFrameProvider(),
+                  new Camera(dims, canvas.getContext("2d"), new DefaultCoordinateConverter(dims)));
         }
     }
 }

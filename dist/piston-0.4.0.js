@@ -242,12 +242,13 @@ var ps;
     var input;
     (function (input) {
         var Mouse = (function () {
-            function Mouse(canvas) {
+            function Mouse(canvas, coordinateConverter) {
+                this.canvas = canvas;
+                this.coordinateConverter = coordinateConverter;
                 this.pos = new ps.Point(0, 0);
                 this.isLeftButtonDown = false;
                 this.isRightButtonDown = false;
                 this.isMiddleButtonDown = false;
-                this.canvas = canvas;
                 this.mouseMoveDelegate = this.onMouseMove.bind(this);
                 this.mouseDownDelegate = this.onMouseDown.bind(this);
                 this.mouseUpDelegate = this.onMouseUp.bind(this);
@@ -273,7 +274,7 @@ var ps;
             };
             Mouse.prototype.onMouseMove = function (e) {
                 var newPos = new ps.Point(e.clientX, e.clientY);
-                this.pos = newPos.subtract(this.findPos(this.canvas));
+                this.pos = this.coordinateConverter.convertCameraCoordsToGameCoords(newPos.subtract(this.findPos(this.canvas)));
             };
             Mouse.prototype.onMouseDown = function (e) {
                 e.stopImmediatePropagation();
@@ -332,6 +333,105 @@ var ps;
     }());
     ps.DateNowStopwatch = DateNowStopwatch;
 })(ps || (ps = {}));
+var ps;
+(function (ps) {
+    var Vector = (function () {
+        function Vector(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+        Vector.prototype.add = function (v) {
+            return new Vector(this.x + v.x, this.y + v.y);
+        };
+        Vector.prototype.subtract = function (v) {
+            return new Vector(this.x - v.x, this.y - v.y);
+        };
+        Vector.prototype.multiply = function (scalar) {
+            return new Vector(this.x * scalar, this.y * scalar);
+        };
+        Vector.prototype.magnitude = function () {
+            return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
+        };
+        Vector.prototype.unit = function () {
+            return this.multiply(1 / this.magnitude());
+        };
+        Vector.prototype.tangent = function () {
+            //avoid negative zero complications
+            return new Vector(this.y === 0 ? 0 : this.y * -1, this.x);
+        };
+        Vector.prototype.dot = function (v) {
+            return this.x * v.x + this.y * v.y;
+        };
+        Vector.prototype.toPoint = function () {
+            return new ps.Point(this.x, this.y);
+        };
+        return Vector;
+    }());
+    ps.Vector = Vector;
+})(ps || (ps = {}));
+/// <reference path="vector.ts" />
+/// <reference path="point.ts" />
+var ps;
+(function (ps) {
+    //assume game coords lie in the first quadrant, with (0, 0) being the lower left corner
+    var DefaultCoordinateConverter = (function () {
+        function DefaultCoordinateConverter(dims) {
+            this.dims = dims;
+        }
+        DefaultCoordinateConverter.prototype.convertGameCoordsToCameraCoords = function (p) {
+            return new ps.Point(p.x, this.dims.y - p.y);
+        };
+        DefaultCoordinateConverter.prototype.convertCameraCoordsToGameCoords = function (p) {
+            return new ps.Point(p.x, this.dims.y - p.y);
+        };
+        return DefaultCoordinateConverter;
+    }());
+    ps.DefaultCoordinateConverter = DefaultCoordinateConverter;
+})(ps || (ps = {}));
+/// <reference path="point.ts" />
+/// <reference path="coordinateconverter.ts" />
+var ps;
+(function (ps) {
+    var Camera = (function () {
+        function Camera(dims, ctx, coordinateConverter) {
+            this.dims = dims;
+            this.ctx = ctx;
+            this.coordinateConverter = coordinateConverter;
+            this.backgroundColor = "black";
+        }
+        Camera.prototype.fillCircle = function (center, radius, color) {
+            var centerInCameraCoords = this.coordinateConverter.convertGameCoordsToCameraCoords(center);
+            var scaledRadius = this.scale(radius);
+            this.ctx.fillStyle = color;
+            this.ctx.beginPath();
+            this.ctx.arc(centerInCameraCoords.x, centerInCameraCoords.y, scaledRadius, 0, Math.PI * 2);
+            this.ctx.fill();
+        };
+        Camera.prototype.fillRect = function (bottomLeft, width, height, color) {
+            var bottomLeftInCameraCoords = this.coordinateConverter.convertGameCoordsToCameraCoords(bottomLeft);
+            var scaledHeight = this.scale(height);
+            var scaledWidth = this.scale(width);
+            this.ctx.fillStyle = color;
+            this.ctx.fillRect(bottomLeftInCameraCoords.x, bottomLeftInCameraCoords.y, scaledWidth, scaledHeight);
+        };
+        Camera.prototype.scale = function (n) {
+            return n; //assume 1:1 scale for now
+        };
+        Camera.prototype.render = function (entities) {
+            this.clear();
+            for (var _i = 0, entities_1 = entities; _i < entities_1.length; _i++) {
+                var entity = entities_1[_i];
+                entity.render(this);
+            }
+        };
+        Camera.prototype.clear = function () {
+            this.ctx.fillStyle = this.backgroundColor;
+            this.ctx.fillRect(0, 0, this.dims.x, this.dims.y);
+        };
+        return Camera;
+    }());
+    ps.Camera = Camera;
+})(ps || (ps = {}));
 /// <reference path="animationframeprovider.ts" />
 /// <reference path="browseranimationframeprovider.ts" />
 /// <reference path="collision/collisiondetector.ts" />
@@ -340,16 +440,19 @@ var ps;
 /// <reference path="input/keyboard.ts" />
 /// <reference path="input/mouse.ts" />
 /// <reference path="stopwatch.ts" />
+/// <reference path="camera.ts" />
+/// <reference path="coordinateconverter.ts" />
 var ps;
 (function (ps) {
     var c = ps.collision;
     var HeadlessEngine = (function () {
-        function HeadlessEngine(dims, canvas, mouse, keyboard, animator) {
+        function HeadlessEngine(dims, canvas, mouse, keyboard, animator, camera) {
             this.dims = dims;
             this.canvas = canvas;
             this.mouse = mouse;
             this.keyboard = keyboard;
             this.animator = animator;
+            this.camera = camera;
             this.debug = false;
             this.backgroundFillStyle = "black";
             this.collisionDetector = new ps.collision.CircularCollisionDetector();
@@ -369,8 +472,8 @@ var ps;
             for (var _i = 0; _i < arguments.length; _i++) {
                 entities[_i - 0] = arguments[_i];
             }
-            for (var _a = 0, entities_1 = entities; _a < entities_1.length; _a++) {
-                var entity = entities_1[_a];
+            for (var _a = 0, entities_2 = entities; _a < entities_2.length; _a++) {
+                var entity = entities_2[_a];
                 this.entities.push(entity);
             }
         };
@@ -385,7 +488,7 @@ var ps;
             //detect and resolve any collisions between entities
             this.checkCollisions(this.entities);
             //render the frame
-            this.render(this.entities);
+            this.camera.render(this.entities);
             //start measuring time since this frame finished
             this.stopwatch.start();
             //request next animation frame
@@ -399,21 +502,10 @@ var ps;
             this.collisionResolver.resolve(collisions);
         };
         HeadlessEngine.prototype.update = function (dt, entities) {
-            for (var _i = 0, entities_2 = entities; _i < entities_2.length; _i++) {
-                var entity = entities_2[_i];
-                entity.update(dt, this.dims);
-            }
-        };
-        HeadlessEngine.prototype.render = function (entities) {
-            this.clearFrame(this.ctx);
             for (var _i = 0, entities_3 = entities; _i < entities_3.length; _i++) {
                 var entity = entities_3[_i];
-                entity.render(this.ctx);
+                entity.update(dt, this.dims);
             }
-        };
-        HeadlessEngine.prototype.clearFrame = function (ctx) {
-            ctx.fillStyle = this.backgroundFillStyle;
-            ctx.fillRect(0, 0, this.dims.x, this.dims.y);
         };
         HeadlessEngine.prototype.garbageCollect = function () {
             this.entities = this.entities.filter(function (e) { return !e.destroyed; });
@@ -427,7 +519,7 @@ var ps;
     var Engine = (function (_super) {
         __extends(Engine, _super);
         function Engine(dims, canvas) {
-            _super.call(this, dims, canvas, new ps.input.Mouse(canvas), new ps.input.Keyboard(document, window), new ps.BrowserAnimationFrameProvider());
+            _super.call(this, dims, canvas, new ps.input.Mouse(canvas, new ps.DefaultCoordinateConverter(dims)), new ps.input.Keyboard(document, window), new ps.BrowserAnimationFrameProvider(), new ps.Camera(dims, canvas.getContext("2d"), new ps.DefaultCoordinateConverter(dims)));
         }
         return Engine;
     }(HeadlessEngine));
@@ -542,42 +634,6 @@ var ps;
         return EntityWithSprites;
     }(ps.Entity));
     ps.EntityWithSprites = EntityWithSprites;
-})(ps || (ps = {}));
-var ps;
-(function (ps) {
-    var Vector = (function () {
-        function Vector(x, y) {
-            this.x = x;
-            this.y = y;
-        }
-        Vector.prototype.add = function (v) {
-            return new Vector(this.x + v.x, this.y + v.y);
-        };
-        Vector.prototype.subtract = function (v) {
-            return new Vector(this.x - v.x, this.y - v.y);
-        };
-        Vector.prototype.multiply = function (scalar) {
-            return new Vector(this.x * scalar, this.y * scalar);
-        };
-        Vector.prototype.magnitude = function () {
-            return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
-        };
-        Vector.prototype.unit = function () {
-            return this.multiply(1 / this.magnitude());
-        };
-        Vector.prototype.tangent = function () {
-            //avoid negative zero complications
-            return new Vector(this.y === 0 ? 0 : this.y * -1, this.x);
-        };
-        Vector.prototype.dot = function (v) {
-            return this.x * v.x + this.y * v.y;
-        };
-        Vector.prototype.toPoint = function () {
-            return new ps.Point(this.x, this.y);
-        };
-        return Vector;
-    }());
-    ps.Vector = Vector;
 })(ps || (ps = {}));
 /// <reference path="engine.ts" />
 /// <reference path="entitywithsprites.ts" />

@@ -30,7 +30,7 @@ declare namespace ps {
         update(dt: number, dims: Vector): void;
         private wrap(dimensions);
         collideWith(other: Entity): void;
-        abstract render(ctx: CanvasRenderingContext2D): void;
+        abstract render(camera: Camera): void;
     }
 }
 declare namespace ps.collision {
@@ -90,15 +90,16 @@ declare namespace ps.input {
 }
 declare namespace ps.input {
     class Mouse {
+        canvas: HTMLCanvasElement;
+        coordinateConverter: CoordinateConverter;
         pos: Point;
         isLeftButtonDown: boolean;
         isRightButtonDown: boolean;
         isMiddleButtonDown: boolean;
-        private canvas;
         private mouseMoveDelegate;
         private mouseDownDelegate;
         private mouseUpDelegate;
-        constructor(canvas: HTMLCanvasElement);
+        constructor(canvas: HTMLCanvasElement, coordinateConverter: CoordinateConverter);
         enable(): void;
         disable(): void;
         setCustomCursor(url: string, hotspot: Point): void;
@@ -121,12 +122,54 @@ declare namespace ps {
     }
 }
 declare namespace ps {
+    class Vector {
+        x: number;
+        y: number;
+        constructor(x: number, y: number);
+        add(v: Vector): Vector;
+        subtract(v: Vector): Vector;
+        multiply(scalar: number): Vector;
+        magnitude(): number;
+        unit(): Vector;
+        tangent(): Vector;
+        dot(v: Vector): number;
+        toPoint(): Point;
+    }
+}
+declare namespace ps {
+    interface CoordinateConverter {
+        convertGameCoordsToCameraCoords(p: Point): Point;
+        convertCameraCoordsToGameCoords(p: Point): Point;
+    }
+    class DefaultCoordinateConverter implements CoordinateConverter {
+        dims: Vector;
+        constructor(dims: Vector);
+        convertGameCoordsToCameraCoords(p: Point): Point;
+        convertCameraCoordsToGameCoords(p: Point): Point;
+    }
+}
+declare namespace ps {
+    class Camera {
+        dims: Vector;
+        ctx: CanvasRenderingContext2D;
+        coordinateConverter: CoordinateConverter;
+        backgroundColor: string;
+        constructor(dims: Vector, ctx: CanvasRenderingContext2D, coordinateConverter: CoordinateConverter);
+        fillCircle(center: Point, radius: number, color: string): void;
+        fillRect(bottomLeft: Point, width: number, height: number, color: string): void;
+        scale(n: number): number;
+        render(entities: Entity[]): void;
+        private clear();
+    }
+}
+declare namespace ps {
     class HeadlessEngine implements Runnable {
         dims: Vector;
         canvas: HTMLCanvasElement;
         mouse: input.Mouse;
         keyboard: input.Keyboard;
         animator: AnimationFrameProvider;
+        camera: Camera;
         ctx: CanvasRenderingContext2D;
         debug: boolean;
         backgroundFillStyle: string;
@@ -134,14 +177,12 @@ declare namespace ps {
         collisionResolver: collision.CollisionResolver;
         stopwatch: Stopwatch;
         entities: Entity[];
-        constructor(dims: Vector, canvas: HTMLCanvasElement, mouse: input.Mouse, keyboard: input.Keyboard, animator: AnimationFrameProvider);
+        constructor(dims: Vector, canvas: HTMLCanvasElement, mouse: input.Mouse, keyboard: input.Keyboard, animator: AnimationFrameProvider, camera: Camera);
         registerEntity(...entities: Entity[]): void;
         run(): void;
         start(): void;
         private checkCollisions(entities);
         private update(dt, entities);
-        private render(entities);
-        private clearFrame(ctx);
         private garbageCollect();
     }
     /**
@@ -180,20 +221,5 @@ declare namespace ps {
     abstract class EntityWithSprites extends Entity {
         sprites: Sprite[];
         update(dt: number, dims: Vector): void;
-    }
-}
-declare namespace ps {
-    class Vector {
-        x: number;
-        y: number;
-        constructor(x: number, y: number);
-        add(v: Vector): Vector;
-        subtract(v: Vector): Vector;
-        multiply(scalar: number): Vector;
-        magnitude(): number;
-        unit(): Vector;
-        tangent(): Vector;
-        dot(v: Vector): number;
-        toPoint(): Point;
     }
 }

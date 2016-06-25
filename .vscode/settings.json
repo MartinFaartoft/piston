@@ -1,0 +1,14 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.DS_Store": true,
+        "node_modules/": true,
+        "bower_components/": true,
+        "build/": true,
+        "sample": true
+    },
+
+    "GitHubIssues.authToken": "55614d1eda37337c76a335e7b1a7711a24ef7404"
+}

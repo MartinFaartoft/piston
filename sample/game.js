@@ -9,23 +9,38 @@ var SampleGame;
     var Ball = (function (_super) {
         __extends(Ball, _super);
         function Ball() {
-            _super.call(this, new ps.Point(100, 100));
+            _super.call(this, new ps.Point(50, 50));
             this.color = "orange";
             this.vel = new ps.Vector(500, 500);
             this.radius = 50;
         }
-        Ball.prototype.render = function (ctx) {
-            ctx.fillStyle = this.color;
-            ctx.beginPath();
-            ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);
-            ctx.fill();
+        Ball.prototype.render = function (camera) {
+            camera.fillCircle(this.pos, this.radius, this.color);
         };
         return Ball;
     }(ps.Entity));
     SampleGame.Ball = Ball;
 })(SampleGame || (SampleGame = {}));
 /// <reference path="../../dist/piston-0.4.0.d.ts" />
+var SampleGame;
+(function (SampleGame) {
+    var Box = (function (_super) {
+        __extends(Box, _super);
+        function Box() {
+            _super.call(this, new ps.Point(200, 200));
+            this.color = "blue";
+            this.vel = new ps.Vector(0, 50);
+        }
+        Box.prototype.render = function (camera) {
+            camera.fillRect(this.pos, 50, 50, this.color);
+        };
+        return Box;
+    }(ps.Entity));
+    SampleGame.Box = Box;
+})(SampleGame || (SampleGame = {}));
+/// <reference path="../../dist/piston-0.4.0.d.ts" />
 /// <reference path="ball.ts" />
+/// <reference path="box.ts" />
 var SampleGame;
 (function (SampleGame) {
     var canvas = document.createElement("canvas");
@@ -53,7 +68,7 @@ var SampleGame;
     var dimensions = new ps.Vector(canvas.width, canvas.height);
     var engine = new ps.Engine(dimensions, canvas);
     engine.mouse.setCustomCursor("assets/crosshairs.png", new ps.Point(10, 10));
-    engine.registerEntity(new SampleGame.Ball(), ball);
+    engine.registerEntity(new SampleGame.Ball(), new SampleGame.Box(), ball);
     engine.run();
 })(SampleGame || (SampleGame = {}));
 //# sourceMappingURL=game.js.map

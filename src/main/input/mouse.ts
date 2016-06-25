@@ -7,14 +7,11 @@ namespace ps.input {
         isRightButtonDown: boolean = false;
         isMiddleButtonDown: boolean = false;
 
-        private canvas: HTMLCanvasElement;
         private mouseMoveDelegate: any;
         private mouseDownDelegate: any;
         private mouseUpDelegate: any;
 
-        constructor(canvas: HTMLCanvasElement) {
-            this.canvas = canvas;
-
+        constructor(public canvas: HTMLCanvasElement, public coordinateConverter: CoordinateConverter) {
             this.mouseMoveDelegate = this.onMouseMove.bind(this);
             this.mouseDownDelegate = this.onMouseDown.bind(this);
             this.mouseUpDelegate = this.onMouseUp.bind(this);
@@ -47,7 +44,7 @@ namespace ps.input {
 
         private onMouseMove(e: MouseEvent) {
             let newPos = new Point(e.clientX, e.clientY);
-            this.pos = newPos.subtract(this.findPos(this.canvas));
+            this.pos = this.coordinateConverter.convertCameraCoordsToGameCoords(newPos.subtract(this.findPos(this.canvas)));
         }
 
         private onMouseDown(e: MouseEvent) {

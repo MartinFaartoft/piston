@@ -39,21 +39,15 @@ namespace EngineTest {
         let mockCanvas: any;
         let animator: InMemoryAnimator;
         let engine: ps.HeadlessEngine;
+        let cameraMock: ps.Camera;
 
         beforeEach(() => {
             mockCtx = jasmine.createSpyObj("CanvasRenderingContext2D", ["fillRect"]);
             mockCanvas = jasmine.createSpyObj("HTMLCanvasElement", ["getContext"]);
+            cameraMock = jasmine.createSpyObj("Camera", ["render"]);
             animator = new InMemoryAnimator(1);
-            engine = new ps.HeadlessEngine(new ps.Vector(100, 100), mockCanvas, null, null, animator);
+            engine = new ps.HeadlessEngine(new ps.Vector(100, 100), mockCanvas, null, null, animator, cameraMock);
             engine.ctx = mockCtx;
-        });
-
-        it("shold clear the frame on each render", () => {
-            //when
-            engine.start();
-
-            //then
-            expect(mockCtx.fillRect).toHaveBeenCalledTimes(1);
         });
 
         describe("with a registered entity", () => {
@@ -72,12 +66,12 @@ namespace EngineTest {
                 expect(mockEntity.update).toHaveBeenCalledTimes(1);
             });
 
-            it("should call render on a registered entity", () => {
+            it("should call render on camera", () => {
                 //when
                 engine.start();
 
                 //then
-                expect(mockEntity.render).toHaveBeenCalledTimes(1);
+                expect(cameraMock.render).toHaveBeenCalledTimes(1);
             });
 
             it("should set engine on a registered entity", () => {
