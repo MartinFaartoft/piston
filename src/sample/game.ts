@@ -23,6 +23,8 @@ namespace SampleGame {
         } else {
             this.color = "orange";
         }
+
+        this.rotation += 1 * dt;
     }
 
     let dimensions = new ps.Vector(canvas.width, canvas.height);

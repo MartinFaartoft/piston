@@ -11,11 +11,12 @@ var SampleGame;
         function Ball() {
             _super.call(this, new ps.Point(50, 50));
             this.color = "orange";
-            this.vel = new ps.Vector(500, 500);
+            this.vel = new ps.Vector(5, 5);
             this.radius = 50;
+            this.rotationSpeed = -0.2;
         }
         Ball.prototype.render = function (camera) {
-            camera.fillCircle(this.pos, this.radius, this.color);
+            camera.fillArc(this, this.radius, 0, Math.PI * 1.2, false, this.color);
         };
         return Ball;
     }(ps.Entity));
@@ -29,10 +30,11 @@ var SampleGame;
         function Box() {
             _super.call(this, new ps.Point(200, 200));
             this.color = "blue";
-            this.vel = new ps.Vector(0, 50);
+            this.vel = new ps.Vector(0, 0);
+            this.rotationSpeed = 1;
         }
         Box.prototype.render = function (camera) {
-            camera.fillRect(this.pos, 50, 50, this.color);
+            camera.fillRect(this, 50, 50, this.color);
         };
         return Box;
     }(ps.Entity));
@@ -47,6 +49,7 @@ var SampleGame;
             _super.call(this, new ps.Point(100, 100));
             this.vel = new ps.Vector(10, 0);
             this.radius = 10;
+            this.rotationSpeed = -1;
             var ballSprite = new ps.Sprite(new ps.Point(0, 0), [10, 10], [0, 1, 2,], 0.9, "assets/ball.png");
             this.sprites.push(ballSprite);
         }
@@ -84,6 +87,7 @@ var SampleGame;
         else {
             this.color = "orange";
         }
+        this.rotation += 1 * dt;
     };
     var dimensions = new ps.Vector(canvas.width, canvas.height);
     var engine = new ps.Engine(dimensions, canvas);

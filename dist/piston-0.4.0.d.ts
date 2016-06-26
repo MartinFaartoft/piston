@@ -19,6 +19,8 @@ declare namespace ps {
         pos: Point;
         vel: Vector;
         acc: Vector;
+        rotation: number;
+        rotationSpeed: number;
         isCollisionDetectionEnabled: boolean;
         isAccelerationEnabled: boolean;
         mass: number;
@@ -156,13 +158,15 @@ declare namespace ps {
         backgroundColor: string;
         resourceManager: ResourceManager;
         constructor(dims: Vector, ctx: CanvasRenderingContext2D, coordinateConverter: CoordinateConverter);
-        fillCircle(center: Point, radius: number, color: string): void;
-        fillRect(bottomLeft: Point, width: number, height: number, color: string): void;
+        fillCircle(entity: Entity, radius: number, color: string): void;
+        fillArc(entity: Entity, radius: number, startAngle: number, endAngle: number, counterClockWise: boolean, color: string): void;
+        fillRect(entity: Entity, width: number, height: number, color: string): void;
         paintSprites(entity: Entity, sprites: Sprite[]): void;
-        paintSprite(sprite: Sprite, center: Point, size: number[], rotation: number): void;
+        paintSprite(sprite: Sprite, pos: Point, size: number[], rotation: number): void;
         scale(n: number): number;
         render(entities: Entity[]): void;
         private clear();
+        private paintWhileRotated(center, rotation, paintDelegate);
     }
 }
 declare namespace ps {

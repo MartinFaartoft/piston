@@ -40,7 +40,7 @@ namespace ps {
                         size[0], size[1]);
             }
             else {
-                ctx.translate(pos[0], pos[1]);
+                ctx.translate(pos.x, pos.y);
                 ctx.rotate(rotation);
                 
                 ctx.drawImage(resourceManager.get(this.url),
@@ -50,7 +50,7 @@ namespace ps {
                             size[0], size[1]);
                 
                 ctx.rotate(-rotation);
-                ctx.translate(-pos[0], -pos[1]);
+                ctx.translate(-pos.x, -pos.y);
             }
         }
     }

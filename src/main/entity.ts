@@ -2,6 +2,9 @@ namespace ps {
     export abstract class Entity {
         vel: Vector = new Vector(0, 0);
         acc: Vector = new Vector(0, 0);
+        rotation: number = 0;
+        rotationSpeed: number = 0;
+
         isCollisionDetectionEnabled: boolean = false;
         isAccelerationEnabled: boolean = false;
         mass: number = 100;
@@ -19,6 +22,8 @@ namespace ps {
             if (this.isAccelerationEnabled) {
                 this.vel = this.vel.add(this.acc.multiply(dt));
             }
+
+            this.rotation = (this.rotation + this.rotationSpeed * dt) % (Math.PI * 2);
 
             this.pos = this.pos.add(this.vel.multiply(dt));
             

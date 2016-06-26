@@ -5,12 +5,13 @@ namespace SampleGame {
         color: string = "orange";
         constructor() {
             super(new ps.Point(50, 50));
-            this.vel = new ps.Vector(500, 500);
+            this.vel = new ps.Vector(5, 5);
             this.radius = 50;
+            this.rotationSpeed = -0.2;
         }
 
         render(camera: ps.Camera) {
-            camera.fillCircle(this.pos, this.radius, this.color);
+            camera.fillArc(this, this.radius, 0, Math.PI * 1.2, false, this.color);
         }
     }
 }

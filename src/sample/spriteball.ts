@@ -6,6 +6,7 @@ namespace SampleGame {
             super(new ps.Point(100, 100));
             this.vel = new ps.Vector(10, 0);
             this.radius = 10;
+            this.rotationSpeed = -1;
             
             let ballSprite = new ps.Sprite(new ps.Point(0, 0), [10, 10], [0, 1, 2,], 0.9, "assets/ball.png");
             this.sprites.push(ballSprite);

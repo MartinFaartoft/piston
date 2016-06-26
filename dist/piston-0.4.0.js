@@ -36,6 +36,8 @@ var ps;
             this.pos = pos;
             this.vel = new ps.Vector(0, 0);
             this.acc = new ps.Vector(0, 0);
+            this.rotation = 0;
+            this.rotationSpeed = 0;
             this.isCollisionDetectionEnabled = false;
             this.isAccelerationEnabled = false;
             this.mass = 100;
@@ -46,6 +48,7 @@ var ps;
             if (this.isAccelerationEnabled) {
                 this.vel = this.vel.add(this.acc.multiply(dt));
             }
+            this.rotation = (this.rotation + this.rotationSpeed * dt) % (Math.PI * 2);
             this.pos = this.pos.add(this.vel.multiply(dt));
             if (this.isWrapping) {
                 this.wrap(dims);
@@ -399,33 +402,41 @@ var ps;
             this.coordinateConverter = coordinateConverter;
             this.backgroundColor = "black";
         }
-        Camera.prototype.fillCircle = function (center, radius, color) {
-            var centerInCameraCoords = this.coordinateConverter.convertGameCoordsToCameraCoords(center);
-            var scaledRadius = this.scale(radius);
-            this.ctx.fillStyle = color;
-            this.ctx.beginPath();
-            this.ctx.arc(centerInCameraCoords.x, centerInCameraCoords.y, scaledRadius, 0, Math.PI * 2);
-            this.ctx.fill();
+        Camera.prototype.fillCircle = function (entity, radius, color) {
+            this.fillArc(entity, radius, 0, Math.PI * 2, false, color);
         };
-        Camera.prototype.fillRect = function (bottomLeft, width, height, color) {
-            var bottomLeftInCameraCoords = this.coordinateConverter.convertGameCoordsToCameraCoords(bottomLeft);
+        Camera.prototype.fillArc = function (entity, radius, startAngle, endAngle, counterClockWise, color) {
+            var _this = this;
+            var centerInCameraCoords = this.coordinateConverter.convertGameCoordsToCameraCoords(entity.pos);
+            var scaledRadius = this.scale(radius);
+            this.paintWhileRotated(centerInCameraCoords, entity.rotation, function () {
+                _this.ctx.fillStyle = color;
+                _this.ctx.beginPath();
+                _this.ctx.arc(0, 0, scaledRadius, startAngle, endAngle);
+                _this.ctx.fill();
+            });
+        };
+        Camera.prototype.fillRect = function (entity, width, height, color) {
+            var _this = this;
+            var centerInCameraCoords = this.coordinateConverter.convertGameCoordsToCameraCoords(entity.pos);
             var scaledHeight = this.scale(height);
             var scaledWidth = this.scale(width);
-            this.ctx.fillStyle = color;
-            this.ctx.fillRect(bottomLeftInCameraCoords.x, bottomLeftInCameraCoords.y, scaledWidth, scaledHeight);
+            this.paintWhileRotated(centerInCameraCoords, entity.rotation, function () {
+                _this.ctx.fillStyle = color;
+                _this.ctx.fillRect(-scaledWidth / 2.0, -scaledHeight / 2.0, scaledWidth, scaledHeight);
+            });
         };
         Camera.prototype.paintSprites = function (entity, sprites) {
             var centerInCameraCoords = this.coordinateConverter.convertGameCoordsToCameraCoords(entity.pos);
             var scaledDiameter = this.scale(entity.radius) * 2;
             var size = [scaledDiameter, scaledDiameter];
-            var rotation = 0;
             for (var _i = 0, sprites_1 = sprites; _i < sprites_1.length; _i++) {
                 var sprite = sprites_1[_i];
-                this.paintSprite(sprite, centerInCameraCoords, size, rotation);
+                this.paintSprite(sprite, centerInCameraCoords, size, entity.rotation);
             }
         };
-        Camera.prototype.paintSprite = function (sprite, center, size, rotation) {
-            sprite.render(this.ctx, this.resourceManager, center, size, rotation);
+        Camera.prototype.paintSprite = function (sprite, pos, size, rotation) {
+            sprite.render(this.ctx, this.resourceManager, pos, size, rotation);
         };
         Camera.prototype.scale = function (n) {
             return n; //assume 1:1 scale for now
@@ -440,6 +451,17 @@ var ps;
         Camera.prototype.clear = function () {
             this.ctx.fillStyle = this.backgroundColor;
             this.ctx.fillRect(0, 0, this.dims.x, this.dims.y);
+        };
+        Camera.prototype.paintWhileRotated = function (center, rotation, paintDelegate) {
+            if (rotation === 0) {
+                paintDelegate();
+                return;
+            }
+            this.ctx.translate(center.x, center.y);
+            this.ctx.rotate(rotation);
+            paintDelegate();
+            this.ctx.rotate(-rotation);
+            this.ctx.translate(-center.x, -center.y);
         };
         return Camera;
     }());
@@ -634,11 +656,11 @@ var ps;
                 ctx.drawImage(resourceManager.get(this.url), sprite_x, sprite_y, this.spriteSize[0], this.spriteSize[1], pos.x - size[0] / 2.0, pos.y - size[1] / 2.0, size[0], size[1]);
             }
             else {
-                ctx.translate(pos[0], pos[1]);
+                ctx.translate(pos.x, pos.y);
                 ctx.rotate(rotation);
                 ctx.drawImage(resourceManager.get(this.url), sprite_x, sprite_y, this.spriteSize[0], this.spriteSize[1], -size[0] / 2, -size[1] / 2, size[0], size[1]);
                 ctx.rotate(-rotation);
-                ctx.translate(-pos[0], -pos[1]);
+                ctx.translate(-pos.x, -pos.y);
             }
         };
         return Sprite;
