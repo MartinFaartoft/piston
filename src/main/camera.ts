@@ -5,6 +5,7 @@
 namespace ps {
     export class Camera {
         backgroundColor: string = "black";
+        resourceManager: ResourceManager;
 
         constructor(public dims: Vector, public ctx: CanvasRenderingContext2D, public coordinateConverter: CoordinateConverter) { }
 
@@ -25,6 +26,21 @@ namespace ps {
 
             this.ctx.fillStyle = color;
             this.ctx.fillRect(bottomLeftInCameraCoords.x, bottomLeftInCameraCoords.y, scaledWidth, scaledHeight)
+        }
+
+        paintSprites(entity: Entity, sprites: Sprite[]): void {
+            let centerInCameraCoords = this.coordinateConverter.convertGameCoordsToCameraCoords(entity.pos);
+            let scaledDiameter = this.scale(entity.radius) * 2;
+            let size = [scaledDiameter, scaledDiameter];
+            let rotation = 0; 
+            
+            for (let sprite of sprites) {
+                this.paintSprite(sprite, centerInCameraCoords, size, rotation);
+            }
+        }
+
+        paintSprite(sprite: Sprite, center: Point, size: number[], rotation: number): void {
+            sprite.render(this.ctx, this.resourceManager, center, size, rotation);
         }
 
         scale(n: number): number {

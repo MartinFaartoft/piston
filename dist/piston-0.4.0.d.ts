@@ -154,12 +154,27 @@ declare namespace ps {
         ctx: CanvasRenderingContext2D;
         coordinateConverter: CoordinateConverter;
         backgroundColor: string;
+        resourceManager: ResourceManager;
         constructor(dims: Vector, ctx: CanvasRenderingContext2D, coordinateConverter: CoordinateConverter);
         fillCircle(center: Point, radius: number, color: string): void;
         fillRect(bottomLeft: Point, width: number, height: number, color: string): void;
+        paintSprites(entity: Entity, sprites: Sprite[]): void;
+        paintSprite(sprite: Sprite, center: Point, size: number[], rotation: number): void;
         scale(n: number): number;
         render(entities: Entity[]): void;
         private clear();
+    }
+}
+declare namespace ps {
+    class ResourceManager {
+        private cache;
+        private readyCallbacks;
+        preload(urls: string[]): void;
+        get(url: string): HTMLImageElement;
+        onReady(callback: {
+            (): void;
+        }): void;
+        isReady(): boolean;
     }
 }
 declare namespace ps {
@@ -177,9 +192,12 @@ declare namespace ps {
         collisionResolver: collision.CollisionResolver;
         stopwatch: Stopwatch;
         entities: Entity[];
+        private resourceManager;
+        private resources;
         constructor(dims: Vector, canvas: HTMLCanvasElement, mouse: input.Mouse, keyboard: input.Keyboard, animator: AnimationFrameProvider, camera: Camera);
         registerEntity(...entities: Entity[]): void;
         run(): void;
+        preloadResources(...resources: string[]): void;
         start(): void;
         private checkCollisions(entities);
         private update(dt, entities);
@@ -190,18 +208,6 @@ declare namespace ps {
      */
     class Engine extends HeadlessEngine {
         constructor(dims: Vector, canvas: HTMLCanvasElement);
-    }
-}
-declare namespace ps {
-    class ResourceManager {
-        private cache;
-        private readyCallbacks;
-        preload(urls: string[]): void;
-        get(url: string): HTMLImageElement;
-        onReady(callback: {
-            (): void;
-        }): void;
-        private isReady();
     }
 }
 declare namespace ps {

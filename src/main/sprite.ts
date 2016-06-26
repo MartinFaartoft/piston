@@ -36,7 +36,7 @@ namespace ps {
                 ctx.drawImage(resourceManager.get(this.url),
                         sprite_x, sprite_y,
                         this.spriteSize[0], this.spriteSize[1],
-                        pos[0] - size[0] / 2.0, pos[1] - size[1] / 2.0,
+                        pos.x - size[0] / 2.0, pos.y - size[1] / 2.0,
                         size[0], size[1]);
             }
             else {

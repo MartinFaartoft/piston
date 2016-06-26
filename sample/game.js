@@ -39,8 +39,28 @@ var SampleGame;
     SampleGame.Box = Box;
 })(SampleGame || (SampleGame = {}));
 /// <reference path="../../dist/piston-0.4.0.d.ts" />
+var SampleGame;
+(function (SampleGame) {
+    var SpriteBall = (function (_super) {
+        __extends(SpriteBall, _super);
+        function SpriteBall() {
+            _super.call(this, new ps.Point(100, 100));
+            this.vel = new ps.Vector(10, 0);
+            this.radius = 10;
+            var ballSprite = new ps.Sprite(new ps.Point(0, 0), [10, 10], [0, 1, 2,], 0.9, "assets/ball.png");
+            this.sprites.push(ballSprite);
+        }
+        SpriteBall.prototype.render = function (camera) {
+            camera.paintSprites(this, this.sprites);
+        };
+        return SpriteBall;
+    }(ps.EntityWithSprites));
+    SampleGame.SpriteBall = SpriteBall;
+})(SampleGame || (SampleGame = {}));
+/// <reference path="../../dist/piston-0.4.0.d.ts" />
 /// <reference path="ball.ts" />
 /// <reference path="box.ts" />
+/// <reference path="spriteball.ts" />
 var SampleGame;
 (function (SampleGame) {
     var canvas = document.createElement("canvas");
@@ -67,8 +87,11 @@ var SampleGame;
     };
     var dimensions = new ps.Vector(canvas.width, canvas.height);
     var engine = new ps.Engine(dimensions, canvas);
+    var resourceManager = new ps.ResourceManager();
+    window.engine = engine;
+    engine.preloadResources("assets/ball.png");
     engine.mouse.setCustomCursor("assets/crosshairs.png", new ps.Point(10, 10));
-    engine.registerEntity(new SampleGame.Ball(), new SampleGame.Box(), ball);
-    engine.run();
+    engine.registerEntity(new SampleGame.Ball(), new SampleGame.Box(), new SampleGame.SpriteBall(), ball);
+    engine.start();
 })(SampleGame || (SampleGame = {}));
 //# sourceMappingURL=game.js.map

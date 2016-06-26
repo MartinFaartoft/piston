@@ -414,6 +414,19 @@ var ps;
             this.ctx.fillStyle = color;
             this.ctx.fillRect(bottomLeftInCameraCoords.x, bottomLeftInCameraCoords.y, scaledWidth, scaledHeight);
         };
+        Camera.prototype.paintSprites = function (entity, sprites) {
+            var centerInCameraCoords = this.coordinateConverter.convertGameCoordsToCameraCoords(entity.pos);
+            var scaledDiameter = this.scale(entity.radius) * 2;
+            var size = [scaledDiameter, scaledDiameter];
+            var rotation = 0;
+            for (var _i = 0, sprites_1 = sprites; _i < sprites_1.length; _i++) {
+                var sprite = sprites_1[_i];
+                this.paintSprite(sprite, centerInCameraCoords, size, rotation);
+            }
+        };
+        Camera.prototype.paintSprite = function (sprite, center, size, rotation) {
+            sprite.render(this.ctx, this.resourceManager, center, size, rotation);
+        };
         Camera.prototype.scale = function (n) {
             return n; //assume 1:1 scale for now
         };
@@ -431,99 +444,6 @@ var ps;
         return Camera;
     }());
     ps.Camera = Camera;
-})(ps || (ps = {}));
-/// <reference path="animationframeprovider.ts" />
-/// <reference path="browseranimationframeprovider.ts" />
-/// <reference path="collision/collisiondetector.ts" />
-/// <reference path="collision/circularcollisiondetector.ts" />
-/// <reference path="collision/defertoentitycollisionresolver.ts" />
-/// <reference path="input/keyboard.ts" />
-/// <reference path="input/mouse.ts" />
-/// <reference path="stopwatch.ts" />
-/// <reference path="camera.ts" />
-/// <reference path="coordinateconverter.ts" />
-var ps;
-(function (ps) {
-    var c = ps.collision;
-    var HeadlessEngine = (function () {
-        function HeadlessEngine(dims, canvas, mouse, keyboard, animator, camera) {
-            this.dims = dims;
-            this.canvas = canvas;
-            this.mouse = mouse;
-            this.keyboard = keyboard;
-            this.animator = animator;
-            this.camera = camera;
-            this.debug = false;
-            this.backgroundFillStyle = "black";
-            this.collisionDetector = new ps.collision.CircularCollisionDetector();
-            this.collisionResolver = new ps.collision.DeferToEntityCollisionResolver();
-            this.stopwatch = new ps.DateNowStopwatch();
-            this.entities = [];
-            this.ctx = canvas.getContext("2d");
-            if (this.mouse) {
-                this.mouse.enable();
-            }
-            if (this.keyboard) {
-                this.keyboard.enable();
-            }
-        }
-        HeadlessEngine.prototype.registerEntity = function () {
-            var entities = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                entities[_i - 0] = arguments[_i];
-            }
-            for (var _a = 0, entities_2 = entities; _a < entities_2.length; _a++) {
-                var entity = entities_2[_a];
-                this.entities.push(entity);
-            }
-        };
-        //the main loop of the piston engine
-        HeadlessEngine.prototype.run = function () {
-            //measure time taken since last frame was processed
-            var dt = this.stopwatch.stop();
-            //remove all destroyed entities
-            this.garbageCollect();
-            //update entities
-            this.update(dt, this.entities);
-            //detect and resolve any collisions between entities
-            this.checkCollisions(this.entities);
-            //render the frame
-            this.camera.render(this.entities);
-            //start measuring time since this frame finished
-            this.stopwatch.start();
-            //request next animation frame
-            this.animator.animate(this);
-        };
-        HeadlessEngine.prototype.start = function () {
-            this.animator.animate(this);
-        };
-        HeadlessEngine.prototype.checkCollisions = function (entities) {
-            var collisions = this.collisionDetector.findCollisions(entities);
-            this.collisionResolver.resolve(collisions);
-        };
-        HeadlessEngine.prototype.update = function (dt, entities) {
-            for (var _i = 0, entities_3 = entities; _i < entities_3.length; _i++) {
-                var entity = entities_3[_i];
-                entity.update(dt, this.dims);
-            }
-        };
-        HeadlessEngine.prototype.garbageCollect = function () {
-            this.entities = this.entities.filter(function (e) { return !e.destroyed; });
-        };
-        return HeadlessEngine;
-    }());
-    ps.HeadlessEngine = HeadlessEngine;
-    /**
-     * Default engine for running in-browser
-     */
-    var Engine = (function (_super) {
-        __extends(Engine, _super);
-        function Engine(dims, canvas) {
-            _super.call(this, dims, canvas, new ps.input.Mouse(canvas, new ps.DefaultCoordinateConverter(dims)), new ps.input.Keyboard(document, window), new ps.BrowserAnimationFrameProvider(), new ps.Camera(dims, canvas.getContext("2d"), new ps.DefaultCoordinateConverter(dims)));
-        }
-        return Engine;
-    }(HeadlessEngine));
-    ps.Engine = Engine;
 })(ps || (ps = {}));
 var ps;
 (function (ps) {
@@ -574,6 +494,117 @@ var ps;
     }());
     ps.ResourceManager = ResourceManager;
 })(ps || (ps = {}));
+/// <reference path="animationframeprovider.ts" />
+/// <reference path="browseranimationframeprovider.ts" />
+/// <reference path="collision/collisiondetector.ts" />
+/// <reference path="collision/circularcollisiondetector.ts" />
+/// <reference path="collision/defertoentitycollisionresolver.ts" />
+/// <reference path="input/keyboard.ts" />
+/// <reference path="input/mouse.ts" />
+/// <reference path="stopwatch.ts" />
+/// <reference path="camera.ts" />
+/// <reference path="coordinateconverter.ts" />
+/// <reference path="resourcemanager.ts" />
+var ps;
+(function (ps) {
+    var c = ps.collision;
+    var HeadlessEngine = (function () {
+        function HeadlessEngine(dims, canvas, mouse, keyboard, animator, camera) {
+            this.dims = dims;
+            this.canvas = canvas;
+            this.mouse = mouse;
+            this.keyboard = keyboard;
+            this.animator = animator;
+            this.camera = camera;
+            this.debug = false;
+            this.backgroundFillStyle = "black";
+            this.collisionDetector = new ps.collision.CircularCollisionDetector();
+            this.collisionResolver = new ps.collision.DeferToEntityCollisionResolver();
+            this.stopwatch = new ps.DateNowStopwatch();
+            this.entities = [];
+            this.resourceManager = new ps.ResourceManager();
+            this.resources = [];
+            this.ctx = canvas.getContext("2d");
+            this.camera.resourceManager = this.resourceManager;
+            if (this.mouse) {
+                this.mouse.enable();
+            }
+            if (this.keyboard) {
+                this.keyboard.enable();
+            }
+        }
+        HeadlessEngine.prototype.registerEntity = function () {
+            var entities = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                entities[_i - 0] = arguments[_i];
+            }
+            for (var _a = 0, entities_2 = entities; _a < entities_2.length; _a++) {
+                var entity = entities_2[_a];
+                this.entities.push(entity);
+            }
+        };
+        //the main loop of the piston engine
+        HeadlessEngine.prototype.run = function () {
+            //measure time taken since last frame was processed
+            var dt = this.stopwatch.stop();
+            //remove all destroyed entities
+            this.garbageCollect();
+            //update entities
+            this.update(dt, this.entities);
+            //detect and resolve any collisions between entities
+            this.checkCollisions(this.entities);
+            //render the frame
+            this.camera.render(this.entities);
+            //start measuring time since this frame finished
+            this.stopwatch.start();
+            //request next animation frame
+            this.animator.animate(this);
+        };
+        HeadlessEngine.prototype.preloadResources = function () {
+            var resources = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                resources[_i - 0] = arguments[_i];
+            }
+            this.resources = resources;
+        };
+        HeadlessEngine.prototype.start = function () {
+            var _this = this;
+            if (this.resources.length > 0) {
+                this.resourceManager.onReady(function () { _this.animator.animate(_this); });
+                this.resourceManager.preload(this.resources);
+            }
+            else {
+                this.animator.animate(this);
+            }
+        };
+        HeadlessEngine.prototype.checkCollisions = function (entities) {
+            var collisions = this.collisionDetector.findCollisions(entities);
+            this.collisionResolver.resolve(collisions);
+        };
+        HeadlessEngine.prototype.update = function (dt, entities) {
+            for (var _i = 0, entities_3 = entities; _i < entities_3.length; _i++) {
+                var entity = entities_3[_i];
+                entity.update(dt, this.dims);
+            }
+        };
+        HeadlessEngine.prototype.garbageCollect = function () {
+            this.entities = this.entities.filter(function (e) { return !e.destroyed; });
+        };
+        return HeadlessEngine;
+    }());
+    ps.HeadlessEngine = HeadlessEngine;
+    /**
+     * Default engine for running in-browser
+     */
+    var Engine = (function (_super) {
+        __extends(Engine, _super);
+        function Engine(dims, canvas) {
+            _super.call(this, dims, canvas, new ps.input.Mouse(canvas, new ps.DefaultCoordinateConverter(dims)), new ps.input.Keyboard(document, window), new ps.BrowserAnimationFrameProvider(), new ps.Camera(dims, canvas.getContext("2d"), new ps.DefaultCoordinateConverter(dims)));
+        }
+        return Engine;
+    }(HeadlessEngine));
+    ps.Engine = Engine;
+})(ps || (ps = {}));
 /// <reference path="resourcemanager.ts" />
 /// <reference path="point.ts" />
 var ps;
@@ -600,7 +631,7 @@ var ps;
             var sprite_x = this.spriteSheetCoordinates.x + frame * this.spriteSize[0];
             var sprite_y = this.spriteSheetCoordinates.y;
             if (rotation === 0) {
-                ctx.drawImage(resourceManager.get(this.url), sprite_x, sprite_y, this.spriteSize[0], this.spriteSize[1], pos[0] - size[0] / 2.0, pos[1] - size[1] / 2.0, size[0], size[1]);
+                ctx.drawImage(resourceManager.get(this.url), sprite_x, sprite_y, this.spriteSize[0], this.spriteSize[1], pos.x - size[0] / 2.0, pos.y - size[1] / 2.0, size[0], size[1]);
             }
             else {
                 ctx.translate(pos[0], pos[1]);

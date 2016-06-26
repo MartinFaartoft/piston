@@ -8,6 +8,8 @@
 /// <reference path="stopwatch.ts" />
 /// <reference path="camera.ts" />
 /// <reference path="coordinateconverter.ts" />
+/// <reference path="resourcemanager.ts" />
+
 
 
 namespace ps {
@@ -21,6 +23,9 @@ namespace ps {
         collisionResolver: collision.CollisionResolver = new collision.DeferToEntityCollisionResolver();
         stopwatch: Stopwatch = new DateNowStopwatch();
         entities: Entity[] = [];
+        
+        private resourceManager: ResourceManager = new ResourceManager();
+        private resources: string[] = [];
 
         constructor(public dims: Vector,
                     public canvas: HTMLCanvasElement,
@@ -30,6 +35,7 @@ namespace ps {
                     public camera: Camera) {
 
             this.ctx = canvas.getContext("2d");
+            this.camera.resourceManager = this.resourceManager;
 
             if (this.mouse) {
                 this.mouse.enable();
@@ -70,8 +76,18 @@ namespace ps {
             this.animator.animate(this);
         }
 
-        start() {
-            this.animator.animate(this);
+        preloadResources(...resources: string[]): void {
+            this.resources = resources;
+        }
+
+        start(): void {
+            if (this.resources.length > 0) {
+                this.resourceManager.onReady(() => { this.animator.animate(this)});
+                this.resourceManager.preload(this.resources);
+            }
+            else {
+                this.animator.animate(this);
+            }
         }
 
         private checkCollisions(entities: Entity[]): void {

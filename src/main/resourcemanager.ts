@@ -31,7 +31,7 @@ namespace ps {
             this.readyCallbacks.push(callback);
         }
 
-        private isReady(): boolean {
+        isReady(): boolean {
             for (let k in this.cache) {
                 if (this.cache.hasOwnProperty(k) && !this.cache[k]) {
                     return false;
