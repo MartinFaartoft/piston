@@ -58,6 +58,14 @@ namespace EngineTest {
                 engine.registerEntity(mockEntity);
             });
 
+            it("should set engine on a registered entity", () => {
+                //when
+                engine.start();
+
+                //then
+                expect(mockEntity.engine).toBe(engine);
+            });
+
             it("should call update on a registered entity", () => {
                 //when
                 engine.start();
@@ -141,6 +149,18 @@ namespace EngineTest {
                 //then
                 expect(b1.collideWith).toHaveBeenCalledWith(b2);
                 expect(b2.collideWith).toHaveBeenCalledWith(b1);
+            });
+
+            it("should destroy colliding entities if destroyOnCollision is true", () => {
+                //given
+                b1.destroyOnCollision = true;
+                
+                //when
+                engine.start();
+
+                //then
+                expect(b1.destroyed).toBe(true);
+                expect(b2.destroyed).toBe(false);
             });
         });
     });

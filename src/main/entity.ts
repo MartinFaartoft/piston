@@ -5,6 +5,7 @@ namespace ps {
         rotation: number = 0;
         rotationSpeed: number = 0;
         isCollisionDetectionEnabled: boolean = false;
+        destroyOnCollision: boolean = false;
         isAccelerationEnabled: boolean = false;
         mass: number = 100;
         destroyed: boolean = false;
@@ -57,7 +58,11 @@ namespace ps {
             }
         }
 
-        collideWith(other: Entity): void { }
+        collideWith(other: Entity): void {
+            if (this.destroyOnCollision) {
+                this.destroyed = true;
+            }
+         }
 
         abstract render(camera: Camera): void;
     }

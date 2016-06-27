@@ -22,6 +22,7 @@ declare namespace ps {
         rotation: number;
         rotationSpeed: number;
         isCollisionDetectionEnabled: boolean;
+        destroyOnCollision: boolean;
         isAccelerationEnabled: boolean;
         mass: number;
         destroyed: boolean;

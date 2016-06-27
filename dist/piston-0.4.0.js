@@ -39,6 +39,7 @@ var ps;
             this.rotation = 0;
             this.rotationSpeed = 0;
             this.isCollisionDetectionEnabled = false;
+            this.destroyOnCollision = false;
             this.isAccelerationEnabled = false;
             this.mass = 100;
             this.destroyed = false;
@@ -74,7 +75,11 @@ var ps;
                 this.pos.y -= dimensions.y;
             }
         };
-        Entity.prototype.collideWith = function (other) { };
+        Entity.prototype.collideWith = function (other) {
+            if (this.destroyOnCollision) {
+                this.destroyed = true;
+            }
+        };
         return Entity;
     }());
     ps.Entity = Entity;

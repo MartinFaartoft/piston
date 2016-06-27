@@ -115,32 +115,15 @@ var SampleGame;
     canvas.width = 1024;
     canvas.height = 768;
     document.body.appendChild(canvas);
-    // let mouseBall = new Ball(new ps.Point(0, 0), new ps.Vector(0, 0));
-    // mouseBall.radius = 20;
-    // mouseBall.vel = new ps.Vector(0, 0);
-    // mouseBall.isCollisionDetectionEnabled = true;
-    // mouseBall.update = function(dt: number, dims: ps.Vector) {
-    //     this.pos = engine.mouse.pos;
-    //     if (engine.mouse.isLeftButtonDown) {
-    //         this.color = "green";
-    //     } else if (engine.mouse.isRightButtonDown) {
-    //         this.color = "red";
-    //     } else if (engine.mouse.isMiddleButtonDown) {
-    //         this.color = "blue";
-    //     } else {
-    //         this.color = "orange";
-    //     }
-    //     this.rotation += 1 * dt;
-    // }
     var b1 = new SampleGame.Ball(new ps.Point(200, 500), new ps.Vector(50, 0));
-    var b3 = new SampleGame.Ball(new ps.Point(500, 500), new ps.Vector(-50, 0));
+    var b2 = new SampleGame.Ball(new ps.Point(500, 500), new ps.Vector(-50, 0));
     var dimensions = new ps.Vector(canvas.width, canvas.height);
     var engine = new ps.Engine(dimensions, canvas);
     var resourceManager = new ps.ResourceManager();
     window.engine = engine;
     engine.preloadResources("assets/ball.png");
     engine.mouse.setCustomCursor("assets/crosshairs.png", new ps.Point(10, 10));
-    engine.registerEntity(new SampleGame.Box(), new SampleGame.SpriteBall(), b1, b3, new SampleGame.MouseBall());
+    engine.registerEntity(new SampleGame.Box(), new SampleGame.SpriteBall(), b1, b2, new SampleGame.MouseBall());
     engine.start();
 })(SampleGame || (SampleGame = {}));
 //# sourceMappingURL=game.js.map
