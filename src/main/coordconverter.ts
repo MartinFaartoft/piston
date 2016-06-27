@@ -2,21 +2,21 @@
 /// <reference path="point.ts" />
 
 namespace ps {
-    export interface CoordinateConverter {
-        convertGameCoordsToCameraCoords(p: Point): Point;
-        convertCameraCoordsToGameCoords(p: Point): Point;
+    export interface CoordConverter {
+        toCameraCoords(p: Point): Point;
+        toGameCoords(p: Point): Point;
     }
     
     //assume game coords lie in the first quadrant, with (0, 0) being the lower left corner
-    export class DefaultCoordinateConverter implements CoordinateConverter {
+    export class DefaultCoordConverter implements CoordConverter {
 
         constructor(public dims: Vector) {}
 
-        convertGameCoordsToCameraCoords(p: Point): Point {
+        toCameraCoords(p: Point): Point {
             return new Point(p.x, this.dims.y - p.y);  
         }
 
-        convertCameraCoordsToGameCoords(p: Point): Point {
+        toGameCoords(p: Point): Point {
             return new Point(p.x, this.dims.y - p.y);
         }
     }

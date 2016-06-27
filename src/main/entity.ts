@@ -22,8 +22,10 @@ namespace ps {
             if (this.isAccelerationEnabled) {
                 this.vel = this.vel.add(this.acc.multiply(dt));
             }
-
-            this.rotation = (this.rotation + this.rotationSpeed * dt) % (Math.PI * 2);
+            
+            if (this.rotationSpeed !== 0) {
+                this.rotation = (this.rotation + this.rotationSpeed * dt) % (Math.PI * 2);
+            }
 
             this.pos = this.pos.add(this.vel.multiply(dt));
             

@@ -7,7 +7,7 @@
 /// <reference path="input/mouse.ts" />
 /// <reference path="stopwatch.ts" />
 /// <reference path="camera.ts" />
-/// <reference path="coordinateconverter.ts" />
+/// <reference path="coordconverter.ts" />
 /// <reference path="resourcemanager.ts" />
 
 
@@ -113,10 +113,10 @@ namespace ps {
         constructor(dims: Vector, canvas: HTMLCanvasElement) {
             super(dims, 
                   canvas, 
-                  new input.Mouse(canvas, new DefaultCoordinateConverter(dims)), 
+                  new input.Mouse(canvas, new DefaultCoordConverter(dims)), 
                   new input.Keyboard(document, window), 
                   new BrowserAnimationFrameProvider(),
-                  new Camera(dims, canvas.getContext("2d"), new DefaultCoordinateConverter(dims)));
+                  new Camera(dims, canvas.getContext("2d"), new DefaultCoordConverter(dims)));
         }
     }
 }

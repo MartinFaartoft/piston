@@ -93,7 +93,7 @@ declare namespace ps.input {
 declare namespace ps.input {
     class Mouse {
         canvas: HTMLCanvasElement;
-        coordinateConverter: CoordinateConverter;
+        coordConverter: CoordConverter;
         pos: Point;
         isLeftButtonDown: boolean;
         isRightButtonDown: boolean;
@@ -101,7 +101,7 @@ declare namespace ps.input {
         private mouseMoveDelegate;
         private mouseDownDelegate;
         private mouseUpDelegate;
-        constructor(canvas: HTMLCanvasElement, coordinateConverter: CoordinateConverter);
+        constructor(canvas: HTMLCanvasElement, coordConverter: CoordConverter);
         enable(): void;
         disable(): void;
         setCustomCursor(url: string, hotspot: Point): void;
@@ -139,28 +139,29 @@ declare namespace ps {
     }
 }
 declare namespace ps {
-    interface CoordinateConverter {
-        convertGameCoordsToCameraCoords(p: Point): Point;
-        convertCameraCoordsToGameCoords(p: Point): Point;
+    interface CoordConverter {
+        toCameraCoords(p: Point): Point;
+        toGameCoords(p: Point): Point;
     }
-    class DefaultCoordinateConverter implements CoordinateConverter {
+    class DefaultCoordConverter implements CoordConverter {
         dims: Vector;
         constructor(dims: Vector);
-        convertGameCoordsToCameraCoords(p: Point): Point;
-        convertCameraCoordsToGameCoords(p: Point): Point;
+        toCameraCoords(p: Point): Point;
+        toGameCoords(p: Point): Point;
     }
 }
 declare namespace ps {
     class Camera {
         dims: Vector;
         ctx: CanvasRenderingContext2D;
-        coordinateConverter: CoordinateConverter;
+        coordConverter: CoordConverter;
         backgroundColor: string;
         resourceManager: ResourceManager;
-        constructor(dims: Vector, ctx: CanvasRenderingContext2D, coordinateConverter: CoordinateConverter);
+        constructor(dims: Vector, ctx: CanvasRenderingContext2D, coordConverter: CoordConverter);
         fillCircle(entity: Entity, radius: number, color: string): void;
         fillArc(entity: Entity, radius: number, startAngle: number, endAngle: number, counterClockWise: boolean, color: string): void;
         fillRect(entity: Entity, width: number, height: number, color: string): void;
+        drawLine(start: Point, end: Point, lineWidth: number, color: string): void;
         paintSprites(entity: Entity, sprites: Sprite[]): void;
         paintSprite(sprite: Sprite, pos: Point, size: number[], rotation: number): void;
         scale(n: number): number;

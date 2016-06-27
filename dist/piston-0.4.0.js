@@ -48,7 +48,9 @@ var ps;
             if (this.isAccelerationEnabled) {
                 this.vel = this.vel.add(this.acc.multiply(dt));
             }
-            this.rotation = (this.rotation + this.rotationSpeed * dt) % (Math.PI * 2);
+            if (this.rotationSpeed !== 0) {
+                this.rotation = (this.rotation + this.rotationSpeed * dt) % (Math.PI * 2);
+            }
             this.pos = this.pos.add(this.vel.multiply(dt));
             if (this.isWrapping) {
                 this.wrap(dims);
@@ -245,9 +247,9 @@ var ps;
     var input;
     (function (input) {
         var Mouse = (function () {
-            function Mouse(canvas, coordinateConverter) {
+            function Mouse(canvas, coordConverter) {
                 this.canvas = canvas;
-                this.coordinateConverter = coordinateConverter;
+                this.coordConverter = coordConverter;
                 this.pos = new ps.Point(0, 0);
                 this.isLeftButtonDown = false;
                 this.isRightButtonDown = false;
@@ -277,7 +279,7 @@ var ps;
             };
             Mouse.prototype.onMouseMove = function (e) {
                 var newPos = new ps.Point(e.clientX, e.clientY);
-                this.pos = this.coordinateConverter.convertCameraCoordsToGameCoords(newPos.subtract(this.findPos(this.canvas)));
+                this.pos = this.coordConverter.toGameCoords(newPos.subtract(this.findPos(this.canvas)));
             };
             Mouse.prototype.onMouseDown = function (e) {
                 e.stopImmediatePropagation();
@@ -377,29 +379,29 @@ var ps;
 var ps;
 (function (ps) {
     //assume game coords lie in the first quadrant, with (0, 0) being the lower left corner
-    var DefaultCoordinateConverter = (function () {
-        function DefaultCoordinateConverter(dims) {
+    var DefaultCoordConverter = (function () {
+        function DefaultCoordConverter(dims) {
             this.dims = dims;
         }
-        DefaultCoordinateConverter.prototype.convertGameCoordsToCameraCoords = function (p) {
+        DefaultCoordConverter.prototype.toCameraCoords = function (p) {
             return new ps.Point(p.x, this.dims.y - p.y);
         };
-        DefaultCoordinateConverter.prototype.convertCameraCoordsToGameCoords = function (p) {
+        DefaultCoordConverter.prototype.toGameCoords = function (p) {
             return new ps.Point(p.x, this.dims.y - p.y);
         };
-        return DefaultCoordinateConverter;
+        return DefaultCoordConverter;
     }());
-    ps.DefaultCoordinateConverter = DefaultCoordinateConverter;
+    ps.DefaultCoordConverter = DefaultCoordConverter;
 })(ps || (ps = {}));
 /// <reference path="point.ts" />
-/// <reference path="coordinateconverter.ts" />
+/// <reference path="coordconverter.ts" />
 var ps;
 (function (ps) {
     var Camera = (function () {
-        function Camera(dims, ctx, coordinateConverter) {
+        function Camera(dims, ctx, coordConverter) {
             this.dims = dims;
             this.ctx = ctx;
-            this.coordinateConverter = coordinateConverter;
+            this.coordConverter = coordConverter;
             this.backgroundColor = "black";
         }
         Camera.prototype.fillCircle = function (entity, radius, color) {
@@ -407,32 +409,48 @@ var ps;
         };
         Camera.prototype.fillArc = function (entity, radius, startAngle, endAngle, counterClockWise, color) {
             var _this = this;
-            var centerInCameraCoords = this.coordinateConverter.convertGameCoordsToCameraCoords(entity.pos);
+            var centerCC = this.coordConverter.toCameraCoords(entity.pos);
             var scaledRadius = this.scale(radius);
-            this.paintWhileRotated(centerInCameraCoords, entity.rotation, function () {
+            this.paintWhileRotated(centerCC, entity.rotation, function () {
                 _this.ctx.fillStyle = color;
                 _this.ctx.beginPath();
                 _this.ctx.arc(0, 0, scaledRadius, startAngle, endAngle);
                 _this.ctx.fill();
+                _this.ctx.closePath();
             });
         };
         Camera.prototype.fillRect = function (entity, width, height, color) {
             var _this = this;
-            var centerInCameraCoords = this.coordinateConverter.convertGameCoordsToCameraCoords(entity.pos);
+            var centerCC = this.coordConverter.toCameraCoords(entity.pos);
             var scaledHeight = this.scale(height);
             var scaledWidth = this.scale(width);
-            this.paintWhileRotated(centerInCameraCoords, entity.rotation, function () {
+            this.paintWhileRotated(centerCC, entity.rotation, function () {
                 _this.ctx.fillStyle = color;
                 _this.ctx.fillRect(-scaledWidth / 2.0, -scaledHeight / 2.0, scaledWidth, scaledHeight);
             });
         };
+        Camera.prototype.drawLine = function (start, end, lineWidth, color) {
+            var startCC = this.coordConverter.toCameraCoords(start);
+            var endCC = this.coordConverter.toCameraCoords(end);
+            var previousStroke = this.ctx.strokeStyle;
+            var previousLineWidth = this.ctx.lineWidth;
+            this.ctx.beginPath();
+            this.ctx.strokeStyle = color;
+            this.ctx.lineWidth = lineWidth;
+            this.ctx.moveTo(startCC.x, startCC.y);
+            this.ctx.lineTo(endCC.x, endCC.y);
+            this.ctx.closePath();
+            this.ctx.stroke();
+            this.ctx.strokeStyle = previousStroke;
+            this.ctx.lineWidth = previousLineWidth;
+        };
         Camera.prototype.paintSprites = function (entity, sprites) {
-            var centerInCameraCoords = this.coordinateConverter.convertGameCoordsToCameraCoords(entity.pos);
+            var centerCC = this.coordConverter.toCameraCoords(entity.pos);
             var scaledDiameter = this.scale(entity.radius) * 2;
             var size = [scaledDiameter, scaledDiameter];
             for (var _i = 0, sprites_1 = sprites; _i < sprites_1.length; _i++) {
                 var sprite = sprites_1[_i];
-                this.paintSprite(sprite, centerInCameraCoords, size, entity.rotation);
+                this.paintSprite(sprite, centerCC, size, entity.rotation);
             }
         };
         Camera.prototype.paintSprite = function (sprite, pos, size, rotation) {
@@ -453,10 +471,6 @@ var ps;
             this.ctx.fillRect(0, 0, this.dims.x, this.dims.y);
         };
         Camera.prototype.paintWhileRotated = function (center, rotation, paintDelegate) {
-            if (rotation === 0) {
-                paintDelegate();
-                return;
-            }
             this.ctx.translate(center.x, center.y);
             this.ctx.rotate(rotation);
             paintDelegate();
@@ -525,7 +539,7 @@ var ps;
 /// <reference path="input/mouse.ts" />
 /// <reference path="stopwatch.ts" />
 /// <reference path="camera.ts" />
-/// <reference path="coordinateconverter.ts" />
+/// <reference path="coordconverter.ts" />
 /// <reference path="resourcemanager.ts" />
 var ps;
 (function (ps) {
@@ -621,7 +635,7 @@ var ps;
     var Engine = (function (_super) {
         __extends(Engine, _super);
         function Engine(dims, canvas) {
-            _super.call(this, dims, canvas, new ps.input.Mouse(canvas, new ps.DefaultCoordinateConverter(dims)), new ps.input.Keyboard(document, window), new ps.BrowserAnimationFrameProvider(), new ps.Camera(dims, canvas.getContext("2d"), new ps.DefaultCoordinateConverter(dims)));
+            _super.call(this, dims, canvas, new ps.input.Mouse(canvas, new ps.DefaultCoordConverter(dims)), new ps.input.Keyboard(document, window), new ps.BrowserAnimationFrameProvider(), new ps.Camera(dims, canvas.getContext("2d"), new ps.DefaultCoordConverter(dims)));
         }
         return Engine;
     }(HeadlessEngine));

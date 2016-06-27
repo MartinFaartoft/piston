@@ -8,15 +8,19 @@ var SampleGame;
 (function (SampleGame) {
     var Ball = (function (_super) {
         __extends(Ball, _super);
-        function Ball() {
-            _super.call(this, new ps.Point(50, 50));
+        function Ball(pos, vel) {
+            _super.call(this, pos);
             this.color = "orange";
-            this.vel = new ps.Vector(5, 5);
+            this.vel = vel;
             this.radius = 50;
-            this.rotationSpeed = -0.2;
+            this.rotationSpeed = -.2;
+            this.isCollisionDetectionEnabled = true;
         }
         Ball.prototype.render = function (camera) {
             camera.fillArc(this, this.radius, 0, Math.PI * 1.2, false, this.color);
+        };
+        Ball.prototype.collideWith = function (other) {
+            this.destroyed = true;
         };
         return Ball;
     }(ps.Entity));
@@ -50,10 +54,12 @@ var SampleGame;
             this.vel = new ps.Vector(10, 0);
             this.radius = 10;
             this.rotationSpeed = -1;
+            this.initialPos = this.pos;
             var ballSprite = new ps.Sprite(new ps.Point(0, 0), [10, 10], [0, 1, 2,], 0.9, "assets/ball.png");
             this.sprites.push(ballSprite);
         }
         SpriteBall.prototype.render = function (camera) {
+            camera.drawLine(this.initialPos, this.pos, 3, "green");
             camera.paintSprites(this, this.sprites);
         };
         return SpriteBall;
@@ -70,10 +76,11 @@ var SampleGame;
     canvas.width = 1024;
     canvas.height = 768;
     document.body.appendChild(canvas);
-    var ball = new SampleGame.Ball();
-    ball.radius = 20;
-    ball.vel = new ps.Vector(0, 0);
-    ball.update = function (dt, dims) {
+    var mouseBall = new SampleGame.Ball(new ps.Point(0, 0), new ps.Vector(0, 0));
+    mouseBall.radius = 20;
+    mouseBall.vel = new ps.Vector(0, 0);
+    mouseBall.isCollisionDetectionEnabled = true;
+    mouseBall.update = function (dt, dims) {
         this.pos = engine.mouse.pos;
         if (engine.mouse.isLeftButtonDown) {
             this.color = "green";
@@ -89,13 +96,15 @@ var SampleGame;
         }
         this.rotation += 1 * dt;
     };
+    var b1 = new SampleGame.Ball(new ps.Point(200, 500), new ps.Vector(50, 0));
+    var b3 = new SampleGame.Ball(new ps.Point(500, 500), new ps.Vector(-50, 0));
     var dimensions = new ps.Vector(canvas.width, canvas.height);
     var engine = new ps.Engine(dimensions, canvas);
     var resourceManager = new ps.ResourceManager();
     window.engine = engine;
     engine.preloadResources("assets/ball.png");
     engine.mouse.setCustomCursor("assets/crosshairs.png", new ps.Point(10, 10));
-    engine.registerEntity(new SampleGame.Ball(), new SampleGame.Box(), new SampleGame.SpriteBall(), ball);
+    engine.registerEntity(new SampleGame.Box(), new SampleGame.SpriteBall(), mouseBall, b1, b3);
     engine.start();
 })(SampleGame || (SampleGame = {}));
 //# sourceMappingURL=game.js.map
