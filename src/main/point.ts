@@ -14,6 +14,10 @@ namespace ps {
             return Math.sqrt(Math.pow(this.x - p.x, 2) + Math.pow(this.y - p.y, 2));
         }
 
+        vectorTo(p: Point): Vector {
+            return p.subtract(this).toVector();
+        }
+
         toVector(): Vector {
             return new Vector(this.x, this.y);
         }

@@ -73,6 +73,7 @@ declare namespace ps {
         add(v: Vector | Point): Point;
         subtract(p: Vector | Point): Point;
         distanceTo(p: Point): number;
+        vectorTo(p: Point): Vector;
         toVector(): Vector;
     }
 }

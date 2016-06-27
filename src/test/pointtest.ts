@@ -27,5 +27,10 @@ namespace PointTest {
             expect(new Point(1, 1).subtract(new Vector(2, 2))).toEqual(new Point(-1, -1));
             expect(new Point(1, 1).subtract(new Point(2, 2))).toEqual(new Point(-1, -1));
         });
+
+        it("should create a vector between two points", () => {
+            expect(new Point(1, 1).vectorTo(new Point(2, 2))).toEqual(new Vector(1, 1));
+            expect(new Point(-10, 0).vectorTo(new Point(10, 0))).toEqual(new Vector(20, 0));
+        });
     });
 }

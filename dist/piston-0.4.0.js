@@ -177,6 +177,9 @@ var ps;
         Point.prototype.distanceTo = function (p) {
             return Math.sqrt(Math.pow(this.x - p.x, 2) + Math.pow(this.y - p.y, 2));
         };
+        Point.prototype.vectorTo = function (p) {
+            return p.subtract(this).toVector();
+        };
         Point.prototype.toVector = function () {
             return new ps.Vector(this.x, this.y);
         };
