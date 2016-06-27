@@ -4,17 +4,18 @@ namespace ps {
         acc: Vector = new Vector(0, 0);
         rotation: number = 0;
         rotationSpeed: number = 0;
-
         isCollisionDetectionEnabled: boolean = false;
         isAccelerationEnabled: boolean = false;
         mass: number = 100;
         destroyed: boolean = false;
         isWrapping: boolean = false;
 
+        engine: Engine;
+
         //for now, all entities are round
         radius: number;
         
-        private engine: Engine;
+        
         
         constructor(public pos: Point) {}
 

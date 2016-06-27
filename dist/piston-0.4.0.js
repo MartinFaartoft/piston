@@ -579,6 +579,7 @@ var ps;
             }
             for (var _a = 0, entities_2 = entities; _a < entities_2.length; _a++) {
                 var entity = entities_2[_a];
+                entity.engine = this;
                 this.entities.push(entity);
             }
         };

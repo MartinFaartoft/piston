@@ -48,6 +48,7 @@ namespace ps {
 
         registerEntity(...entities: Entity[]): void {
             for (let entity of entities) {
+                entity.engine = this;
                 this.entities.push(entity);
             }
         }

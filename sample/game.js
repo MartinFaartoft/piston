@@ -67,35 +67,71 @@ var SampleGame;
     SampleGame.SpriteBall = SpriteBall;
 })(SampleGame || (SampleGame = {}));
 /// <reference path="../../dist/piston-0.4.0.d.ts" />
+var SampleGame;
+(function (SampleGame) {
+    var MouseBall = (function (_super) {
+        __extends(MouseBall, _super);
+        function MouseBall() {
+            _super.call(this, new ps.Point(0, 0));
+            this.color = "yellow";
+            this.radius = 5;
+            this.rotationSpeed = -1;
+            this.isCollisionDetectionEnabled = true;
+        }
+        MouseBall.prototype.update = function (dt, dims) {
+            this.pos = this.engine.mouse.pos;
+            if (this.engine.mouse.isLeftButtonDown) {
+                this.color = "green";
+            }
+            else if (this.engine.mouse.isRightButtonDown) {
+                this.color = "red";
+            }
+            else if (this.engine.mouse.isMiddleButtonDown) {
+                this.color = "blue";
+            }
+            else {
+                this.color = "yellow";
+            }
+            this.rotation += 1 * dt;
+        };
+        MouseBall.prototype.render = function (camera) {
+            camera.fillArc(this, this.radius, 0, Math.PI * 1.2, false, this.color);
+        };
+        MouseBall.prototype.collideWith = function (other) {
+            this.destroyed = true;
+        };
+        return MouseBall;
+    }(ps.Entity));
+    SampleGame.MouseBall = MouseBall;
+})(SampleGame || (SampleGame = {}));
+/// <reference path="../../dist/piston-0.4.0.d.ts" />
 /// <reference path="ball.ts" />
 /// <reference path="box.ts" />
 /// <reference path="spriteball.ts" />
+/// <reference path="mouseball.ts" />
 var SampleGame;
 (function (SampleGame) {
     var canvas = document.createElement("canvas");
     canvas.width = 1024;
     canvas.height = 768;
     document.body.appendChild(canvas);
-    var mouseBall = new SampleGame.Ball(new ps.Point(0, 0), new ps.Vector(0, 0));
-    mouseBall.radius = 20;
-    mouseBall.vel = new ps.Vector(0, 0);
-    mouseBall.isCollisionDetectionEnabled = true;
-    mouseBall.update = function (dt, dims) {
-        this.pos = engine.mouse.pos;
-        if (engine.mouse.isLeftButtonDown) {
-            this.color = "green";
-        }
-        else if (engine.mouse.isRightButtonDown) {
-            this.color = "red";
-        }
-        else if (engine.mouse.isMiddleButtonDown) {
-            this.color = "blue";
-        }
-        else {
-            this.color = "orange";
-        }
-        this.rotation += 1 * dt;
-    };
+    // let mouseBall = new Ball(new ps.Point(0, 0), new ps.Vector(0, 0));
+    // mouseBall.radius = 20;
+    // mouseBall.vel = new ps.Vector(0, 0);
+    // mouseBall.isCollisionDetectionEnabled = true;
+    // mouseBall.update = function(dt: number, dims: ps.Vector) {
+    //     this.pos = engine.mouse.pos;
+    //     if (engine.mouse.isLeftButtonDown) {
+    //         this.color = "green";
+    //     } else if (engine.mouse.isRightButtonDown) {
+    //         this.color = "red";
+    //     } else if (engine.mouse.isMiddleButtonDown) {
+    //         this.color = "blue";
+    //     } else {
+    //         this.color = "orange";
+    //     }
+    //     this.rotation += 1 * dt;
+    // }
     var b1 = new SampleGame.Ball(new ps.Point(200, 500), new ps.Vector(50, 0));
     var b3 = new SampleGame.Ball(new ps.Point(500, 500), new ps.Vector(-50, 0));
     var dimensions = new ps.Vector(canvas.width, canvas.height);
@@ -104,7 +140,7 @@ var SampleGame;
     window.engine = engine;
     engine.preloadResources("assets/ball.png");
     engine.mouse.setCustomCursor("assets/crosshairs.png", new ps.Point(10, 10));
-    engine.registerEntity(new SampleGame.Box(), new SampleGame.SpriteBall(), mouseBall, b1, b3);
+    engine.registerEntity(new SampleGame.Box(), new SampleGame.SpriteBall(), b1, b3, new SampleGame.MouseBall());
     engine.start();
 })(SampleGame || (SampleGame = {}));
 //# sourceMappingURL=game.js.map
