@@ -1,4 +1,4 @@
-node_modules/
-bower_components/
-build/
-sample/
+/node_modules/
+/bower_components/
+/build/
+/sample/
