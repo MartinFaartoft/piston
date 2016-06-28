@@ -13,6 +13,7 @@ namespace SampleGame {
 
     let b1 = new Ball(new ps.Point(200, 500), new ps.Vector(50, 0));
     let b2 = new Ball(new ps.Point(500, 500), new ps.Vector(-50, 0));
+    let box = new Box();
     
     let dimensions = new ps.Vector(canvas.width, canvas.height);
     let engine = new ps.Engine(dimensions, canvas);
@@ -22,7 +23,23 @@ namespace SampleGame {
     
     engine.preloadResources("assets/ball.png");
     engine.mouse.setCustomCursor("assets/crosshairs.png", new ps.Point(10, 10));
-    engine.registerEntity(new Box(), new SpriteBall(), b1, b2, new MouseBall());
+    engine.registerEntity(box, new SpriteBall(), b1, b2, new MouseBall());
+
+    engine.mouse.addMouseMoveEventListener((pos) =>  {
+        box.pos = pos;
+    });
+
+    engine.mouse.addMouseDownEventListener((pos, button) =>  {
+        if (button === 0) {
+            box.color = "green";
+        }
+    });
+
+    engine.mouse.addMouseUpEventListener((pos, button) =>  {
+        if (button === 0) {
+            box.color = "blue";
+        }
+    });
     
     engine.start();    
 }

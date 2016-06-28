@@ -101,14 +101,20 @@ declare namespace ps.input {
         isRightButtonDown: boolean;
         isMiddleButtonDown: boolean;
         private mouseMoveDelegate;
+        private mouseMoveListeners;
         private mouseDownDelegate;
+        private mouseDownListeners;
         private mouseUpDelegate;
+        private mouseUpListeners;
         constructor(canvas: HTMLCanvasElement, coordConverter: CoordConverter);
         enable(): void;
         disable(): void;
         setCustomCursor(url: string, hotspot: Point): void;
+        addMouseMoveEventListener(action: (p: Point) => void): void;
         private onMouseMove(e);
+        addMouseDownEventListener(action: (p: Point, button: number) => void): void;
         private onMouseDown(e);
+        addMouseUpEventListener(action: (Point, MouseEvent) => void): void;
         private onMouseUp(e);
         private findPos(obj);
     }

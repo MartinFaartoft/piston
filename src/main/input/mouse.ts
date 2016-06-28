@@ -8,8 +8,13 @@ namespace ps.input {
         isMiddleButtonDown: boolean = false;
 
         private mouseMoveDelegate: any;
+        private mouseMoveListeners: ((Point) => void)[] = [];
+
         private mouseDownDelegate: any;
+        private mouseDownListeners: ((p: Point, button: number) => void)[] = [];
+        
         private mouseUpDelegate: any;
+        private mouseUpListeners: ((p: Point, button: number) => void)[] = [];
 
         constructor(public canvas: HTMLCanvasElement, public coordConverter: CoordConverter) {
             this.mouseMoveDelegate = this.onMouseMove.bind(this);
@@ -42,9 +47,21 @@ namespace ps.input {
             this.canvas.style.cursor = "url(" + url + ") " + hotspot.x + " " + hotspot.y + ", auto";
         }
 
+        public addMouseMoveEventListener(action: (p: Point) => void): void {
+            this.mouseMoveListeners.push(action);
+        }
+
         private onMouseMove(e: MouseEvent) {
             let newPos = new Point(e.clientX, e.clientY);
             this.pos = this.coordConverter.toGameCoords(newPos.subtract(this.findPos(this.canvas)));
+
+            for (let listener of this.mouseMoveListeners) {
+                listener(this.pos);
+            }
+        }
+
+        public addMouseDownEventListener(action: (p: Point, button: number) => void): void {
+            this.mouseDownListeners.push(action);
         }
 
         private onMouseDown(e: MouseEvent) {
@@ -56,8 +73,16 @@ namespace ps.input {
             } else if (e.button === 2) {
                 this.isMiddleButtonDown = true;
             }
+
+            for (let listener of this.mouseDownListeners) {
+                listener(this.pos, e.button);
+            }
         }
 
+        public addMouseUpEventListener(action: (Point, MouseEvent) => void): void {
+            this.mouseUpListeners.push(action);
+        }
+        
         private onMouseUp(e: MouseEvent) {
             e.stopImmediatePropagation();
             if (e.button === 0) {
@@ -66,6 +91,10 @@ namespace ps.input {
                 this.isRightButtonDown = false;
             } else if (e.button === 2) {
                 this.isMiddleButtonDown = false;
+            }
+
+            for (let listener of this.mouseUpListeners) {
+                listener(this.pos, e.button);
             }
         }
 

@@ -262,6 +262,9 @@ var ps;
                 this.isLeftButtonDown = false;
                 this.isRightButtonDown = false;
                 this.isMiddleButtonDown = false;
+                this.mouseMoveListeners = [];
+                this.mouseDownListeners = [];
+                this.mouseUpListeners = [];
                 this.mouseMoveDelegate = this.onMouseMove.bind(this);
                 this.mouseDownDelegate = this.onMouseDown.bind(this);
                 this.mouseUpDelegate = this.onMouseUp.bind(this);
@@ -285,9 +288,19 @@ var ps;
             Mouse.prototype.setCustomCursor = function (url, hotspot) {
                 this.canvas.style.cursor = "url(" + url + ") " + hotspot.x + " " + hotspot.y + ", auto";
             };
+            Mouse.prototype.addMouseMoveEventListener = function (action) {
+                this.mouseMoveListeners.push(action);
+            };
             Mouse.prototype.onMouseMove = function (e) {
                 var newPos = new ps.Point(e.clientX, e.clientY);
                 this.pos = this.coordConverter.toGameCoords(newPos.subtract(this.findPos(this.canvas)));
+                for (var _i = 0, _a = this.mouseMoveListeners; _i < _a.length; _i++) {
+                    var listener = _a[_i];
+                    listener(this.pos);
+                }
+            };
+            Mouse.prototype.addMouseDownEventListener = function (action) {
+                this.mouseDownListeners.push(action);
             };
             Mouse.prototype.onMouseDown = function (e) {
                 e.stopImmediatePropagation();
@@ -300,6 +313,13 @@ var ps;
                 else if (e.button === 2) {
                     this.isMiddleButtonDown = true;
                 }
+                for (var _i = 0, _a = this.mouseDownListeners; _i < _a.length; _i++) {
+                    var listener = _a[_i];
+                    listener(this.pos, e.button);
+                }
+            };
+            Mouse.prototype.addMouseUpEventListener = function (action) {
+                this.mouseUpListeners.push(action);
             };
             Mouse.prototype.onMouseUp = function (e) {
                 e.stopImmediatePropagation();
@@ -311,6 +331,10 @@ var ps;
                 }
                 else if (e.button === 2) {
                     this.isMiddleButtonDown = false;
+                }
+                for (var _i = 0, _a = this.mouseUpListeners; _i < _a.length; _i++) {
+                    var listener = _a[_i];
+                    listener(this.pos, e.button);
                 }
             };
             // Find out where an element is on the page
