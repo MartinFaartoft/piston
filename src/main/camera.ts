@@ -20,7 +20,7 @@ namespace ps {
             this.paintWhileRotated(centerCC, rotation, () => {
                 this.ctx.fillStyle = color;
                 this.ctx.beginPath();
-                this.ctx.arc(0, 0, scaledRadius, startAngle, endAngle);
+                this.ctx.arc(0, 0, scaledRadius, startAngle, endAngle, counterClockWise);
                 this.ctx.fill();
                 this.ctx.closePath();
             });

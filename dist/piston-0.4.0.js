@@ -446,7 +446,7 @@ var ps;
             this.paintWhileRotated(centerCC, rotation, function () {
                 _this.ctx.fillStyle = color;
                 _this.ctx.beginPath();
-                _this.ctx.arc(0, 0, scaledRadius, startAngle, endAngle);
+                _this.ctx.arc(0, 0, scaledRadius, startAngle, endAngle, counterClockWise);
                 _this.ctx.fill();
                 _this.ctx.closePath();
             });
