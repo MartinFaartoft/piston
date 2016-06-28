@@ -10,7 +10,7 @@ namespace SampleGame {
         }
 
         render(camera: ps.Camera) {
-            camera.fillRect(this, 50, 50, this.color);
+            camera.fillRect(this.pos, this.rotation, 50, 50, this.color);
         }
     }
 }

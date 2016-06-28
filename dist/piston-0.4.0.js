@@ -436,14 +436,14 @@ var ps;
             this.coordConverter = coordConverter;
             this.backgroundColor = "black";
         }
-        Camera.prototype.fillCircle = function (entity, radius, color) {
-            this.fillArc(entity, radius, 0, Math.PI * 2, false, color);
+        Camera.prototype.fillCircle = function (pos, radius, color) {
+            this.fillArc(pos, 0, radius, 0, Math.PI * 2, false, color);
         };
-        Camera.prototype.fillArc = function (entity, radius, startAngle, endAngle, counterClockWise, color) {
+        Camera.prototype.fillArc = function (pos, rotation, radius, startAngle, endAngle, counterClockWise, color) {
             var _this = this;
-            var centerCC = this.coordConverter.toCameraCoords(entity.pos);
+            var centerCC = this.coordConverter.toCameraCoords(pos);
             var scaledRadius = this.scale(radius);
-            this.paintWhileRotated(centerCC, entity.rotation, function () {
+            this.paintWhileRotated(centerCC, rotation, function () {
                 _this.ctx.fillStyle = color;
                 _this.ctx.beginPath();
                 _this.ctx.arc(0, 0, scaledRadius, startAngle, endAngle);
@@ -451,12 +451,12 @@ var ps;
                 _this.ctx.closePath();
             });
         };
-        Camera.prototype.fillRect = function (entity, width, height, color) {
+        Camera.prototype.fillRect = function (pos, rotation, width, height, color) {
             var _this = this;
-            var centerCC = this.coordConverter.toCameraCoords(entity.pos);
+            var centerCC = this.coordConverter.toCameraCoords(pos);
             var scaledHeight = this.scale(height);
             var scaledWidth = this.scale(width);
-            this.paintWhileRotated(centerCC, entity.rotation, function () {
+            this.paintWhileRotated(centerCC, rotation, function () {
                 _this.ctx.fillStyle = color;
                 _this.ctx.fillRect(-scaledWidth / 2.0, -scaledHeight / 2.0, scaledWidth, scaledHeight);
             });
@@ -476,13 +476,12 @@ var ps;
             this.ctx.strokeStyle = previousStroke;
             this.ctx.lineWidth = previousLineWidth;
         };
-        Camera.prototype.paintSprites = function (entity, sprites) {
-            var centerCC = this.coordConverter.toCameraCoords(entity.pos);
-            var scaledDiameter = this.scale(entity.radius) * 2;
-            var size = [scaledDiameter, scaledDiameter];
+        Camera.prototype.paintSprites = function (pos, rotation, size, sprites) {
+            var centerCC = this.coordConverter.toCameraCoords(pos);
+            var scaledSize = [this.scale(size[0]), this.scale(size[1])];
             for (var _i = 0, sprites_1 = sprites; _i < sprites_1.length; _i++) {
                 var sprite = sprites_1[_i];
-                this.paintSprite(sprite, centerCC, size, entity.rotation);
+                this.paintSprite(sprite, centerCC, scaledSize, rotation);
             }
         };
         Camera.prototype.paintSprite = function (sprite, pos, size, rotation) {

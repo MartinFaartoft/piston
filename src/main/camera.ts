@@ -9,15 +9,15 @@ namespace ps {
 
         constructor(public dims: Vector, public ctx: CanvasRenderingContext2D, public coordConverter: CoordConverter) { }
 
-        fillCircle(entity: Entity, radius: number, color: string): void {
-            this.fillArc(entity, radius, 0, Math.PI * 2, false, color);
+        fillCircle(pos: Point, radius: number, color: string): void {
+            this.fillArc(pos, 0, radius, 0, Math.PI * 2, false, color);
         }
 
-        fillArc(entity: Entity, radius: number, startAngle: number, endAngle: number, counterClockWise: boolean, color: string) {
-            let centerCC = this.coordConverter.toCameraCoords(entity.pos); 
+        fillArc(pos: Point, rotation: number, radius: number, startAngle: number, endAngle: number, counterClockWise: boolean, color: string) {
+            let centerCC = this.coordConverter.toCameraCoords(pos); 
             let scaledRadius = this.scale(radius);
 
-            this.paintWhileRotated(centerCC, entity.rotation, () => {
+            this.paintWhileRotated(centerCC, rotation, () => {
                 this.ctx.fillStyle = color;
                 this.ctx.beginPath();
                 this.ctx.arc(0, 0, scaledRadius, startAngle, endAngle);
@@ -26,12 +26,12 @@ namespace ps {
             });
         }
 
-        fillRect(entity: Entity, width: number, height: number, color: string): void {
-            let centerCC = this.coordConverter.toCameraCoords(entity.pos);
+        fillRect(pos: Point, rotation: number, width: number, height: number, color: string): void {
+            let centerCC = this.coordConverter.toCameraCoords(pos);
             let scaledHeight = this.scale(height);
             let scaledWidth = this.scale(width);
 
-            this.paintWhileRotated(centerCC, entity.rotation, () => {
+            this.paintWhileRotated(centerCC, rotation, () => {
                 this.ctx.fillStyle = color;
                 this.ctx.fillRect(-scaledWidth / 2.0, -scaledHeight / 2.0, scaledWidth, scaledHeight);
             });
@@ -56,13 +56,12 @@ namespace ps {
             this.ctx.lineWidth = previousLineWidth;
         }
 
-        paintSprites(entity: Entity, sprites: Sprite[]): void {
-            let centerCC = this.coordConverter.toCameraCoords(entity.pos);
-            let scaledDiameter = this.scale(entity.radius) * 2;
-            let size = [scaledDiameter, scaledDiameter];
+        paintSprites(pos: Point, rotation: number, size: number[], sprites: Sprite[]): void {
+            let centerCC = this.coordConverter.toCameraCoords(pos);
+            let scaledSize = [this.scale(size[0]), this.scale(size[1])];
             
             for (let sprite of sprites) {
-                this.paintSprite(sprite, centerCC, size, entity.rotation);
+                this.paintSprite(sprite, centerCC, scaledSize, rotation);
             }
         }
 

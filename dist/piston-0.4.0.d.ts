@@ -166,11 +166,11 @@ declare namespace ps {
         backgroundColor: string;
         resourceManager: ResourceManager;
         constructor(dims: Vector, ctx: CanvasRenderingContext2D, coordConverter: CoordConverter);
-        fillCircle(entity: Entity, radius: number, color: string): void;
-        fillArc(entity: Entity, radius: number, startAngle: number, endAngle: number, counterClockWise: boolean, color: string): void;
-        fillRect(entity: Entity, width: number, height: number, color: string): void;
+        fillCircle(pos: Point, radius: number, color: string): void;
+        fillArc(pos: Point, rotation: number, radius: number, startAngle: number, endAngle: number, counterClockWise: boolean, color: string): void;
+        fillRect(pos: Point, rotation: number, width: number, height: number, color: string): void;
         drawLine(start: Point, end: Point, lineWidth: number, color: string): void;
-        paintSprites(entity: Entity, sprites: Sprite[]): void;
+        paintSprites(pos: Point, rotation: number, size: number[], sprites: Sprite[]): void;
         paintSprite(sprite: Sprite, pos: Point, size: number[], rotation: number): void;
         scale(n: number): number;
         render(entities: Entity[]): void;
