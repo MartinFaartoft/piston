@@ -14,6 +14,13 @@ namespace SampleGame {
             this.sprites.push(ballSprite);
         }
 
+        update(dt: number, dims: ps.Vector) {
+            super.update(dt, dims);
+            if (this.engine.keyboard.isKeyDown("space")) {
+                this.pos.x += 20;
+            }
+        }
+
         render(camera: ps.Camera) {
             camera.drawLine(this.initialPos, this.pos, 3, "green");
             camera.paintSprites(this.pos, this.rotation, [30, 80], this.sprites);
