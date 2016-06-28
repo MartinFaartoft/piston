@@ -2,6 +2,8 @@
 /// <reference path="ball.ts" />
 /// <reference path="box.ts" />
 /// <reference path="spriteball.ts" />
+/// <reference path="mouseball.ts" />
+
 
 namespace SampleGame {
     let canvas = document.createElement("canvas");
@@ -20,7 +22,7 @@ namespace SampleGame {
     
     engine.preloadResources("assets/ball.png");
     engine.mouse.setCustomCursor("assets/crosshairs.png", new ps.Point(10, 10));
-    engine.registerEntity(new Box(), new SpriteBall(), b1, b2);
+    engine.registerEntity(new Box(), new SpriteBall(), b1, b2, new MouseBall());
     
     engine.start();    
 }
