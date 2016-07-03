@@ -1,6 +1,11 @@
 # Piston [![Build Status](https://travis-ci.org/MartinFaartoft/piston.svg?branch=master)](https://travis-ci.org/MartinFaartoft/piston)
 A game engine for making 2D games using HTML5 Canvas
 
+## Example games
+* Missile Command [play] (http://ftft.dk/missilecommand/) | [source] (https://github.com/MartinFaartoft/missilecommand) 
+* Volley [play] (http://ftft.dk/volley/) | [source] (https://github.com/MartinFaartoft/volley)
+* Asteroids [play] (http://ftft.dk/asteroids/) | [source] (https://github.com/MartinFaartoft/asteroids)
+
 ## Features
 * Collision detection
 * Sprite animation
@@ -21,7 +26,3 @@ A game engine for making 2D games using HTML5 Canvas
 
 ### Version 0.2.0
 * Replaced number[] with ps.Vector
-
-## Example games
-* Asteroids [play] (http://ftft.dk/asteroids/) | [source] (https://github.com/MartinFaartoft/asteroids)
-* Volley [play] (http://ftft.dk/volley/) | [source] (https://github.com/MartinFaartoft/volley)
