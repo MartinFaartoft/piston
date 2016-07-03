@@ -170,8 +170,9 @@ declare namespace ps {
         fillArc(pos: Point, rotation: number, radius: number, startAngle: number, endAngle: number, counterClockWise: boolean, color: string): void;
         fillRect(pos: Point, rotation: number, width: number, height: number, color: string): void;
         drawLine(start: Point, end: Point, lineWidth: number, color: string): void;
+        paintSprite(pos: Point, rotation: number, size: number[], sprite: Sprite): void;
         paintSprites(pos: Point, rotation: number, size: number[], sprites: Sprite[]): void;
-        paintSprite(sprite: Sprite, pos: Point, size: number[], rotation: number): void;
+        private paintSpriteInternal(sprite, pos, size, rotation);
         scale(n: number): number;
         render(entities: Entity[]): void;
         private clear();

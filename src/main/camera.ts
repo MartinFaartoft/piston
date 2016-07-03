@@ -56,16 +56,20 @@ namespace ps {
             this.ctx.lineWidth = previousLineWidth;
         }
 
+        paintSprite(pos: Point, rotation: number, size: number[], sprite: Sprite): void {
+            this.paintSprites(pos, rotation, size, [sprite]);
+        }
+
         paintSprites(pos: Point, rotation: number, size: number[], sprites: Sprite[]): void {
             let centerCC = this.coordConverter.toCameraCoords(pos);
             let scaledSize = [this.scale(size[0]), this.scale(size[1])];
             
             for (let sprite of sprites) {
-                this.paintSprite(sprite, centerCC, scaledSize, rotation);
+                this.paintSpriteInternal(sprite, centerCC, scaledSize, rotation);
             }
         }
 
-        paintSprite(sprite: Sprite, pos: Point, size: number[], rotation: number): void {
+        private paintSpriteInternal(sprite: Sprite, pos: Point, size: number[], rotation: number): void {
             sprite.render(this.ctx, this.resourceManager, pos, size, rotation);
         }
 

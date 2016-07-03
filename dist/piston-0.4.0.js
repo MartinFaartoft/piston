@@ -476,15 +476,18 @@ var ps;
             this.ctx.strokeStyle = previousStroke;
             this.ctx.lineWidth = previousLineWidth;
         };
+        Camera.prototype.paintSprite = function (pos, rotation, size, sprite) {
+            this.paintSprites(pos, rotation, size, [sprite]);
+        };
         Camera.prototype.paintSprites = function (pos, rotation, size, sprites) {
             var centerCC = this.coordConverter.toCameraCoords(pos);
             var scaledSize = [this.scale(size[0]), this.scale(size[1])];
             for (var _i = 0, sprites_1 = sprites; _i < sprites_1.length; _i++) {
                 var sprite = sprites_1[_i];
-                this.paintSprite(sprite, centerCC, scaledSize, rotation);
+                this.paintSpriteInternal(sprite, centerCC, scaledSize, rotation);
             }
         };
-        Camera.prototype.paintSprite = function (sprite, pos, size, rotation) {
+        Camera.prototype.paintSpriteInternal = function (sprite, pos, size, rotation) {
             sprite.render(this.ctx, this.resourceManager, pos, size, rotation);
         };
         Camera.prototype.scale = function (n) {
