@@ -39,6 +39,14 @@ namespace SampleGame {
         if (button === 0) {
             box.color = "blue";
         }
+
+        if (button === 2) {
+            engine.toggleFullScreen();
+            // canvas.webkitRequestFullscreen();
+            // canvas.width = screen.width;
+            // canvas.height = screen.height;
+            // engine.setDimensions(new ps.Vector(screen.width, screen.height));
+        }
     });
     
     engine.start();    

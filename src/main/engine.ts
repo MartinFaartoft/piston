@@ -15,6 +15,10 @@
 namespace ps {
     let c = collision;
 
+    export interface EngineExtension {
+        setEngine(engine: Engine): void;
+    }
+
     export class HeadlessEngine implements Runnable {
         ctx: CanvasRenderingContext2D;
         debug: boolean = false;
@@ -23,6 +27,8 @@ namespace ps {
         collisionResolver: collision.CollisionResolver = new collision.DeferToEntityCollisionResolver();
         stopwatch: Stopwatch = new DateNowStopwatch();
         entities: Entity[] = [];
+        
+        protected isFullScreen: boolean = false;
         
         private resourceManager: ResourceManager = new ResourceManager();
         private resources: string[] = [];
@@ -44,6 +50,13 @@ namespace ps {
             if (this.keyboard) {
                 this.keyboard.enable();
             }
+        }
+
+        setDimensions(dims: Vector): void {
+            this.dims = dims;
+            this.camera.dims = dims;
+            this.mouse.coordConverter.setDims(dims);
+            this.camera.coordConverter.setDims(dims);
         }
 
         registerEntity(...entities: Entity[]): void {
@@ -105,6 +118,10 @@ namespace ps {
         private garbageCollect() {
             this.entities = this.entities.filter(e => !e.destroyed);
         }
+
+        toggleFullScreen(): void {
+            //no implementation
+        }
     }
 
     /**
@@ -118,6 +135,20 @@ namespace ps {
                   new input.Keyboard(document, window), 
                   new BrowserAnimationFrameProvider(),
                   new Camera(dims, canvas.getContext("2d"), new DefaultCoordConverter(dims)));
+        }
+
+        toggleFullScreen(): void {
+            if (!this.isFullScreen) {
+                this.canvas.webkitRequestFullscreen();
+                let newWidth = screen.width;
+                let newHeight = screen.height;
+                this.canvas.width = newWidth;
+                this.canvas.height = newHeight;
+
+                this.setDimensions(new Vector(newWidth, newHeight));
+
+                this.isFullScreen = true;
+            }
         }
     }
 }

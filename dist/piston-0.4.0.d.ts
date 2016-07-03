@@ -150,12 +150,14 @@ declare namespace ps {
     interface CoordConverter {
         toCameraCoords(p: Point): Point;
         toGameCoords(p: Point): Point;
+        setDims(dims: Vector): void;
     }
     class DefaultCoordConverter implements CoordConverter {
         dims: Vector;
         constructor(dims: Vector);
         toCameraCoords(p: Point): Point;
         toGameCoords(p: Point): Point;
+        setDims(dims: Vector): void;
     }
 }
 declare namespace ps {
@@ -192,6 +194,9 @@ declare namespace ps {
     }
 }
 declare namespace ps {
+    interface EngineExtension {
+        setEngine(engine: Engine): void;
+    }
     class HeadlessEngine implements Runnable {
         dims: Vector;
         canvas: HTMLCanvasElement;
@@ -206,9 +211,11 @@ declare namespace ps {
         collisionResolver: collision.CollisionResolver;
         stopwatch: Stopwatch;
         entities: Entity[];
+        protected isFullScreen: boolean;
         private resourceManager;
         private resources;
         constructor(dims: Vector, canvas: HTMLCanvasElement, mouse: input.Mouse, keyboard: input.Keyboard, animator: AnimationFrameProvider, camera: Camera);
+        setDimensions(dims: Vector): void;
         registerEntity(...entities: Entity[]): void;
         run(): void;
         preloadResources(...resources: string[]): void;
@@ -216,12 +223,14 @@ declare namespace ps {
         private checkCollisions(entities);
         private update(dt, entities);
         private garbageCollect();
+        toggleFullScreen(): void;
     }
     /**
      * Default engine for running in-browser
      */
     class Engine extends HeadlessEngine {
         constructor(dims: Vector, canvas: HTMLCanvasElement);
+        toggleFullScreen(): void;
     }
 }
 declare namespace ps {
