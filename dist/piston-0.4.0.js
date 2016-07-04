@@ -421,7 +421,7 @@ var ps;
         DefaultCoordConverter.prototype.toGameCoords = function (p) {
             return new ps.Point(p.x, this.dims.y - p.y);
         };
-        DefaultCoordConverter.prototype.setDims = function (dims) {
+        DefaultCoordConverter.prototype.setResolution = function (dims) {
             this.dims = dims;
         };
         return DefaultCoordConverter;
@@ -433,11 +433,11 @@ var ps;
 var ps;
 (function (ps) {
     var Camera = (function () {
-        function Camera(dims, ctx, coordConverter) {
-            this.dims = dims;
-            this.ctx = ctx;
+        function Camera(canvas, coordConverter, sceneSize) {
             this.coordConverter = coordConverter;
+            this.sceneSize = sceneSize;
             this.backgroundColor = "black";
+            this.canvas = canvas;
         }
         Camera.prototype.fillCircle = function (pos, radius, color) {
             this.fillArc(pos, 0, radius, 0, Math.PI * 2, false, color);
@@ -494,18 +494,28 @@ var ps;
             sprite.render(this.ctx, this.resourceManager, pos, size, rotation);
         };
         Camera.prototype.scale = function (n) {
-            return n; //assume 1:1 scale for now
+            //assume camera shows entire scene and camera aspect ratio === scene aspect ratio
+            return n * this.canvas.width / this.sceneSize.x;
         };
         Camera.prototype.render = function (entities) {
+            this.ctx = this.canvas.getContext("2d");
             this.clear();
             for (var _i = 0, entities_1 = entities; _i < entities_1.length; _i++) {
                 var entity = entities_1[_i];
                 entity.render(this);
             }
         };
+        Camera.prototype.toggleFullScreen = function () {
+            if (!document.webkitFullscreenElement) {
+                this.canvas.webkitRequestFullscreen();
+            }
+            else {
+                document.webkitExitFullscreen();
+            }
+        };
         Camera.prototype.clear = function () {
             this.ctx.fillStyle = this.backgroundColor;
-            this.ctx.fillRect(0, 0, this.dims.x, this.dims.y);
+            this.ctx.fillRect(0, 0, this.canvas.offsetWidth, this.canvas.offsetHeight);
         };
         Camera.prototype.paintWhileRotated = function (center, rotation, paintDelegate) {
             this.ctx.translate(center.x, center.y);
@@ -598,7 +608,6 @@ var ps;
             this.isFullScreen = false;
             this.resourceManager = new ps.ResourceManager();
             this.resources = [];
-            this.ctx = canvas.getContext("2d");
             this.camera.resourceManager = this.resourceManager;
             if (this.mouse) {
                 this.mouse.enable();
@@ -609,9 +618,8 @@ var ps;
         }
         HeadlessEngine.prototype.setDimensions = function (dims) {
             this.dims = dims;
-            this.camera.dims = dims;
-            this.mouse.coordConverter.setDims(dims);
-            this.camera.coordConverter.setDims(dims);
+            this.mouse.coordConverter.setResolution(dims);
+            this.camera.coordConverter.setResolution(dims);
         };
         HeadlessEngine.prototype.registerEntity = function () {
             var entities = [];
@@ -682,20 +690,9 @@ var ps;
      */
     var Engine = (function (_super) {
         __extends(Engine, _super);
-        function Engine(dims, canvas) {
-            _super.call(this, dims, canvas, new ps.input.Mouse(canvas, new ps.DefaultCoordConverter(dims)), new ps.input.Keyboard(document, window), new ps.BrowserAnimationFrameProvider(), new ps.Camera(dims, canvas.getContext("2d"), new ps.DefaultCoordConverter(dims)));
+        function Engine(dims, sceneSize, canvas) {
+            _super.call(this, dims, canvas, new ps.input.Mouse(canvas, new ps.DefaultCoordConverter(dims)), new ps.input.Keyboard(document, window), new ps.BrowserAnimationFrameProvider(), new ps.Camera(canvas, new ps.DefaultCoordConverter(dims), sceneSize));
         }
-        Engine.prototype.toggleFullScreen = function () {
-            if (!this.isFullScreen) {
-                this.canvas.webkitRequestFullscreen();
-                var newWidth = screen.width;
-                var newHeight = screen.height;
-                this.canvas.width = newWidth;
-                this.canvas.height = newHeight;
-                this.setDimensions(new ps.Vector(newWidth, newHeight));
-                this.isFullScreen = true;
-            }
-        };
         return Engine;
     }(HeadlessEngine));
     ps.Engine = Engine;

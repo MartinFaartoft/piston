@@ -7,16 +7,27 @@
 
 namespace SampleGame {
     let canvas = document.createElement("canvas");
-    canvas.width = 1024;
-    canvas.height = 768;
+    let aspectRatio = 16 / 9.0;
+    
+    function resizeCanvas(e) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerWidth / aspectRatio;
+        engine.setDimensions(new ps.Vector(canvas.width, canvas.height));
+    }
+    
+    window.onresize = resizeCanvas; 
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerWidth / aspectRatio;
     document.body.appendChild(canvas);
+    document.body.style.margin = "0";
+    console.log(canvas.offsetWidth, canvas.offsetHeight);
 
     let b1 = new Ball(new ps.Point(200, 500), new ps.Vector(50, 0));
     let b2 = new Ball(new ps.Point(500, 500), new ps.Vector(-50, 0));
     let box = new Box();
     
-    let dimensions = new ps.Vector(canvas.width, canvas.height);
-    let engine = new ps.Engine(dimensions, canvas);
+    let dimensions = new ps.Vector(canvas.offsetWidth, canvas.offsetHeight);
+    let engine = new ps.Engine(dimensions, new ps.Vector(1600, 900), canvas);
     let resourceManager = new ps.ResourceManager();
 
     (<any>window).engine = engine;
@@ -41,11 +52,7 @@ namespace SampleGame {
         }
 
         if (button === 2) {
-            engine.toggleFullScreen();
-            // canvas.webkitRequestFullscreen();
-            // canvas.width = screen.width;
-            // canvas.height = screen.height;
-            // engine.setDimensions(new ps.Vector(screen.width, screen.height));
+            engine.camera.toggleFullScreen();
         }
     });
     

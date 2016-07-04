@@ -20,7 +20,6 @@ namespace ps {
     }
 
     export class HeadlessEngine implements Runnable {
-        ctx: CanvasRenderingContext2D;
         debug: boolean = false;
         backgroundFillStyle: string = "black";
         collisionDetector: collision.CollisionDetector = new collision.CircularCollisionDetector();
@@ -40,7 +39,6 @@ namespace ps {
                     public animator: AnimationFrameProvider,
                     public camera: Camera) {
 
-            this.ctx = canvas.getContext("2d");
             this.camera.resourceManager = this.resourceManager;
 
             if (this.mouse) {
@@ -54,9 +52,8 @@ namespace ps {
 
         setDimensions(dims: Vector): void {
             this.dims = dims;
-            this.camera.dims = dims;
-            this.mouse.coordConverter.setDims(dims);
-            this.camera.coordConverter.setDims(dims);
+            this.mouse.coordConverter.setResolution(dims);
+            this.camera.coordConverter.setResolution(dims);
         }
 
         registerEntity(...entities: Entity[]): void {
@@ -128,27 +125,13 @@ namespace ps {
      * Default engine for running in-browser
      */
     export class Engine extends HeadlessEngine {
-        constructor(dims: Vector, canvas: HTMLCanvasElement) {
+        constructor(dims: Vector, sceneSize: Vector,  canvas: HTMLCanvasElement) {
             super(dims, 
                   canvas, 
                   new input.Mouse(canvas, new DefaultCoordConverter(dims)), 
                   new input.Keyboard(document, window), 
                   new BrowserAnimationFrameProvider(),
-                  new Camera(dims, canvas.getContext("2d"), new DefaultCoordConverter(dims)));
-        }
-
-        toggleFullScreen(): void {
-            if (!this.isFullScreen) {
-                this.canvas.webkitRequestFullscreen();
-                let newWidth = screen.width;
-                let newHeight = screen.height;
-                this.canvas.width = newWidth;
-                this.canvas.height = newHeight;
-
-                this.setDimensions(new Vector(newWidth, newHeight));
-
-                this.isFullScreen = true;
-            }
+                  new Camera(canvas, new DefaultCoordConverter(dims), sceneSize));
         }
     }
 }

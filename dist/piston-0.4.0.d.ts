@@ -150,24 +150,25 @@ declare namespace ps {
     interface CoordConverter {
         toCameraCoords(p: Point): Point;
         toGameCoords(p: Point): Point;
-        setDims(dims: Vector): void;
+        setResolution(res: Vector): void;
     }
     class DefaultCoordConverter implements CoordConverter {
         dims: Vector;
         constructor(dims: Vector);
         toCameraCoords(p: Point): Point;
         toGameCoords(p: Point): Point;
-        setDims(dims: Vector): void;
+        setResolution(dims: Vector): void;
     }
 }
 declare namespace ps {
     class Camera {
-        dims: Vector;
-        ctx: CanvasRenderingContext2D;
         coordConverter: CoordConverter;
+        sceneSize: Vector;
         backgroundColor: string;
         resourceManager: ResourceManager;
-        constructor(dims: Vector, ctx: CanvasRenderingContext2D, coordConverter: CoordConverter);
+        private canvas;
+        private ctx;
+        constructor(canvas: HTMLCanvasElement, coordConverter: CoordConverter, sceneSize: Vector);
         fillCircle(pos: Point, radius: number, color: string): void;
         fillArc(pos: Point, rotation: number, radius: number, startAngle: number, endAngle: number, counterClockWise: boolean, color: string): void;
         fillRect(pos: Point, rotation: number, width: number, height: number, color: string): void;
@@ -177,6 +178,7 @@ declare namespace ps {
         private paintSpriteInternal(sprite, pos, size, rotation);
         scale(n: number): number;
         render(entities: Entity[]): void;
+        toggleFullScreen(): void;
         private clear();
         private paintWhileRotated(center, rotation, paintDelegate);
     }
@@ -204,7 +206,6 @@ declare namespace ps {
         keyboard: input.Keyboard;
         animator: AnimationFrameProvider;
         camera: Camera;
-        ctx: CanvasRenderingContext2D;
         debug: boolean;
         backgroundFillStyle: string;
         collisionDetector: collision.CollisionDetector;
@@ -229,8 +230,7 @@ declare namespace ps {
      * Default engine for running in-browser
      */
     class Engine extends HeadlessEngine {
-        constructor(dims: Vector, canvas: HTMLCanvasElement);
-        toggleFullScreen(): void;
+        constructor(dims: Vector, sceneSize: Vector, canvas: HTMLCanvasElement);
     }
 }
 declare namespace ps {

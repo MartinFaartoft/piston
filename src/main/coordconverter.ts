@@ -5,7 +5,7 @@ namespace ps {
     export interface CoordConverter {
         toCameraCoords(p: Point): Point;
         toGameCoords(p: Point): Point;
-        setDims(dims: Vector): void;
+        setResolution(res: Vector): void;
     }
     
     //assume game coords lie in the first quadrant, with (0, 0) being the lower left corner
@@ -21,7 +21,7 @@ namespace ps {
             return new Point(p.x, this.dims.y - p.y);
         }
 
-        setDims(dims: Vector) {
+        setResolution(dims: Vector) {
             this.dims = dims;
         }
     }

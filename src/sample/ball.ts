@@ -12,6 +12,7 @@ namespace SampleGame {
         }
 
         render(camera: ps.Camera) {
+            camera.fillRect(new ps.Point(0,0), 0, 50, 50, "green");
             camera.fillArc(this.pos, this.rotation, this.radius, 0, Math.PI * 1.2, false, this.color);
         }
 

@@ -1,13 +1,17 @@
 /// <reference path="point.ts" />
 /// <reference path="coordconverter.ts" />
 
-
 namespace ps {
     export class Camera {
         backgroundColor: string = "black";
         resourceManager: ResourceManager;
 
-        constructor(public dims: Vector, public ctx: CanvasRenderingContext2D, public coordConverter: CoordConverter) { }
+        private canvas: HTMLCanvasElement;
+        private ctx: CanvasRenderingContext2D;
+
+        constructor(canvas: HTMLCanvasElement, public coordConverter: CoordConverter, public sceneSize: Vector) {
+            this.canvas = canvas;
+         }
 
         fillCircle(pos: Point, radius: number, color: string): void {
             this.fillArc(pos, 0, radius, 0, Math.PI * 2, false, color);
@@ -74,10 +78,12 @@ namespace ps {
         }
 
         scale(n: number): number {
-            return n; //assume 1:1 scale for now
+            //assume camera shows entire scene and camera aspect ratio === scene aspect ratio
+            return n * this.canvas.width / this.sceneSize.x; 
         }
 
         render(entities: Entity[]): void {
+            this.ctx = this.canvas.getContext("2d");
             this.clear();
 
             for (let entity of entities) {
@@ -85,9 +91,18 @@ namespace ps {
             }            
         }
 
+        toggleFullScreen(): void {
+            if (!document.webkitFullscreenElement) {
+                this.canvas.webkitRequestFullscreen();
+            }
+            else {
+                document.webkitExitFullscreen();
+            }
+        }
+
         private clear(): void {
             this.ctx.fillStyle = this.backgroundColor;
-            this.ctx.fillRect(0, 0, this.dims.x, this.dims.y);
+            this.ctx.fillRect(0, 0, this.canvas.offsetWidth, this.canvas.offsetHeight);
         }
 
         private paintWhileRotated(center: Point, rotation: number, paintDelegate: () => void ) {
