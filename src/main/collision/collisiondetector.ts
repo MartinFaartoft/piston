@@ -1,9 +1,9 @@
-/// <reference path="../entity.ts" />
+/// <reference path="../actor.ts" />
 /// <reference path="collision.ts" />
 
 namespace ps.collision {
     export interface CollisionDetector {
-        findCollisions(entities: Entity[]): Collision[];
-        collides(a: Entity, b: Entity);
+        findCollisions(entities: Actor[]): Collision[];
+        collides(a: Actor, b: Actor);
     }   
 }

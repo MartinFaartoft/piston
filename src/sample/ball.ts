@@ -1,7 +1,7 @@
 /// <reference path="../../dist/piston-0.4.0.d.ts" />
 
 namespace SampleGame {
-    export class Ball extends ps.Entity {
+    export class Ball extends ps.Actor {
         color: string = "orange";
         constructor(pos: ps.Point, vel: ps.Vector) {
             super(pos);
@@ -16,7 +16,7 @@ namespace SampleGame {
             camera.fillArc(this.pos, this.rotation, this.radius, 0, Math.PI * 1.2, false, this.color);
         }
 
-        collideWith(other: ps.Entity) {
+        collideWith(other: ps.Actor) {
             this.destroyed = true;
         }
     }

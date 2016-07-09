@@ -20,7 +20,14 @@ namespace EngineTest {
         }
     }
 
-    class Ball extends ps.Entity {
+    class FakeStopwatch implements ps.Stopwatch {
+        constructor(public timeElapsed: number = 0) {}
+
+        start() {}
+        stop() { return this.timeElapsed; }
+    }
+
+    class Ball extends ps.Actor {
         constructor(pos: ps.Point) {
             super(pos);
             this.isCollisionDetectionEnabled = true;
@@ -30,21 +37,26 @@ namespace EngineTest {
         render() { }
     }
 
-    class TestEntity extends ps.Entity {
+    class TestEntity extends ps.Actor {
         render() { }
     }
 
     describe("An engine running a single main loop", () => {
-        let mockCanvas: any;
+        let gameMock: any;
         let animator: InMemoryAnimator;
         let engine: ps.Engine;
         let cameraMock: ps.Camera;
+        let scene: ps.Scene;
+        let timeElapsed = 123;
+        let stopWatch = new FakeStopwatch(timeElapsed);
 
         beforeEach(() => {
-            mockCanvas = jasmine.createSpyObj("HTMLCanvasElement", ["getContext"]);
+            gameMock = null;
             cameraMock = jasmine.createSpyObj("Camera", ["render"]);
             animator = new InMemoryAnimator(1);
-            engine = new ps.Engine(new ps.Vector(100, 100), mockCanvas, null, null, animator, cameraMock);
+            scene = new ps.DefaultScene(gameMock, new ps.Vector(100, 100));
+            engine = new ps.Engine(animator, cameraMock, scene);
+            engine.stopwatch = stopWatch;
         });
 
         describe("with a registered entity", () => {
@@ -52,23 +64,15 @@ namespace EngineTest {
 
             beforeEach(() => {
                 mockEntity = jasmine.createSpyObj("Entity", ["render", "update", "remove"]);
-                engine.registerEntity(mockEntity);
+                scene.addActors(mockEntity);
             });
 
-            it("should set engine on a registered entity", () => {
+            it("should call update on a registered entity with correct parameters", () => {
                 //when
                 engine.start();
 
                 //then
-                expect(mockEntity.engine).toBe(engine);
-            });
-
-            it("should call update on a registered entity", () => {
-                //when
-                engine.start();
-
-                //then
-                expect(mockEntity.update).toHaveBeenCalledTimes(1);
+                expect(mockEntity.update).toHaveBeenCalledWith(timeElapsed, scene);
             });
 
             it("should call render on camera", () => {
@@ -77,14 +81,6 @@ namespace EngineTest {
 
                 //then
                 expect(cameraMock.render).toHaveBeenCalledTimes(1);
-            });
-
-            it("should set engine on a registered entity", () => {
-                //when
-                engine.start();
-
-                //then
-                expect(mockEntity.engine).not.toBeNull();
             });
 
             it("should not call update on a destroyed entity", () => {
@@ -106,7 +102,7 @@ namespace EngineTest {
                 b1 = new Ball(new ps.Point(0, 0));
                 b2 = new Ball(new ps.Point(10, 10));
                 b3 = new Ball(new ps.Point(40, 40));
-                engine.registerEntity(b1, b2, b3);
+                scene.addActors(b1, b2, b3);
             });
             
             it("should check for collisions between all Collidable entities with collision detection enabled", () => {

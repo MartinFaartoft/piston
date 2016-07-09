@@ -28,67 +28,49 @@ var ps;
     }());
     ps.BrowserAnimationFrameProvider = BrowserAnimationFrameProvider;
 })(ps || (ps = {}));
-/// <reference path="browseranimationframeprovider.ts" />
 var ps;
 (function (ps) {
-    var Game = (function () {
-        function Game(canvas) {
-            if (canvas === void 0) { canvas = null; }
-            this.resourceManager = new ps.ResourceManager();
-            this.resources = [];
-            this.canvas = canvas || this.createCanvas();
-            var resolution = new ps.Vector(this.canvas.width, this.canvas.height);
-            var sceneSize = new ps.Vector(1600, 900);
-            var mouse = new ps.input.Mouse(this.canvas, new ps.DefaultCoordConverter(resolution));
-            var keyboard = new ps.input.Keyboard(document, window);
-            var animator = new ps.BrowserAnimationFrameProvider();
-            var camera = new ps.Camera(this.canvas, this.resourceManager, new ps.DefaultCoordConverter(resolution), sceneSize);
-            this.engine = new ps.Engine(resolution, this.canvas, mouse, keyboard, animator, camera);
+    var Vector = (function () {
+        function Vector(x, y) {
+            this.x = x;
+            this.y = y;
         }
-        Game.prototype.start = function () {
-            var _this = this;
-            if (this.resources.length > 0) {
-                this.resourceManager.onReady(function () { _this.engine.start(); });
-                this.resourceManager.preload(this.resources);
-            }
-            else {
-                this.engine.start();
-            }
+        Vector.prototype.add = function (v) {
+            return new Vector(this.x + v.x, this.y + v.y);
         };
-        Game.prototype.loadResources = function () {
-            var resources = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                resources[_i - 0] = arguments[_i];
-            }
-            this.resources = this.resources.concat(resources);
+        Vector.prototype.subtract = function (v) {
+            return new Vector(this.x - v.x, this.y - v.y);
         };
-        Game.prototype.createCanvas = function () {
-            var canvas = document.createElement("canvas");
-            var resolution = this.getMaxCanvasSize(window.innerWidth, window.innerHeight, this.getAspectRatio());
-            canvas.width = resolution.x;
-            canvas.height = resolution.y;
-            document.body.appendChild(canvas);
-            document.body.style.margin = "0";
-            return canvas;
+        Vector.prototype.multiply = function (scalar) {
+            return new Vector(this.x * scalar, this.y * scalar);
         };
-        Game.prototype.getAspectRatio = function () {
-            return screen.width / screen.height;
+        Vector.prototype.magnitude = function () {
+            return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
         };
-        Game.prototype.getMaxCanvasSize = function (windowWidth, windowHeight, aspectRatio) {
-            var desiredHeight = windowWidth / aspectRatio;
-            var canvasHeight = Math.min(desiredHeight, windowHeight);
-            var canvasWidth = canvasHeight * aspectRatio;
-            return new ps.Vector(canvasWidth, canvasHeight);
+        Vector.prototype.unit = function () {
+            return this.multiply(1 / this.magnitude());
         };
-        return Game;
+        Vector.prototype.tangent = function () {
+            //avoid negative zero complications
+            return new Vector(this.y === 0 ? 0 : this.y * -1, this.x);
+        };
+        Vector.prototype.dot = function (v) {
+            return this.x * v.x + this.y * v.y;
+        };
+        Vector.prototype.toPoint = function () {
+            return new ps.Point(this.x, this.y);
+        };
+        return Vector;
     }());
-    ps.Game = Game;
+    ps.Vector = Vector;
 })(ps || (ps = {}));
-/// <reference path="runnable.ts" />
+/// <reference path="vector.ts" />
+/// <reference path="scene.ts" />
+/// <reference path="game.ts" />
 var ps;
 (function (ps) {
-    var Entity = (function () {
-        function Entity(pos) {
+    var Actor = (function () {
+        function Actor(pos) {
             this.pos = pos;
             this.vel = new ps.Vector(0, 0);
             this.acc = new ps.Vector(0, 0);
@@ -101,7 +83,7 @@ var ps;
             this.destroyed = false;
             this.isWrapping = false;
         }
-        Entity.prototype.update = function (dt, resolution) {
+        Actor.prototype.update = function (dt, scene) {
             if (this.isAccelerationEnabled) {
                 this.vel = this.vel.add(this.acc.multiply(dt));
             }
@@ -110,117 +92,76 @@ var ps;
             }
             this.pos = this.pos.add(this.vel.multiply(dt));
             if (this.isWrapping) {
-                this.wrap(resolution);
+                this.wrap(scene.getSize());
             }
         };
-        Entity.prototype.wrap = function (resolution) {
+        Actor.prototype.wrap = function (sceneSize) {
             // exit right edge
-            if (this.pos.x > resolution.x) {
-                this.pos.x -= resolution.x;
+            if (this.pos.x > sceneSize.x) {
+                this.pos.x -= sceneSize.x;
             }
             // exit left edge
             if (this.pos.x < 0) {
-                this.pos.x += resolution.x;
+                this.pos.x += sceneSize.x;
             }
             // exit top
             if (this.pos.y < 0) {
-                this.pos.y += resolution.y;
+                this.pos.y += sceneSize.y;
             }
             // exit bottom
-            if (this.pos.y > resolution.y) {
-                this.pos.y -= resolution.y;
+            if (this.pos.y > sceneSize.y) {
+                this.pos.y -= sceneSize.y;
             }
         };
-        Entity.prototype.collideWith = function (other) {
+        Actor.prototype.collideWith = function (other) {
             if (this.destroyOnCollision) {
                 this.destroyed = true;
             }
         };
-        return Entity;
+        return Actor;
     }());
-    ps.Entity = Entity;
+    ps.Actor = Actor;
 })(ps || (ps = {}));
-/// <reference path="../entity.ts" />
+/// <reference path="scene.ts" />
+/// <reference path="actor.ts" />
+/// <reference path="vector.ts" />
 var ps;
 (function (ps) {
-    var collision;
-    (function (collision) {
-        var Collision = (function () {
-            function Collision() {
-                var entities = [];
-                for (var _i = 0; _i < arguments.length; _i++) {
-                    entities[_i - 0] = arguments[_i];
-                }
-                this.entities = entities;
+    var DefaultScene = (function () {
+        function DefaultScene(game, size) {
+            this.game = game;
+            this.size = size;
+            this.actors = [];
+        }
+        DefaultScene.prototype.update = function (dt) {
+            for (var _i = 0, _a = this.getActors(); _i < _a.length; _i++) {
+                var actor = _a[_i];
+                actor.update(dt, this);
             }
-            return Collision;
-        }());
-        collision.Collision = Collision;
-    })(collision = ps.collision || (ps.collision = {}));
-})(ps || (ps = {}));
-/// <reference path="../entity.ts" />
-/// <reference path="collision.ts" />
-/// <reference path="collisiondetector.ts" />
-/// <reference path="collision.ts" />
-var ps;
-(function (ps) {
-    var collision;
-    (function (collision) {
-        var CircularCollisionDetector = (function () {
-            function CircularCollisionDetector() {
+        };
+        DefaultScene.prototype.addActors = function () {
+            var actors = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                actors[_i - 0] = arguments[_i];
             }
-            CircularCollisionDetector.prototype.findCollisions = function (entities) {
-                var collidables = this.getCollisionEnabledEntities(entities);
-                var collisions = [];
-                for (var i = 0; i < collidables.length - 1; i++) {
-                    for (var j = i + 1; j < collidables.length; j++) {
-                        if (this.collides(collidables[i], collidables[j])) {
-                            collisions.push(new collision.Collision(collidables[i], collidables[j]));
-                        }
-                    }
-                }
-                return collisions;
-            };
-            CircularCollisionDetector.prototype.collides = function (a, b) {
-                return a.pos.distanceTo(b.pos) < a.radius + b.radius;
-            };
-            CircularCollisionDetector.prototype.getCollisionEnabledEntities = function (entities) {
-                return entities.filter(function (e) { return e.isCollisionDetectionEnabled; });
-            };
-            return CircularCollisionDetector;
-        }());
-        collision.CircularCollisionDetector = CircularCollisionDetector;
-    })(collision = ps.collision || (ps.collision = {}));
-})(ps || (ps = {}));
-/// <reference path="collision.ts" />
-/// <reference path="collision.ts" />
-/// <reference path="collisionresolver.ts" />
-var ps;
-(function (ps) {
-    var collision;
-    (function (collision_1) {
-        var DeferToEntityCollisionResolver = (function () {
-            function DeferToEntityCollisionResolver() {
+            for (var _a = 0, actors_1 = actors; _a < actors_1.length; _a++) {
+                var actor = actors_1[_a];
+                actor.game = this.game;
+                this.actors.push(actor);
             }
-            DeferToEntityCollisionResolver.prototype.resolve = function (collisions) {
-                for (var _i = 0, collisions_1 = collisions; _i < collisions_1.length; _i++) {
-                    var collision_2 = collisions_1[_i];
-                    this.resolveSingleCollision(collision_2);
-                }
-            };
-            DeferToEntityCollisionResolver.prototype.resolveSingleCollision = function (collision) {
-                var entities = collision.entities;
-                for (var i = 0; i < entities.length - 1; i++) {
-                    for (var j = i + 1; j < entities.length; j++) {
-                        entities[i].collideWith(entities[j]);
-                        entities[j].collideWith(entities[i]);
-                    }
-                }
-            };
-            return DeferToEntityCollisionResolver;
-        }());
-        collision_1.DeferToEntityCollisionResolver = DeferToEntityCollisionResolver;
-    })(collision = ps.collision || (ps.collision = {}));
+        };
+        DefaultScene.prototype.getActors = function () {
+            return this.actors;
+        };
+        DefaultScene.prototype.garbageCollect = function () {
+            this.actors = this.actors.filter(function (a) { return !a.destroyed; });
+        };
+        DefaultScene.prototype.getSize = function () {
+            return this.size;
+        };
+        return DefaultScene;
+    }());
+    ps.DefaultScene = DefaultScene;
 })(ps || (ps = {}));
 var ps;
 (function (ps) {
@@ -247,63 +188,6 @@ var ps;
         return Point;
     }());
     ps.Point = Point;
-})(ps || (ps = {}));
-/// <reference path="../point.ts" />
-var ps;
-(function (ps) {
-    var input;
-    (function (input) {
-        var Keyboard = (function () {
-            function Keyboard(document, window) {
-                var _this = this;
-                this.pressedKeys = {};
-                this.document = document;
-                this.keyDownDelegate = (function (e) { return _this.setKey(e, true); }).bind(this);
-                this.keyUpDelegate = (function (e) { return _this.setKey(e, false); }).bind(this);
-                this.blurDelegate = (function (e) { return _this.pressedKeys = {}; }).bind(this);
-            }
-            Keyboard.prototype.enable = function () {
-                document.addEventListener("keydown", this.keyDownDelegate);
-                document.addEventListener("keyup", this.keyUpDelegate);
-                window.addEventListener("blur", this.keyUpDelegate);
-            };
-            Keyboard.prototype.disable = function () {
-                document.removeEventListener("keydown", this.keyDownDelegate);
-                document.removeEventListener("keyup", this.keyUpDelegate);
-                window.removeEventListener("blur", this.keyUpDelegate);
-            };
-            Keyboard.prototype.isKeyDown = function (key) {
-                return this.pressedKeys[key.toUpperCase()];
-            };
-            Keyboard.prototype.setKey = function (event, status) {
-                var code = event.keyCode;
-                var key;
-                switch (code) {
-                    case 32:
-                        key = "SPACE";
-                        break;
-                    case 37:
-                        key = "LEFT";
-                        break;
-                    case 38:
-                        key = "UP";
-                        break;
-                    case 39:
-                        key = "RIGHT";
-                        break;
-                    case 40:
-                        key = "DOWN";
-                        break;
-                    default:
-                        // Convert ASCII codes to letters
-                        key = String.fromCharCode(code);
-                }
-                this.pressedKeys[key] = status;
-            };
-            return Keyboard;
-        }());
-        input.Keyboard = Keyboard;
-    })(input = ps.input || (ps.input = {}));
 })(ps || (ps = {}));
 /// <reference path="../point.ts" />
 var ps;
@@ -410,6 +294,217 @@ var ps;
         input.Mouse = Mouse;
     })(input = ps.input || (ps.input = {}));
 })(ps || (ps = {}));
+/// <reference path="../point.ts" />
+var ps;
+(function (ps) {
+    var input;
+    (function (input) {
+        var Keyboard = (function () {
+            function Keyboard(document, window) {
+                var _this = this;
+                this.pressedKeys = {};
+                this.document = document;
+                this.keyDownDelegate = (function (e) { return _this.setKey(e, true); }).bind(this);
+                this.keyUpDelegate = (function (e) { return _this.setKey(e, false); }).bind(this);
+                this.blurDelegate = (function (e) { return _this.pressedKeys = {}; }).bind(this);
+            }
+            Keyboard.prototype.enable = function () {
+                document.addEventListener("keydown", this.keyDownDelegate);
+                document.addEventListener("keyup", this.keyUpDelegate);
+                window.addEventListener("blur", this.keyUpDelegate);
+            };
+            Keyboard.prototype.disable = function () {
+                document.removeEventListener("keydown", this.keyDownDelegate);
+                document.removeEventListener("keyup", this.keyUpDelegate);
+                window.removeEventListener("blur", this.keyUpDelegate);
+            };
+            Keyboard.prototype.isKeyDown = function (key) {
+                return this.pressedKeys[key.toUpperCase()];
+            };
+            Keyboard.prototype.setKey = function (event, status) {
+                var code = event.keyCode;
+                var key;
+                switch (code) {
+                    case 32:
+                        key = "SPACE";
+                        break;
+                    case 37:
+                        key = "LEFT";
+                        break;
+                    case 38:
+                        key = "UP";
+                        break;
+                    case 39:
+                        key = "RIGHT";
+                        break;
+                    case 40:
+                        key = "DOWN";
+                        break;
+                    default:
+                        // Convert ASCII codes to letters
+                        key = String.fromCharCode(code);
+                }
+                this.pressedKeys[key] = status;
+            };
+            return Keyboard;
+        }());
+        input.Keyboard = Keyboard;
+    })(input = ps.input || (ps.input = {}));
+})(ps || (ps = {}));
+/// <reference path="browseranimationframeprovider.ts" />
+/// <reference path="defaultscene.ts" />
+/// <reference path="input/mouse.ts" />
+/// <reference path="input/keyboard.ts" />
+var ps;
+(function (ps) {
+    var Game = (function () {
+        function Game(canvas, scene) {
+            if (canvas === void 0) { canvas = null; }
+            if (scene === void 0) { scene = null; }
+            this.scene = scene;
+            this.resourceManager = new ps.ResourceManager();
+            this.resources = [];
+            this.canvas = canvas || this.createCanvas();
+            this.resolution = new ps.Vector(this.canvas.width, this.canvas.height);
+            this.scene = scene || new ps.DefaultScene(this, this.resolution);
+            this.mouse = new ps.input.Mouse(this.canvas, new ps.DefaultCoordConverter(this.resolution));
+            this.mouse.enable();
+            this.keyboard = new ps.input.Keyboard(document, window);
+            this.keyboard.enable();
+        }
+        Game.prototype.start = function () {
+            var _this = this;
+            this.engine = this.createEngine();
+            if (this.resources.length > 0) {
+                this.resourceManager.onReady(function () { _this.engine.start(); });
+                this.resourceManager.preload(this.resources);
+            }
+            else {
+                this.engine.start();
+            }
+        };
+        Game.prototype.loadResources = function () {
+            var resources = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                resources[_i - 0] = arguments[_i];
+            }
+            this.resources = this.resources.concat(resources);
+        };
+        Game.prototype.setResolution = function (resolution) {
+            this.resolution = resolution;
+            this.mouse.coordConverter.setResolution(resolution);
+            this.engine.camera.coordConverter.setResolution(resolution);
+        };
+        Game.prototype.createEngine = function () {
+            var animator = new ps.BrowserAnimationFrameProvider();
+            var camera = new ps.Camera(this.canvas, this.resourceManager, new ps.DefaultCoordConverter(this.resolution), this.scene.getSize());
+            return new ps.Engine(animator, camera, this.scene);
+        };
+        Game.prototype.createCanvas = function () {
+            var canvas = document.createElement("canvas");
+            var resolution = this.getMaxCanvasSize(window.innerWidth, window.innerHeight, this.getAspectRatio());
+            canvas.width = resolution.x;
+            canvas.height = resolution.y;
+            document.body.appendChild(canvas);
+            document.body.style.margin = "0";
+            return canvas;
+        };
+        Game.prototype.getAspectRatio = function () {
+            return screen.width / screen.height;
+        };
+        Game.prototype.getMaxCanvasSize = function (windowWidth, windowHeight, aspectRatio) {
+            var desiredHeight = windowWidth / aspectRatio;
+            var canvasHeight = Math.min(desiredHeight, windowHeight);
+            var canvasWidth = canvasHeight * aspectRatio;
+            return new ps.Vector(canvasWidth, canvasHeight);
+        };
+        return Game;
+    }());
+    ps.Game = Game;
+})(ps || (ps = {}));
+/// <reference path="runnable.ts" />
+/// <reference path="../actor.ts" />
+var ps;
+(function (ps) {
+    var collision;
+    (function (collision) {
+        var Collision = (function () {
+            function Collision() {
+                var entities = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    entities[_i - 0] = arguments[_i];
+                }
+                this.entities = entities;
+            }
+            return Collision;
+        }());
+        collision.Collision = Collision;
+    })(collision = ps.collision || (ps.collision = {}));
+})(ps || (ps = {}));
+/// <reference path="../actor.ts" />
+/// <reference path="collision.ts" />
+/// <reference path="collisiondetector.ts" />
+/// <reference path="collision.ts" />
+var ps;
+(function (ps) {
+    var collision;
+    (function (collision) {
+        var CircularCollisionDetector = (function () {
+            function CircularCollisionDetector() {
+            }
+            CircularCollisionDetector.prototype.findCollisions = function (entities) {
+                var collidables = this.getCollisionEnabledEntities(entities);
+                var collisions = [];
+                for (var i = 0; i < collidables.length - 1; i++) {
+                    for (var j = i + 1; j < collidables.length; j++) {
+                        if (this.collides(collidables[i], collidables[j])) {
+                            collisions.push(new collision.Collision(collidables[i], collidables[j]));
+                        }
+                    }
+                }
+                return collisions;
+            };
+            CircularCollisionDetector.prototype.collides = function (a, b) {
+                return a.pos.distanceTo(b.pos) < a.radius + b.radius;
+            };
+            CircularCollisionDetector.prototype.getCollisionEnabledEntities = function (entities) {
+                return entities.filter(function (e) { return e.isCollisionDetectionEnabled; });
+            };
+            return CircularCollisionDetector;
+        }());
+        collision.CircularCollisionDetector = CircularCollisionDetector;
+    })(collision = ps.collision || (ps.collision = {}));
+})(ps || (ps = {}));
+/// <reference path="collision.ts" />
+/// <reference path="collision.ts" />
+/// <reference path="collisionresolver.ts" />
+var ps;
+(function (ps) {
+    var collision;
+    (function (collision_1) {
+        var DeferToActorCollisionResolver = (function () {
+            function DeferToActorCollisionResolver() {
+            }
+            DeferToActorCollisionResolver.prototype.resolve = function (collisions) {
+                for (var _i = 0, collisions_1 = collisions; _i < collisions_1.length; _i++) {
+                    var collision_2 = collisions_1[_i];
+                    this.resolveSingleCollision(collision_2);
+                }
+            };
+            DeferToActorCollisionResolver.prototype.resolveSingleCollision = function (collision) {
+                var entities = collision.entities;
+                for (var i = 0; i < entities.length - 1; i++) {
+                    for (var j = i + 1; j < entities.length; j++) {
+                        entities[i].collideWith(entities[j]);
+                        entities[j].collideWith(entities[i]);
+                    }
+                }
+            };
+            return DeferToActorCollisionResolver;
+        }());
+        collision_1.DeferToActorCollisionResolver = DeferToActorCollisionResolver;
+    })(collision = ps.collision || (ps.collision = {}));
+})(ps || (ps = {}));
 var ps;
 (function (ps) {
     var DateNowStopwatch = (function () {
@@ -425,42 +520,6 @@ var ps;
         return DateNowStopwatch;
     }());
     ps.DateNowStopwatch = DateNowStopwatch;
-})(ps || (ps = {}));
-var ps;
-(function (ps) {
-    var Vector = (function () {
-        function Vector(x, y) {
-            this.x = x;
-            this.y = y;
-        }
-        Vector.prototype.add = function (v) {
-            return new Vector(this.x + v.x, this.y + v.y);
-        };
-        Vector.prototype.subtract = function (v) {
-            return new Vector(this.x - v.x, this.y - v.y);
-        };
-        Vector.prototype.multiply = function (scalar) {
-            return new Vector(this.x * scalar, this.y * scalar);
-        };
-        Vector.prototype.magnitude = function () {
-            return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
-        };
-        Vector.prototype.unit = function () {
-            return this.multiply(1 / this.magnitude());
-        };
-        Vector.prototype.tangent = function () {
-            //avoid negative zero complications
-            return new Vector(this.y === 0 ? 0 : this.y * -1, this.x);
-        };
-        Vector.prototype.dot = function (v) {
-            return this.x * v.x + this.y * v.y;
-        };
-        Vector.prototype.toPoint = function () {
-            return new ps.Point(this.x, this.y);
-        };
-        return Vector;
-    }());
-    ps.Vector = Vector;
 })(ps || (ps = {}));
 /// <reference path="vector.ts" />
 /// <reference path="point.ts" />
@@ -562,10 +621,10 @@ var ps;
             //assume camera shows entire scene and camera aspect ratio === scene aspect ratio
             return n * this.canvas.width / this.sceneSize.x;
         };
-        Camera.prototype.render = function (entities) {
+        Camera.prototype.render = function (scene) {
             this.clear();
-            for (var _i = 0, entities_1 = entities; _i < entities_1.length; _i++) {
-                var entity = entities_1[_i];
+            for (var _i = 0, _a = scene.getActors(); _i < _a.length; _i++) {
+                var entity = _a[_i];
                 entity.render(this);
             }
         };
@@ -595,64 +654,33 @@ var ps;
 /// <reference path="animationframeprovider.ts" />
 /// <reference path="collision/collisiondetector.ts" />
 /// <reference path="collision/circularcollisiondetector.ts" />
-/// <reference path="collision/defertoentitycollisionresolver.ts" />
-/// <reference path="input/keyboard.ts" />
-/// <reference path="input/mouse.ts" />
+/// <reference path="collision/defertoactorcollisionresolver.ts" />
 /// <reference path="stopwatch.ts" />
 /// <reference path="camera.ts" />
 var ps;
 (function (ps) {
     var c = ps.collision;
     var Engine = (function () {
-        function Engine(res, canvas, mouse, keyboard, animator, camera) {
-            this.res = res;
-            this.canvas = canvas;
-            this.mouse = mouse;
-            this.keyboard = keyboard;
+        function Engine(animator, camera, scene) {
             this.animator = animator;
             this.camera = camera;
-            this.debug = false;
-            this.backgroundFillStyle = "black";
-            this.collisionDetector = new ps.collision.CircularCollisionDetector();
-            this.collisionResolver = new ps.collision.DeferToEntityCollisionResolver();
+            this.scene = scene;
+            this.collisionDetector = new c.CircularCollisionDetector();
+            this.collisionResolver = new c.DeferToActorCollisionResolver();
             this.stopwatch = new ps.DateNowStopwatch();
-            this.entities = [];
-            this.isFullScreen = false;
-            if (this.mouse) {
-                this.mouse.enable();
-            }
-            if (this.keyboard) {
-                this.keyboard.enable();
-            }
         }
-        Engine.prototype.setResolution = function (res) {
-            this.res = res;
-            this.mouse.coordConverter.setResolution(res);
-            this.camera.coordConverter.setResolution(res);
-        };
-        Engine.prototype.registerEntity = function () {
-            var entities = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                entities[_i - 0] = arguments[_i];
-            }
-            for (var _a = 0, entities_2 = entities; _a < entities_2.length; _a++) {
-                var entity = entities_2[_a];
-                entity.engine = this;
-                this.entities.push(entity);
-            }
-        };
         //the main loop of the piston engine
         Engine.prototype.run = function () {
             //measure time taken since last frame was processed
             var dt = this.stopwatch.stop();
             //remove all destroyed entities
-            this.garbageCollect();
+            this.scene.garbageCollect();
             //update entities
-            this.update(dt, this.entities);
+            this.scene.update(dt);
             //detect and resolve any collisions between entities
-            this.checkCollisions(this.entities);
+            this.checkCollisions(this.scene.getActors());
             //render the frame
-            this.camera.render(this.entities);
+            this.camera.render(this.scene);
             //start measuring time since this frame finished
             this.stopwatch.start();
             //request next animation frame
@@ -664,15 +692,6 @@ var ps;
         Engine.prototype.checkCollisions = function (entities) {
             var collisions = this.collisionDetector.findCollisions(entities);
             this.collisionResolver.resolve(collisions);
-        };
-        Engine.prototype.update = function (dt, entities) {
-            for (var _i = 0, entities_3 = entities; _i < entities_3.length; _i++) {
-                var entity = entities_3[_i];
-                entity.update(dt, this.res);
-            }
-        };
-        Engine.prototype.garbageCollect = function () {
-            this.entities = this.entities.filter(function (e) { return !e.destroyed; });
         };
         return Engine;
     }());
@@ -767,34 +786,35 @@ var ps;
     }());
     ps.Sprite = Sprite;
 })(ps || (ps = {}));
-/// <reference path="entity.ts" />
+/// <reference path="actor.ts" />
 /// <reference path="sprite.ts" />
+/// <reference path="scene.ts" />
 var ps;
 (function (ps) {
-    var EntityWithSprites = (function (_super) {
-        __extends(EntityWithSprites, _super);
-        function EntityWithSprites() {
+    var ActorWithSprites = (function (_super) {
+        __extends(ActorWithSprites, _super);
+        function ActorWithSprites() {
             _super.apply(this, arguments);
             this.sprites = [];
         }
-        EntityWithSprites.prototype.update = function (dt, resolution) {
-            _super.prototype.update.call(this, dt, resolution);
+        ActorWithSprites.prototype.update = function (dt, scene) {
+            _super.prototype.update.call(this, dt, scene);
             for (var _i = 0, _a = this.sprites; _i < _a.length; _i++) {
                 var sprite = _a[_i];
                 sprite.update(dt);
             }
         };
-        return EntityWithSprites;
-    }(ps.Entity));
-    ps.EntityWithSprites = EntityWithSprites;
+        return ActorWithSprites;
+    }(ps.Actor));
+    ps.ActorWithSprites = ActorWithSprites;
 })(ps || (ps = {}));
 /// <reference path="game.ts" />
 /// <reference path="engine.ts" />
-/// <reference path="entitywithsprites.ts" />
+/// <reference path="actorwithsprites.ts" />
 /// <reference path="sprite.ts" />
 /// <reference path="collision/collisiondetector.ts" />
 /// <reference path="collision/collisionresolver.ts" />
-/// <reference path="collision/defertoentitycollisionresolver.ts" />
+/// <reference path="collision/defertoactorcollisionresolver.ts" />
 /// <reference path="vector.ts" />
 /// <reference path="point.ts" /> 
 //# sourceMappingURL=piston-0.4.0.js.map

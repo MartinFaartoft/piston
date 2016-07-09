@@ -4,7 +4,7 @@
 
 namespace ps.collision {
     export class CircularCollisionDetector implements CollisionDetector {
-        findCollisions(entities: Entity[]): Collision[] {
+        findCollisions(entities: Actor[]): Collision[] {
             let collidables = this.getCollisionEnabledEntities(entities);
 
             let collisions: Collision[] = [];
@@ -19,11 +19,11 @@ namespace ps.collision {
             return collisions;
         }
         
-        collides(a: Entity, b: Entity) {
+        collides(a: Actor, b: Actor) {
             return a.pos.distanceTo(b.pos) < a.radius + b.radius;
         }
 
-        private getCollisionEnabledEntities(entities: Entity[]): Entity[] {
+        private getCollisionEnabledEntities(entities: Actor[]): Actor[] {
             return entities.filter(e => e.isCollisionDetectionEnabled);
         }
     }

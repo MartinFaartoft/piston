@@ -90,10 +90,10 @@ namespace ps {
             return n * this.canvas.width / this.sceneSize.x; 
         }
 
-        render(entities: Entity[]): void {
+        render(scene: Scene): void {
             this.clear();
 
-            for (let entity of entities) {
+            for (let entity of scene.getActors()) {
                 entity.render(this);
             }            
         }

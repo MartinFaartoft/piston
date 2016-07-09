@@ -12,20 +12,20 @@ namespace SampleGame {
     let box = new Box();
     
     game.loadResources("assets/ball.png");
-    game.engine.mouse.setCustomCursor("assets/crosshairs.png", new ps.Point(10, 10));
-    game.engine.registerEntity(box, new SpriteBall(), b1, b2, new MouseBall());
+    game.mouse.setCustomCursor("assets/crosshairs.png", new ps.Point(10, 10));
+    game.scene.addActors(box, new SpriteBall(), b1, b2, new MouseBall());
 
-    game.engine.mouse.addMouseMoveEventListener((pos) =>  {
+    game.mouse.addMouseMoveEventListener((pos) =>  {
         box.pos = pos;
     });
 
-    game.engine.mouse.addMouseDownEventListener((pos, button) =>  {
+    game.mouse.addMouseDownEventListener((pos, button) =>  {
         if (button === 0) {
             box.color = "green";
         }
     });
 
-    game.engine.mouse.addMouseUpEventListener((pos, button) =>  {
+    game.mouse.addMouseUpEventListener((pos, button) =>  {
         if (button === 0) {
             box.color = "blue";
         }

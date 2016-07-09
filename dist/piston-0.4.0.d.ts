@@ -10,26 +10,31 @@ declare namespace ps {
     }
 }
 declare namespace ps {
-    class Game {
-        engine: Engine;
-        private canvas;
-        private resourceManager;
-        private resources;
-        constructor(canvas?: HTMLCanvasElement);
-        start(): void;
-        loadResources(...resources: string[]): void;
-        private createCanvas();
-        private getAspectRatio();
-        private getMaxCanvasSize(windowWidth, windowHeight, aspectRatio);
+    class Vector {
+        x: number;
+        y: number;
+        constructor(x: number, y: number);
+        add(v: Vector): Vector;
+        subtract(v: Vector): Vector;
+        multiply(scalar: number): Vector;
+        magnitude(): number;
+        unit(): Vector;
+        tangent(): Vector;
+        dot(v: Vector): number;
+        toPoint(): Point;
     }
 }
 declare namespace ps {
-    interface AnimationFrameProvider {
-        animate(runnable: Runnable): void;
+    interface Scene {
+        update(dt: number): void;
+        getActors(): Actor[];
+        garbageCollect(): void;
+        getSize(): Vector;
+        addActors(...actors: Actor[]): void;
     }
 }
 declare namespace ps {
-    abstract class Entity {
+    abstract class Actor {
         pos: Point;
         vel: Vector;
         acc: Vector;
@@ -41,43 +46,26 @@ declare namespace ps {
         mass: number;
         destroyed: boolean;
         isWrapping: boolean;
-        engine: Engine;
+        game: Game;
         radius: number;
         constructor(pos: Point);
-        update(dt: number, resolution: Vector): void;
-        private wrap(resolution);
-        collideWith(other: Entity): void;
+        update(dt: number, scene: Scene): void;
+        private wrap(sceneSize);
+        collideWith(other: Actor): void;
         abstract render(camera: Camera): void;
     }
 }
-declare namespace ps.collision {
-    class Collision {
-        entities: Entity[];
-        constructor(...entities: Entity[]);
-    }
-}
-declare namespace ps.collision {
-    interface CollisionDetector {
-        findCollisions(entities: Entity[]): Collision[];
-        collides(a: Entity, b: Entity): any;
-    }
-}
-declare namespace ps.collision {
-    class CircularCollisionDetector implements CollisionDetector {
-        findCollisions(entities: Entity[]): Collision[];
-        collides(a: Entity, b: Entity): boolean;
-        private getCollisionEnabledEntities(entities);
-    }
-}
-declare namespace ps.collision {
-    interface CollisionResolver {
-        resolve(collisions: Collision[]): void;
-    }
-}
-declare namespace ps.collision {
-    class DeferToEntityCollisionResolver implements CollisionResolver {
-        resolve(collisions: Collision[]): void;
-        private resolveSingleCollision(collision);
+declare namespace ps {
+    class DefaultScene implements Scene {
+        game: Game;
+        size: Vector;
+        private actors;
+        constructor(game: Game, size: Vector);
+        update(dt: number): void;
+        addActors(...actors: Actor[]): void;
+        getActors(): Actor[];
+        garbageCollect(): void;
+        getSize(): Vector;
     }
 }
 declare namespace ps {
@@ -90,20 +78,6 @@ declare namespace ps {
         distanceTo(p: Point): number;
         vectorTo(p: Point): Vector;
         toVector(): Vector;
-    }
-}
-declare namespace ps.input {
-    class Keyboard {
-        private pressedKeys;
-        private document;
-        private keyDownDelegate;
-        private keyUpDelegate;
-        private blurDelegate;
-        constructor(document: Document, window: Window);
-        enable(): void;
-        disable(): void;
-        isKeyDown(key: string): boolean;
-        private setKey(event, status);
     }
 }
 declare namespace ps.input {
@@ -133,6 +107,75 @@ declare namespace ps.input {
         private findPos(obj);
     }
 }
+declare namespace ps.input {
+    class Keyboard {
+        private pressedKeys;
+        private document;
+        private keyDownDelegate;
+        private keyUpDelegate;
+        private blurDelegate;
+        constructor(document: Document, window: Window);
+        enable(): void;
+        disable(): void;
+        isKeyDown(key: string): boolean;
+        private setKey(event, status);
+    }
+}
+declare namespace ps {
+    class Game {
+        scene: Scene;
+        engine: Engine;
+        mouse: input.Mouse;
+        keyboard: input.Keyboard;
+        private canvas;
+        private resolution;
+        private resourceManager;
+        private resources;
+        constructor(canvas?: HTMLCanvasElement, scene?: Scene);
+        start(): void;
+        loadResources(...resources: string[]): void;
+        setResolution(resolution: Vector): void;
+        private createEngine();
+        private createCanvas();
+        private getAspectRatio();
+        private getMaxCanvasSize(windowWidth, windowHeight, aspectRatio);
+    }
+}
+declare namespace ps {
+    interface AnimationFrameProvider {
+        animate(runnable: Runnable): void;
+    }
+}
+declare namespace ps.collision {
+    class Collision {
+        entities: Actor[];
+        constructor(...entities: Actor[]);
+    }
+}
+declare namespace ps.collision {
+    interface CollisionDetector {
+        findCollisions(entities: Actor[]): Collision[];
+        collides(a: Actor, b: Actor): any;
+    }
+}
+declare namespace ps.collision {
+    class CircularCollisionDetector implements CollisionDetector {
+        findCollisions(entities: Actor[]): Collision[];
+        collides(a: Actor, b: Actor): boolean;
+        private getCollisionEnabledEntities(entities);
+    }
+}
+declare namespace ps.collision {
+    interface CollisionResolver {
+        resolve(collisions: Collision[]): void;
+    }
+}
+declare namespace ps.collision {
+    class DeferToActorCollisionResolver implements CollisionResolver {
+        resolve(collisions: Collision[]): void;
+        private resolveSingleCollision(collision);
+    }
+}
 declare namespace ps {
     interface Stopwatch {
         start(): void;
@@ -143,21 +186,6 @@ declare namespace ps {
         constructor();
         start(): void;
         stop(): number;
-    }
-}
-declare namespace ps {
-    class Vector {
-        x: number;
-        y: number;
-        constructor(x: number, y: number);
-        add(v: Vector): Vector;
-        subtract(v: Vector): Vector;
-        multiply(scalar: number): Vector;
-        magnitude(): number;
-        unit(): Vector;
-        tangent(): Vector;
-        dot(v: Vector): number;
-        toPoint(): Point;
     }
 }
 declare namespace ps {
@@ -191,7 +219,7 @@ declare namespace ps {
         paintSprites(pos: Point, rotation: number, size: number[], sprites: Sprite[]): void;
         private paintSpriteInternal(sprite, pos, size, rotation);
         scale(n: number): number;
-        render(entities: Entity[]): void;
+        render(scene: Scene): void;
         toggleFullScreen(): void;
         private clear();
         private paintWhileRotated(center, rotation, paintDelegate);
@@ -199,27 +227,16 @@ declare namespace ps {
 }
 declare namespace ps {
     class Engine implements Runnable {
-        res: Vector;
-        canvas: HTMLCanvasElement;
-        mouse: input.Mouse;
-        keyboard: input.Keyboard;
         animator: AnimationFrameProvider;
         camera: Camera;
-        debug: boolean;
-        backgroundFillStyle: string;
+        scene: Scene;
         collisionDetector: collision.CollisionDetector;
         collisionResolver: collision.CollisionResolver;
         stopwatch: Stopwatch;
-        entities: Entity[];
-        protected isFullScreen: boolean;
-        constructor(res: Vector, canvas: HTMLCanvasElement, mouse: input.Mouse, keyboard: input.Keyboard, animator: AnimationFrameProvider, camera: Camera);
-        setResolution(res: Vector): void;
-        registerEntity(...entities: Entity[]): void;
+        constructor(animator: AnimationFrameProvider, camera: Camera, scene: Scene);
         run(): void;
         start(): void;
         private checkCollisions(entities);
-        private update(dt, entities);
-        private garbageCollect();
     }
 }
 declare namespace ps {
@@ -248,8 +265,8 @@ declare namespace ps {
     }
 }
 declare namespace ps {
-    abstract class EntityWithSprites extends Entity {
+    abstract class ActorWithSprites extends Actor {
         sprites: Sprite[];
-        update(dt: number, resolution: Vector): void;
+        update(dt: number, scene: Scene): void;
     }
 }

@@ -5,7 +5,7 @@ namespace CollisionDetectorTest {
     let Point = ps.Point;
     let Vector = ps.Vector;
 
-    class Ball extends ps.Entity {
+    class Ball extends ps.Actor {
         constructor(pos: ps.Point, radius: number) {
             super(pos);
             this.radius = radius;

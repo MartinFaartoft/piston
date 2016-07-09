@@ -1,7 +1,7 @@
 /// <reference path="../../dist/piston-0.4.0.d.ts" />
 
 namespace SampleGame {
-    export class SpriteBall extends ps.EntityWithSprites {
+    export class SpriteBall extends ps.ActorWithSprites {
         initialPos: ps.Point;
         constructor() {
             super(new ps.Point(100, 100));
@@ -14,9 +14,9 @@ namespace SampleGame {
             this.sprites.push(ballSprite);
         }
 
-        update(dt: number, resolution: ps.Vector) {
-            super.update(dt, resolution);
-            if (this.engine.keyboard.isKeyDown("space")) {
+        update(dt: number, scene: ps.Scene) {
+            super.update(dt, scene);
+            if (this.game.keyboard.isKeyDown("space")) {
                 this.pos.x += 20;
             }
         }

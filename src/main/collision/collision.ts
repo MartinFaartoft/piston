@@ -1,9 +1,9 @@
-/// <reference path="../entity.ts" />
+/// <reference path="../actor.ts" />
 
 namespace ps.collision {
     export class Collision {
-        entities: Entity[];
-        constructor(...entities: Entity[]) {
+        entities: Actor[];
+        constructor(...entities: Actor[]) {
             this.entities = entities;
         }
     }

@@ -1,7 +1,7 @@
 /// <reference path="../../dist/piston-0.4.0.d.ts" />
 
 namespace SampleGame {
-    export class MouseBall extends ps.Entity {
+    export class MouseBall extends ps.Actor {
         color: string = "yellow";
         constructor() {
             super(new ps.Point(0, 0));
@@ -10,13 +10,13 @@ namespace SampleGame {
             this.isCollisionDetectionEnabled = true;
         }
 
-        update(dt: number, resolution: ps.Vector) {
-        this.pos = this.engine.mouse.pos;
-        if (this.engine.mouse.isLeftButtonDown) {
+        update(dt: number, scene: ps.Scene) {
+        this.pos = this.game.mouse.pos;
+        if (this.game.mouse.isLeftButtonDown) {
             this.color = "green";
-        } else if (this.engine.mouse.isRightButtonDown) {
+        } else if (this.game.mouse.isRightButtonDown) {
             this.color = "red";
-        } else if (this.engine.mouse.isMiddleButtonDown) {
+        } else if (this.game.mouse.isMiddleButtonDown) {
             this.color = "blue";
         } else {
             this.color = "yellow";
@@ -29,7 +29,7 @@ namespace SampleGame {
             camera.fillArc(this.pos, this.rotation, this.radius, 0, Math.PI * 1.2, false, this.color);
         }
 
-        collideWith(other: ps.Entity) {
+        collideWith(other: ps.Actor) {
             this.destroyed = true;
         }
     }
