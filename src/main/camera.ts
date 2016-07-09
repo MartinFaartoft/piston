@@ -11,6 +11,7 @@ namespace ps {
 
         constructor(canvas: HTMLCanvasElement, public coordConverter: CoordConverter, public sceneSize: Vector) {
             this.canvas = canvas;
+            this.ctx = canvas.getContext("2d");
          }
 
         fillCircle(pos: Point, radius: number, color: string): void {
@@ -83,7 +84,6 @@ namespace ps {
         }
 
         render(entities: Entity[]): void {
-            this.ctx = this.canvas.getContext("2d");
             this.clear();
 
             for (let entity of entities) {

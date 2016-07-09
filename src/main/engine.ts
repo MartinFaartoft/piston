@@ -32,7 +32,7 @@ namespace ps {
         private resourceManager: ResourceManager = new ResourceManager();
         private resources: string[] = [];
 
-        constructor(public dims: Vector,
+        constructor(public res: Vector,
                     public canvas: HTMLCanvasElement,
                     public mouse: input.Mouse,
                     public keyboard: input.Keyboard,
@@ -50,10 +50,10 @@ namespace ps {
             }
         }
 
-        setDimensions(dims: Vector): void {
-            this.dims = dims;
-            this.mouse.coordConverter.setResolution(dims);
-            this.camera.coordConverter.setResolution(dims);
+        setResolution(res: Vector): void { //todo make internal to camera within resize logic
+            this.res = res;
+            this.mouse.coordConverter.setResolution(res);
+            this.camera.coordConverter.setResolution(res);
         }
 
         registerEntity(...entities: Entity[]): void {
@@ -108,16 +108,12 @@ namespace ps {
 
         private update(dt: number, entities: Entity[]): void {
             for (let entity of entities) {
-                entity.update(dt, this.dims);
+                entity.update(dt, this.res);
             }
         }
 
         private garbageCollect() {
             this.entities = this.entities.filter(e => !e.destroyed);
-        }
-
-        toggleFullScreen(): void {
-            //no implementation
         }
     }
 
@@ -125,13 +121,15 @@ namespace ps {
      * Default engine for running in-browser
      */
     export class Engine extends HeadlessEngine {
-        constructor(dims: Vector, sceneSize: Vector,  canvas: HTMLCanvasElement) {
-            super(dims, 
+        constructor(resolution: Vector, 
+                    sceneSize: Vector,  
+                    canvas: HTMLCanvasElement) {
+            super(resolution, 
                   canvas, 
-                  new input.Mouse(canvas, new DefaultCoordConverter(dims)), 
+                  new input.Mouse(canvas, new DefaultCoordConverter(resolution)), 
                   new input.Keyboard(document, window), 
                   new BrowserAnimationFrameProvider(),
-                  new Camera(canvas, new DefaultCoordConverter(dims), sceneSize));
+                  new Camera(canvas, new DefaultCoordConverter(resolution), sceneSize));
         }
     }
 }

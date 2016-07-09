@@ -11,18 +11,18 @@ namespace ps {
     //assume game coords lie in the first quadrant, with (0, 0) being the lower left corner
     export class DefaultCoordConverter implements CoordConverter {
 
-        constructor(public dims: Vector) {}
+        constructor(public resolution: Vector) {}
 
         toCameraCoords(p: Point): Point {
-            return new Point(p.x, this.dims.y - p.y);  
+            return new Point(p.x, this.resolution.y - p.y);  
         }
 
         toGameCoords(p: Point): Point {
-            return new Point(p.x, this.dims.y - p.y);
+            return new Point(p.x, this.resolution.y - p.y);
         }
 
-        setResolution(dims: Vector) {
-            this.dims = dims;
+        setResolution(resolution: Vector) {
+            this.resolution = resolution;
         }
     }
 }

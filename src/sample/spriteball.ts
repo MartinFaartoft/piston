@@ -14,8 +14,8 @@ namespace SampleGame {
             this.sprites.push(ballSprite);
         }
 
-        update(dt: number, dims: ps.Vector) {
-            super.update(dt, dims);
+        update(dt: number, resolution: ps.Vector) {
+            super.update(dt, resolution);
             if (this.engine.keyboard.isKeyDown("space")) {
                 this.pos.x += 20;
             }

@@ -20,7 +20,7 @@ namespace ps {
         
         constructor(public pos: Point) {}
 
-        update(dt: number, dims: Vector): void {
+        update(dt: number, resolution: Vector): void {
             if (this.isAccelerationEnabled) {
                 this.vel = this.vel.add(this.acc.multiply(dt));
             }
@@ -32,29 +32,29 @@ namespace ps {
             this.pos = this.pos.add(this.vel.multiply(dt));
             
             if (this.isWrapping) {
-                this.wrap(dims);
+                this.wrap(resolution);
             }
         }
 
-        private wrap(dimensions: Vector): void {
+        private wrap(resolution: Vector): void {
             // exit right edge
-            if (this.pos.x > dimensions.x) {
-                this.pos.x -= dimensions.x;
+            if (this.pos.x > resolution.x) {
+                this.pos.x -= resolution.x;
             }
 
             // exit left edge
             if (this.pos.x < 0) {
-                this.pos.x += dimensions.x;
+                this.pos.x += resolution.x;
             }
 
             // exit top
             if (this.pos.y < 0) {
-                this.pos.y += dimensions.y;
+                this.pos.y += resolution.y;
             }
 
             // exit bottom
-            if (this.pos.y > dimensions.y) {
-                this.pos.y -= dimensions.y;
+            if (this.pos.y > resolution.y) {
+                this.pos.y -= resolution.y;
             }
         }
 

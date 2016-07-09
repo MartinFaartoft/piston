@@ -30,8 +30,8 @@ declare namespace ps {
         engine: Engine;
         radius: number;
         constructor(pos: Point);
-        update(dt: number, dims: Vector): void;
-        private wrap(dimensions);
+        update(dt: number, resolution: Vector): void;
+        private wrap(resolution);
         collideWith(other: Entity): void;
         abstract render(camera: Camera): void;
     }
@@ -153,11 +153,11 @@ declare namespace ps {
         setResolution(res: Vector): void;
     }
     class DefaultCoordConverter implements CoordConverter {
-        dims: Vector;
-        constructor(dims: Vector);
+        resolution: Vector;
+        constructor(resolution: Vector);
         toCameraCoords(p: Point): Point;
         toGameCoords(p: Point): Point;
-        setResolution(dims: Vector): void;
+        setResolution(resolution: Vector): void;
     }
 }
 declare namespace ps {
@@ -200,7 +200,7 @@ declare namespace ps {
         setEngine(engine: Engine): void;
     }
     class HeadlessEngine implements Runnable {
-        dims: Vector;
+        res: Vector;
         canvas: HTMLCanvasElement;
         mouse: input.Mouse;
         keyboard: input.Keyboard;
@@ -215,8 +215,8 @@ declare namespace ps {
         protected isFullScreen: boolean;
         private resourceManager;
         private resources;
-        constructor(dims: Vector, canvas: HTMLCanvasElement, mouse: input.Mouse, keyboard: input.Keyboard, animator: AnimationFrameProvider, camera: Camera);
-        setDimensions(dims: Vector): void;
+        constructor(res: Vector, canvas: HTMLCanvasElement, mouse: input.Mouse, keyboard: input.Keyboard, animator: AnimationFrameProvider, camera: Camera);
+        setResolution(res: Vector): void;
         registerEntity(...entities: Entity[]): void;
         run(): void;
         preloadResources(...resources: string[]): void;
@@ -224,13 +224,12 @@ declare namespace ps {
         private checkCollisions(entities);
         private update(dt, entities);
         private garbageCollect();
-        toggleFullScreen(): void;
     }
     /**
      * Default engine for running in-browser
      */
     class Engine extends HeadlessEngine {
-        constructor(dims: Vector, sceneSize: Vector, canvas: HTMLCanvasElement);
+        constructor(resolution: Vector, sceneSize: Vector, canvas: HTMLCanvasElement);
     }
 }
 declare namespace ps {
@@ -249,6 +248,6 @@ declare namespace ps {
 declare namespace ps {
     abstract class EntityWithSprites extends Entity {
         sprites: Sprite[];
-        update(dt: number, dims: Vector): void;
+        update(dt: number, resolution: Vector): void;
     }
 }

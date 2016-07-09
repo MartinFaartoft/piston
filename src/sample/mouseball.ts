@@ -10,7 +10,7 @@ namespace SampleGame {
             this.isCollisionDetectionEnabled = true;
         }
 
-        update(dt: number, dims: ps.Vector) {
+        update(dt: number, resolution: ps.Vector) {
         this.pos = this.engine.mouse.pos;
         if (this.engine.mouse.isLeftButtonDown) {
             this.color = "green";

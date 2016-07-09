@@ -45,7 +45,7 @@ var ps;
             this.destroyed = false;
             this.isWrapping = false;
         }
-        Entity.prototype.update = function (dt, dims) {
+        Entity.prototype.update = function (dt, resolution) {
             if (this.isAccelerationEnabled) {
                 this.vel = this.vel.add(this.acc.multiply(dt));
             }
@@ -54,25 +54,25 @@ var ps;
             }
             this.pos = this.pos.add(this.vel.multiply(dt));
             if (this.isWrapping) {
-                this.wrap(dims);
+                this.wrap(resolution);
             }
         };
-        Entity.prototype.wrap = function (dimensions) {
+        Entity.prototype.wrap = function (resolution) {
             // exit right edge
-            if (this.pos.x > dimensions.x) {
-                this.pos.x -= dimensions.x;
+            if (this.pos.x > resolution.x) {
+                this.pos.x -= resolution.x;
             }
             // exit left edge
             if (this.pos.x < 0) {
-                this.pos.x += dimensions.x;
+                this.pos.x += resolution.x;
             }
             // exit top
             if (this.pos.y < 0) {
-                this.pos.y += dimensions.y;
+                this.pos.y += resolution.y;
             }
             // exit bottom
-            if (this.pos.y > dimensions.y) {
-                this.pos.y -= dimensions.y;
+            if (this.pos.y > resolution.y) {
+                this.pos.y -= resolution.y;
             }
         };
         Entity.prototype.collideWith = function (other) {
@@ -412,17 +412,17 @@ var ps;
 (function (ps) {
     //assume game coords lie in the first quadrant, with (0, 0) being the lower left corner
     var DefaultCoordConverter = (function () {
-        function DefaultCoordConverter(dims) {
-            this.dims = dims;
+        function DefaultCoordConverter(resolution) {
+            this.resolution = resolution;
         }
         DefaultCoordConverter.prototype.toCameraCoords = function (p) {
-            return new ps.Point(p.x, this.dims.y - p.y);
+            return new ps.Point(p.x, this.resolution.y - p.y);
         };
         DefaultCoordConverter.prototype.toGameCoords = function (p) {
-            return new ps.Point(p.x, this.dims.y - p.y);
+            return new ps.Point(p.x, this.resolution.y - p.y);
         };
-        DefaultCoordConverter.prototype.setResolution = function (dims) {
-            this.dims = dims;
+        DefaultCoordConverter.prototype.setResolution = function (resolution) {
+            this.resolution = resolution;
         };
         return DefaultCoordConverter;
     }());
@@ -438,6 +438,7 @@ var ps;
             this.sceneSize = sceneSize;
             this.backgroundColor = "black";
             this.canvas = canvas;
+            this.ctx = canvas.getContext("2d");
         }
         Camera.prototype.fillCircle = function (pos, radius, color) {
             this.fillArc(pos, 0, radius, 0, Math.PI * 2, false, color);
@@ -498,7 +499,6 @@ var ps;
             return n * this.canvas.width / this.sceneSize.x;
         };
         Camera.prototype.render = function (entities) {
-            this.ctx = this.canvas.getContext("2d");
             this.clear();
             for (var _i = 0, entities_1 = entities; _i < entities_1.length; _i++) {
                 var entity = entities_1[_i];
@@ -592,8 +592,8 @@ var ps;
 (function (ps) {
     var c = ps.collision;
     var HeadlessEngine = (function () {
-        function HeadlessEngine(dims, canvas, mouse, keyboard, animator, camera) {
-            this.dims = dims;
+        function HeadlessEngine(res, canvas, mouse, keyboard, animator, camera) {
+            this.res = res;
             this.canvas = canvas;
             this.mouse = mouse;
             this.keyboard = keyboard;
@@ -616,10 +616,10 @@ var ps;
                 this.keyboard.enable();
             }
         }
-        HeadlessEngine.prototype.setDimensions = function (dims) {
-            this.dims = dims;
-            this.mouse.coordConverter.setResolution(dims);
-            this.camera.coordConverter.setResolution(dims);
+        HeadlessEngine.prototype.setResolution = function (res) {
+            this.res = res;
+            this.mouse.coordConverter.setResolution(res);
+            this.camera.coordConverter.setResolution(res);
         };
         HeadlessEngine.prototype.registerEntity = function () {
             var entities = [];
@@ -673,14 +673,11 @@ var ps;
         HeadlessEngine.prototype.update = function (dt, entities) {
             for (var _i = 0, entities_3 = entities; _i < entities_3.length; _i++) {
                 var entity = entities_3[_i];
-                entity.update(dt, this.dims);
+                entity.update(dt, this.res);
             }
         };
         HeadlessEngine.prototype.garbageCollect = function () {
             this.entities = this.entities.filter(function (e) { return !e.destroyed; });
-        };
-        HeadlessEngine.prototype.toggleFullScreen = function () {
-            //no implementation
         };
         return HeadlessEngine;
     }());
@@ -690,8 +687,8 @@ var ps;
      */
     var Engine = (function (_super) {
         __extends(Engine, _super);
-        function Engine(dims, sceneSize, canvas) {
-            _super.call(this, dims, canvas, new ps.input.Mouse(canvas, new ps.DefaultCoordConverter(dims)), new ps.input.Keyboard(document, window), new ps.BrowserAnimationFrameProvider(), new ps.Camera(canvas, new ps.DefaultCoordConverter(dims), sceneSize));
+        function Engine(resolution, sceneSize, canvas) {
+            _super.call(this, resolution, canvas, new ps.input.Mouse(canvas, new ps.DefaultCoordConverter(resolution)), new ps.input.Keyboard(document, window), new ps.BrowserAnimationFrameProvider(), new ps.Camera(canvas, new ps.DefaultCoordConverter(resolution), sceneSize));
         }
         return Engine;
     }(HeadlessEngine));
@@ -747,8 +744,8 @@ var ps;
             _super.apply(this, arguments);
             this.sprites = [];
         }
-        EntityWithSprites.prototype.update = function (dt, dims) {
-            _super.prototype.update.call(this, dt, dims);
+        EntityWithSprites.prototype.update = function (dt, resolution) {
+            _super.prototype.update.call(this, dt, resolution);
             for (var _i = 0, _a = this.sprites; _i < _a.length; _i++) {
                 var sprite = _a[_i];
                 sprite.update(dt);
