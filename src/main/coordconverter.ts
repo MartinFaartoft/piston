@@ -3,8 +3,8 @@
 
 namespace ps {
     export interface CoordConverter {
-        toCameraCoords(p: Point): Point;
-        toGameCoords(p: Point): Point;
+        toCameraCoords(p: Point, cameraPosition: Point): Point;
+        toGameCoords(p: Point, cameraPosition: Point): Point;
         setResolution(res: Vector): void;
     }
     
@@ -13,12 +13,13 @@ namespace ps {
 
         constructor(public resolution: Vector) {}
 
-        toCameraCoords(p: Point): Point {
-            return new Point(p.x, this.resolution.y - p.y);  
+        toCameraCoords(p: Point, cameraPosition: Point): Point {
+            let _p = p.subtract(cameraPosition);
+            return new Point(_p.x, this.resolution.y - _p.y);  
         }
 
-        toGameCoords(p: Point): Point {
-            return new Point(p.x, this.resolution.y - p.y);
+        toGameCoords(p: Point, cameraPosition: Point): Point {
+            return new Point(p.x, this.resolution.y - p.y).add(cameraPosition);
         }
 
         setResolution(resolution: Vector) {

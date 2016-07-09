@@ -5,9 +5,11 @@
 
 namespace ps {
     export class DefaultScene implements Scene {
+        game: Game;
+        
         private actors: Actor[] = [];
-
-        constructor(public game: Game, public size: Vector) {}
+        
+        constructor(public size: Vector) {}
 
         update(dt: number) {
             for (let actor of this.getActors()) {
@@ -32,6 +34,10 @@ namespace ps {
 
         getSize(): Vector {
             return this.size;
+        }
+
+        setGame(game: Game) {
+            this.game = game;
         }
     }
 }

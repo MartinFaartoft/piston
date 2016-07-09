@@ -128,8 +128,7 @@ var ps;
 var ps;
 (function (ps) {
     var DefaultScene = (function () {
-        function DefaultScene(game, size) {
-            this.game = game;
+        function DefaultScene(size) {
             this.size = size;
             this.actors = [];
         }
@@ -158,6 +157,9 @@ var ps;
         };
         DefaultScene.prototype.getSize = function () {
             return this.size;
+        };
+        DefaultScene.prototype.setGame = function (game) {
+            this.game = game;
         };
         return DefaultScene;
     }());
@@ -195,16 +197,16 @@ var ps;
     var input;
     (function (input) {
         var Mouse = (function () {
-            function Mouse(canvas, coordConverter) {
-                this.canvas = canvas;
-                this.coordConverter = coordConverter;
-                this.pos = new ps.Point(0, 0);
+            function Mouse(camera) {
+                this.positionOnCanvas = new ps.Point(0, 0);
                 this.isLeftButtonDown = false;
                 this.isRightButtonDown = false;
                 this.isMiddleButtonDown = false;
                 this.mouseMoveListeners = [];
                 this.mouseDownListeners = [];
                 this.mouseUpListeners = [];
+                this.camera = camera;
+                this.canvas = camera.canvas;
                 this.mouseMoveDelegate = this.onMouseMove.bind(this);
                 this.mouseDownDelegate = this.onMouseDown.bind(this);
                 this.mouseUpDelegate = this.onMouseUp.bind(this);
@@ -231,12 +233,15 @@ var ps;
             Mouse.prototype.addMouseMoveEventListener = function (action) {
                 this.mouseMoveListeners.push(action);
             };
+            Mouse.prototype.getPosition = function () {
+                return this.camera.toGameCoords(this.positionOnCanvas);
+            };
             Mouse.prototype.onMouseMove = function (e) {
                 var newPos = new ps.Point(e.clientX, e.clientY);
-                this.pos = this.coordConverter.toGameCoords(newPos.subtract(this.findPos(this.canvas)));
+                this.positionOnCanvas = newPos.subtract(this.findPos(this.canvas));
                 for (var _i = 0, _a = this.mouseMoveListeners; _i < _a.length; _i++) {
                     var listener = _a[_i];
-                    listener(this.pos);
+                    listener(this.getPosition());
                 }
             };
             Mouse.prototype.addMouseDownEventListener = function (action) {
@@ -255,7 +260,7 @@ var ps;
                 }
                 for (var _i = 0, _a = this.mouseDownListeners; _i < _a.length; _i++) {
                     var listener = _a[_i];
-                    listener(this.pos, e.button);
+                    listener(this.positionOnCanvas, e.button);
                 }
             };
             Mouse.prototype.addMouseUpEventListener = function (action) {
@@ -274,7 +279,7 @@ var ps;
                 }
                 for (var _i = 0, _a = this.mouseUpListeners; _i < _a.length; _i++) {
                     var listener = _a[_i];
-                    listener(this.pos, e.button);
+                    listener(this.positionOnCanvas, e.button);
                 }
             };
             // Find out where an element is on the page
@@ -366,15 +371,17 @@ var ps;
             this.resources = [];
             this.canvas = canvas || this.createCanvas();
             this.resolution = new ps.Vector(this.canvas.width, this.canvas.height);
-            this.scene = scene || new ps.DefaultScene(this, this.resolution);
-            this.mouse = new ps.input.Mouse(this.canvas, new ps.DefaultCoordConverter(this.resolution));
+            this.scene = scene || new ps.DefaultScene(this.resolution);
+            this.scene.setGame(this);
+            this.camera = new ps.Camera(this.canvas, this.resourceManager, new ps.DefaultCoordConverter(this.resolution), this.scene.getSize(), this.resolution, new ps.Point(0, 0));
+            this.mouse = new ps.input.Mouse(this.camera);
             this.mouse.enable();
             this.keyboard = new ps.input.Keyboard(document, window);
             this.keyboard.enable();
+            this.engine = new ps.Engine(new ps.BrowserAnimationFrameProvider(), this.camera, this.scene);
         }
         Game.prototype.start = function () {
             var _this = this;
-            this.engine = this.createEngine();
             if (this.resources.length > 0) {
                 this.resourceManager.onReady(function () { _this.engine.start(); });
                 this.resourceManager.preload(this.resources);
@@ -392,13 +399,7 @@ var ps;
         };
         Game.prototype.setResolution = function (resolution) {
             this.resolution = resolution;
-            this.mouse.coordConverter.setResolution(resolution);
             this.engine.camera.coordConverter.setResolution(resolution);
-        };
-        Game.prototype.createEngine = function () {
-            var animator = new ps.BrowserAnimationFrameProvider();
-            var camera = new ps.Camera(this.canvas, this.resourceManager, new ps.DefaultCoordConverter(this.resolution), this.scene.getSize());
-            return new ps.Engine(animator, camera, this.scene);
         };
         Game.prototype.createCanvas = function () {
             var canvas = document.createElement("canvas");
@@ -530,11 +531,12 @@ var ps;
         function DefaultCoordConverter(resolution) {
             this.resolution = resolution;
         }
-        DefaultCoordConverter.prototype.toCameraCoords = function (p) {
-            return new ps.Point(p.x, this.resolution.y - p.y);
+        DefaultCoordConverter.prototype.toCameraCoords = function (p, cameraPosition) {
+            var _p = p.subtract(cameraPosition);
+            return new ps.Point(_p.x, this.resolution.y - _p.y);
         };
-        DefaultCoordConverter.prototype.toGameCoords = function (p) {
-            return new ps.Point(p.x, this.resolution.y - p.y);
+        DefaultCoordConverter.prototype.toGameCoords = function (p, cameraPosition) {
+            return new ps.Point(p.x, this.resolution.y - p.y).add(cameraPosition);
         };
         DefaultCoordConverter.prototype.setResolution = function (resolution) {
             this.resolution = resolution;
@@ -548,10 +550,13 @@ var ps;
 var ps;
 (function (ps) {
     var Camera = (function () {
-        function Camera(canvas, resourceManager, coordConverter, sceneSize) {
+        function Camera(canvas, resourceManager, coordConverter, sceneSize, viewPort, pos) {
+            this.canvas = canvas;
             this.resourceManager = resourceManager;
             this.coordConverter = coordConverter;
             this.sceneSize = sceneSize;
+            this.viewPort = viewPort;
+            this.pos = pos;
             this.backgroundColor = "black";
             this.canvas = canvas;
             this.ctx = canvas.getContext("2d");
@@ -563,12 +568,15 @@ var ps;
         //     engine.setResolution(new ps.Vector(canvas.width, canvas.height));
         // }
         // window.onresize = resizeCanvas;
+        Camera.prototype.centerOn = function (p) {
+            this.pos = p.subtract(this.viewPort.multiply(.5));
+        };
         Camera.prototype.fillCircle = function (pos, radius, color) {
             this.fillArc(pos, 0, radius, 0, Math.PI * 2, false, color);
         };
         Camera.prototype.fillArc = function (pos, rotation, radius, startAngle, endAngle, counterClockWise, color) {
             var _this = this;
-            var centerCC = this.coordConverter.toCameraCoords(pos);
+            var centerCC = this.toCameraCoords(pos);
             var scaledRadius = this.scale(radius);
             this.paintWhileRotated(centerCC, rotation, function () {
                 _this.ctx.fillStyle = color;
@@ -580,7 +588,7 @@ var ps;
         };
         Camera.prototype.fillRect = function (pos, rotation, width, height, color) {
             var _this = this;
-            var centerCC = this.coordConverter.toCameraCoords(pos);
+            var centerCC = this.toCameraCoords(pos);
             var scaledHeight = this.scale(height);
             var scaledWidth = this.scale(width);
             this.paintWhileRotated(centerCC, rotation, function () {
@@ -589,8 +597,8 @@ var ps;
             });
         };
         Camera.prototype.drawLine = function (start, end, lineWidth, color) {
-            var startCC = this.coordConverter.toCameraCoords(start);
-            var endCC = this.coordConverter.toCameraCoords(end);
+            var startCC = this.toCameraCoords(start);
+            var endCC = this.toCameraCoords(end);
             var previousStroke = this.ctx.strokeStyle;
             var previousLineWidth = this.ctx.lineWidth;
             this.ctx.beginPath();
@@ -607,12 +615,18 @@ var ps;
             this.paintSprites(pos, rotation, size, [sprite]);
         };
         Camera.prototype.paintSprites = function (pos, rotation, size, sprites) {
-            var centerCC = this.coordConverter.toCameraCoords(pos);
+            var centerCC = this.toCameraCoords(pos);
             var scaledSize = [this.scale(size[0]), this.scale(size[1])];
             for (var _i = 0, sprites_1 = sprites; _i < sprites_1.length; _i++) {
                 var sprite = sprites_1[_i];
                 this.paintSpriteInternal(sprite, centerCC, scaledSize, rotation);
             }
+        };
+        Camera.prototype.toGameCoords = function (p) {
+            return this.coordConverter.toGameCoords(p, this.pos);
+        };
+        Camera.prototype.toCameraCoords = function (p) {
+            return this.coordConverter.toCameraCoords(p, this.pos);
         };
         Camera.prototype.paintSpriteInternal = function (sprite, pos, size, rotation) {
             sprite.render(this.ctx, this.resourceManager, pos, size, rotation);
@@ -624,8 +638,8 @@ var ps;
         Camera.prototype.render = function (scene) {
             this.clear();
             for (var _i = 0, _a = scene.getActors(); _i < _a.length; _i++) {
-                var entity = _a[_i];
-                entity.render(this);
+                var actor = _a[_i];
+                actor.render(this, scene);
             }
         };
         Camera.prototype.toggleFullScreen = function () {

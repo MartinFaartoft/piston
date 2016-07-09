@@ -67,6 +67,6 @@ namespace ps {
             }
          }
 
-        abstract render(camera: Camera): void;
+        abstract render(camera: Camera, scene: Scene): void;
     }
 }

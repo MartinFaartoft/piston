@@ -5,10 +5,14 @@ namespace ps {
     export class Camera {
         backgroundColor: string = "black";
 
-        private canvas: HTMLCanvasElement;
         private ctx: CanvasRenderingContext2D;
 
-        constructor(canvas: HTMLCanvasElement, public resourceManager: ResourceManager, public coordConverter: CoordConverter, public sceneSize: Vector) {
+        constructor(public canvas: HTMLCanvasElement, 
+                    public resourceManager: ResourceManager, 
+                    public coordConverter: CoordConverter, 
+                    public sceneSize: Vector,
+                    public viewPort: Vector,
+                    public pos: Point) { //lower left corner of camera in game coordinates
             this.canvas = canvas;
             this.ctx = canvas.getContext("2d");
         }
@@ -20,13 +24,16 @@ namespace ps {
         //     engine.setResolution(new ps.Vector(canvas.width, canvas.height));
         // }
         // window.onresize = resizeCanvas;
+        centerOn(p: Point) { //gamepoint
+            this.pos = p.subtract(this.viewPort.multiply(.5));
+        }
 
         fillCircle(pos: Point, radius: number, color: string): void {
             this.fillArc(pos, 0, radius, 0, Math.PI * 2, false, color);
         }
 
         fillArc(pos: Point, rotation: number, radius: number, startAngle: number, endAngle: number, counterClockWise: boolean, color: string) {
-            let centerCC = this.coordConverter.toCameraCoords(pos); 
+            let centerCC = this.toCameraCoords(pos); 
             let scaledRadius = this.scale(radius);
 
             this.paintWhileRotated(centerCC, rotation, () => {
@@ -39,7 +46,7 @@ namespace ps {
         }
 
         fillRect(pos: Point, rotation: number, width: number, height: number, color: string): void {
-            let centerCC = this.coordConverter.toCameraCoords(pos);
+            let centerCC = this.toCameraCoords(pos);
             let scaledHeight = this.scale(height);
             let scaledWidth = this.scale(width);
 
@@ -50,8 +57,8 @@ namespace ps {
         }
 
         drawLine(start: Point, end: Point, lineWidth: number, color: string): void {
-            let startCC = this.coordConverter.toCameraCoords(start);
-            let endCC = this.coordConverter.toCameraCoords(end);
+            let startCC = this.toCameraCoords(start);
+            let endCC = this.toCameraCoords(end);
             
             let previousStroke = this.ctx.strokeStyle;
             let previousLineWidth = this.ctx.lineWidth;
@@ -73,12 +80,20 @@ namespace ps {
         }
 
         paintSprites(pos: Point, rotation: number, size: number[], sprites: Sprite[]): void {
-            let centerCC = this.coordConverter.toCameraCoords(pos);
+            let centerCC = this.toCameraCoords(pos);
             let scaledSize = [this.scale(size[0]), this.scale(size[1])];
             
             for (let sprite of sprites) {
                 this.paintSpriteInternal(sprite, centerCC, scaledSize, rotation);
             }
+        }
+
+        toGameCoords(p: Point): Point {
+            return this.coordConverter.toGameCoords(p, this.pos);
+        }
+
+        toCameraCoords(p: Point): Point {
+            return this.coordConverter.toCameraCoords(p, this.pos);
         }
 
         private paintSpriteInternal(sprite: Sprite, pos: Point, size: number[], rotation: number): void {
@@ -93,8 +108,8 @@ namespace ps {
         render(scene: Scene): void {
             this.clear();
 
-            for (let entity of scene.getActors()) {
-                entity.render(this);
+            for (let actor of scene.getActors()) {
+                actor.render(this, scene);
             }            
         }
 

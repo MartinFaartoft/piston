@@ -11,7 +11,7 @@ namespace SampleGame {
         }
 
         update(dt: number, scene: ps.Scene) {
-        this.pos = this.game.mouse.pos;
+        this.pos = this.game.mouse.getPosition();
         if (this.game.mouse.isLeftButtonDown) {
             this.color = "green";
         } else if (this.game.mouse.isRightButtonDown) {

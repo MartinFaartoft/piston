@@ -26,6 +26,7 @@ declare namespace ps {
 }
 declare namespace ps {
     interface Scene {
+        setGame(game: Game): void;
         update(dt: number): void;
         getActors(): Actor[];
         garbageCollect(): void;
@@ -52,20 +53,21 @@ declare namespace ps {
         update(dt: number, scene: Scene): void;
         private wrap(sceneSize);
         collideWith(other: Actor): void;
-        abstract render(camera: Camera): void;
+        abstract render(camera: Camera, scene: Scene): void;
     }
 }
 declare namespace ps {
     class DefaultScene implements Scene {
-        game: Game;
         size: Vector;
+        game: Game;
         private actors;
-        constructor(game: Game, size: Vector);
+        constructor(size: Vector);
         update(dt: number): void;
         addActors(...actors: Actor[]): void;
         getActors(): Actor[];
         garbageCollect(): void;
         getSize(): Vector;
+        setGame(game: Game): void;
     }
 }
 declare namespace ps {
@@ -82,23 +84,24 @@ declare namespace ps {
 }
 declare namespace ps.input {
     class Mouse {
-        canvas: HTMLCanvasElement;
-        coordConverter: CoordConverter;
-        pos: Point;
+        private positionOnCanvas;
         isLeftButtonDown: boolean;
         isRightButtonDown: boolean;
         isMiddleButtonDown: boolean;
+        private camera;
+        private canvas;
         private mouseMoveDelegate;
         private mouseMoveListeners;
         private mouseDownDelegate;
         private mouseDownListeners;
         private mouseUpDelegate;
         private mouseUpListeners;
-        constructor(canvas: HTMLCanvasElement, coordConverter: CoordConverter);
+        constructor(camera: Camera);
         enable(): void;
         disable(): void;
         setCustomCursor(url: string, hotspot: Point): void;
         addMouseMoveEventListener(action: (p: Point) => void): void;
+        getPosition(): Point;
         private onMouseMove(e);
         addMouseDownEventListener(action: (p: Point, button: number) => void): void;
         private onMouseDown(e);
@@ -127,6 +130,7 @@ declare namespace ps {
         engine: Engine;
         mouse: input.Mouse;
         keyboard: input.Keyboard;
+        camera: Camera;
         private canvas;
         private resolution;
         private resourceManager;
@@ -135,7 +139,6 @@ declare namespace ps {
         start(): void;
         loadResources(...resources: string[]): void;
         setResolution(resolution: Vector): void;
-        private createEngine();
         private createCanvas();
         private getAspectRatio();
         private getMaxCanvasSize(windowWidth, windowHeight, aspectRatio);
@@ -190,33 +193,38 @@ declare namespace ps {
 }
 declare namespace ps {
     interface CoordConverter {
-        toCameraCoords(p: Point): Point;
-        toGameCoords(p: Point): Point;
+        toCameraCoords(p: Point, cameraPosition: Point): Point;
+        toGameCoords(p: Point, cameraPosition: Point): Point;
         setResolution(res: Vector): void;
     }
     class DefaultCoordConverter implements CoordConverter {
         resolution: Vector;
         constructor(resolution: Vector);
-        toCameraCoords(p: Point): Point;
-        toGameCoords(p: Point): Point;
+        toCameraCoords(p: Point, cameraPosition: Point): Point;
+        toGameCoords(p: Point, cameraPosition: Point): Point;
         setResolution(resolution: Vector): void;
     }
 }
 declare namespace ps {
     class Camera {
+        canvas: HTMLCanvasElement;
         resourceManager: ResourceManager;
         coordConverter: CoordConverter;
         sceneSize: Vector;
+        viewPort: Vector;
+        pos: Point;
         backgroundColor: string;
-        private canvas;
         private ctx;
-        constructor(canvas: HTMLCanvasElement, resourceManager: ResourceManager, coordConverter: CoordConverter, sceneSize: Vector);
+        constructor(canvas: HTMLCanvasElement, resourceManager: ResourceManager, coordConverter: CoordConverter, sceneSize: Vector, viewPort: Vector, pos: Point);
+        centerOn(p: Point): void;
         fillCircle(pos: Point, radius: number, color: string): void;
         fillArc(pos: Point, rotation: number, radius: number, startAngle: number, endAngle: number, counterClockWise: boolean, color: string): void;
         fillRect(pos: Point, rotation: number, width: number, height: number, color: string): void;
         drawLine(start: Point, end: Point, lineWidth: number, color: string): void;
         paintSprite(pos: Point, rotation: number, size: number[], sprite: Sprite): void;
         paintSprites(pos: Point, rotation: number, size: number[], sprites: Sprite[]): void;
+        toGameCoords(p: Point): Point;
+        toCameraCoords(p: Point): Point;
         private paintSpriteInternal(sprite, pos, size, rotation);
         scale(n: number): number;
         render(scene: Scene): void;

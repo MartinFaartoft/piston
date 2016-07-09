@@ -54,7 +54,8 @@ namespace EngineTest {
             gameMock = null;
             cameraMock = jasmine.createSpyObj("Camera", ["render"]);
             animator = new InMemoryAnimator(1);
-            scene = new ps.DefaultScene(gameMock, new ps.Vector(100, 100));
+            scene = new ps.DefaultScene(new ps.Vector(100, 100));
+            scene.setGame(gameMock);
             engine = new ps.Engine(animator, cameraMock, scene);
             engine.stopwatch = stopWatch;
         });

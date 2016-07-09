@@ -21,7 +21,7 @@ namespace SampleGame {
             }
         }
 
-        render(camera: ps.Camera) {
+        render(camera: ps.Camera, scene: ps.Scene) {
             camera.drawLine(this.initialPos, this.pos, 3, "green");
             camera.paintSprites(this.pos, this.rotation, [30, 80], this.sprites);
         }

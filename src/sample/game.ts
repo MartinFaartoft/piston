@@ -3,6 +3,9 @@
 /// <reference path="box.ts" />
 /// <reference path="spriteball.ts" />
 /// <reference path="mouseball.ts" />
+/// <reference path="background.ts" />
+/// <reference path="person.ts" />
+
 
 namespace SampleGame {
     let game = new ps.Game();
@@ -13,7 +16,7 @@ namespace SampleGame {
     
     game.loadResources("assets/ball.png");
     game.mouse.setCustomCursor("assets/crosshairs.png", new ps.Point(10, 10));
-    game.scene.addActors(box, new SpriteBall(), b1, b2, new MouseBall());
+    game.scene.addActors(new Background(), box, new SpriteBall(), b1, b2, new MouseBall(), new Person());
 
     game.mouse.addMouseMoveEventListener((pos) =>  {
         box.pos = pos;

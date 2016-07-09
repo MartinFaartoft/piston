@@ -8,10 +8,10 @@ namespace ps {
         engine: Engine;
         mouse: input.Mouse;
         keyboard: input.Keyboard;
-
+        camera: Camera;
+        
         private canvas: HTMLCanvasElement;
         private resolution: Vector;
-        
         private resourceManager: ResourceManager = new ResourceManager();
         private resources: string[] = [];
 
@@ -20,18 +20,26 @@ namespace ps {
             
             this.resolution = new Vector(this.canvas.width, this.canvas.height);
 
-            this.scene = scene || new DefaultScene(this, this.resolution);
+            this.scene = scene || new DefaultScene(this.resolution);
+            this.scene.setGame(this);
 
-            this.mouse = new input.Mouse(this.canvas, new DefaultCoordConverter(this.resolution));
+            this.camera = new Camera(this.canvas, 
+                                    this.resourceManager, 
+                                    new DefaultCoordConverter(this.resolution), 
+                                    this.scene.getSize(),
+                                    this.resolution,
+                                    new Point(0, 0));
+
+            this.mouse = new input.Mouse(this.camera);
             this.mouse.enable();
             
             this.keyboard = new input.Keyboard(document, window);
-            this.keyboard.enable();   
+            this.keyboard.enable();
+
+            this.engine = new Engine(new BrowserAnimationFrameProvider(), this.camera, this.scene);
         }
 
         start(): void {
-            this.engine = this.createEngine();
-
             if (this.resources.length > 0) {
                 this.resourceManager.onReady(() => { this.engine.start() });
                 this.resourceManager.preload(this.resources);
@@ -47,17 +55,7 @@ namespace ps {
 
         setResolution(resolution: Vector): void { //todo make internal to camera within resize logic
             this.resolution = resolution;
-            this.mouse.coordConverter.setResolution(resolution);
             this.engine.camera.coordConverter.setResolution(resolution);
-        }
-
-        private createEngine(): Engine {
-            let animator = new BrowserAnimationFrameProvider();
-            let camera = new Camera(this.canvas, 
-                                    this.resourceManager, 
-                                    new DefaultCoordConverter(this.resolution), 
-                                    this.scene.getSize());
-            return new Engine(animator, camera, this.scene);
         }
 
         private createCanvas(): HTMLCanvasElement {

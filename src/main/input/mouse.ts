@@ -2,10 +2,13 @@
 
 namespace ps.input {
     export class Mouse {
-        pos: Point = new Point(0, 0);
+        private positionOnCanvas: Point = new Point(0, 0);
         isLeftButtonDown: boolean = false;
         isRightButtonDown: boolean = false;
         isMiddleButtonDown: boolean = false;
+
+        private camera: Camera;
+        private canvas: HTMLCanvasElement;
 
         private mouseMoveDelegate: any;
         private mouseMoveListeners: ((Point) => void)[] = [];
@@ -16,7 +19,10 @@ namespace ps.input {
         private mouseUpDelegate: any;
         private mouseUpListeners: ((p: Point, button: number) => void)[] = [];
 
-        constructor(public canvas: HTMLCanvasElement, public coordConverter: CoordConverter) {
+        constructor(camera: Camera) {
+            this.camera = camera;
+            this.canvas = camera.canvas;
+            
             this.mouseMoveDelegate = this.onMouseMove.bind(this);
             this.mouseDownDelegate = this.onMouseDown.bind(this);
             this.mouseUpDelegate = this.onMouseUp.bind(this);
@@ -47,16 +53,20 @@ namespace ps.input {
             this.canvas.style.cursor = "url(" + url + ") " + hotspot.x + " " + hotspot.y + ", auto";
         }
 
-        public addMouseMoveEventListener(action: (p: Point) => void): void {
+        addMouseMoveEventListener(action: (p: Point) => void): void {
             this.mouseMoveListeners.push(action);
+        }
+
+        getPosition(): Point {
+            return this.camera.toGameCoords(this.positionOnCanvas);
         }
 
         private onMouseMove(e: MouseEvent) {
             let newPos = new Point(e.clientX, e.clientY);
-            this.pos = this.coordConverter.toGameCoords(newPos.subtract(this.findPos(this.canvas)));
+            this.positionOnCanvas = newPos.subtract(this.findPos(this.canvas));
 
             for (let listener of this.mouseMoveListeners) {
-                listener(this.pos);
+                listener(this.getPosition());
             }
         }
 
@@ -75,7 +85,7 @@ namespace ps.input {
             }
 
             for (let listener of this.mouseDownListeners) {
-                listener(this.pos, e.button);
+                listener(this.positionOnCanvas, e.button);
             }
         }
 
@@ -94,7 +104,7 @@ namespace ps.input {
             }
 
             for (let listener of this.mouseUpListeners) {
-                listener(this.pos, e.button);
+                listener(this.positionOnCanvas, e.button);
             }
         }
 

@@ -1,7 +1,5 @@
-/// <reference path="../main/vector.ts" />
-/// <reference path="../main/point.ts" />
-
 /// <reference path="jasmine.d.ts" />
+/// <reference path="../main/testexport.ts" />
 
 namespace VectorTest {
     let Vector = ps.Vector;
