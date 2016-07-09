@@ -4,14 +4,28 @@ declare namespace ps {
     }
 }
 declare namespace ps {
-    interface AnimationFrameProvider {
-        animate(runnable: Runnable): void;
-    }
-}
-declare namespace ps {
     class BrowserAnimationFrameProvider {
         animate(runnable: Runnable): void;
         private requestAnimationFrame;
+    }
+}
+declare namespace ps {
+    class Game {
+        engine: Engine;
+        private canvas;
+        private resourceManager;
+        private resources;
+        constructor(canvas?: HTMLCanvasElement);
+        start(): void;
+        loadResources(...resources: string[]): void;
+        private createCanvas();
+        private getAspectRatio();
+        private getMaxCanvasSize(windowWidth, windowHeight, aspectRatio);
+    }
+}
+declare namespace ps {
+    interface AnimationFrameProvider {
+        animate(runnable: Runnable): void;
     }
 }
 declare namespace ps {
@@ -162,13 +176,13 @@ declare namespace ps {
 }
 declare namespace ps {
     class Camera {
+        resourceManager: ResourceManager;
         coordConverter: CoordConverter;
         sceneSize: Vector;
         backgroundColor: string;
-        resourceManager: ResourceManager;
         private canvas;
         private ctx;
-        constructor(canvas: HTMLCanvasElement, coordConverter: CoordConverter, sceneSize: Vector);
+        constructor(canvas: HTMLCanvasElement, resourceManager: ResourceManager, coordConverter: CoordConverter, sceneSize: Vector);
         fillCircle(pos: Point, radius: number, color: string): void;
         fillArc(pos: Point, rotation: number, radius: number, startAngle: number, endAngle: number, counterClockWise: boolean, color: string): void;
         fillRect(pos: Point, rotation: number, width: number, height: number, color: string): void;
@@ -184,22 +198,7 @@ declare namespace ps {
     }
 }
 declare namespace ps {
-    class ResourceManager {
-        private cache;
-        private readyCallbacks;
-        preload(urls: string[]): void;
-        get(url: string): HTMLImageElement;
-        onReady(callback: {
-            (): void;
-        }): void;
-        isReady(): boolean;
-    }
-}
-declare namespace ps {
-    interface EngineExtension {
-        setEngine(engine: Engine): void;
-    }
-    class HeadlessEngine implements Runnable {
+    class Engine implements Runnable {
         res: Vector;
         canvas: HTMLCanvasElement;
         mouse: input.Mouse;
@@ -213,23 +212,26 @@ declare namespace ps {
         stopwatch: Stopwatch;
         entities: Entity[];
         protected isFullScreen: boolean;
-        private resourceManager;
-        private resources;
         constructor(res: Vector, canvas: HTMLCanvasElement, mouse: input.Mouse, keyboard: input.Keyboard, animator: AnimationFrameProvider, camera: Camera);
         setResolution(res: Vector): void;
         registerEntity(...entities: Entity[]): void;
         run(): void;
-        preloadResources(...resources: string[]): void;
         start(): void;
         private checkCollisions(entities);
         private update(dt, entities);
         private garbageCollect();
     }
-    /**
-     * Default engine for running in-browser
-     */
-    class Engine extends HeadlessEngine {
-        constructor(resolution: Vector, sceneSize: Vector, canvas: HTMLCanvasElement);
+}
+declare namespace ps {
+    class ResourceManager {
+        private cache;
+        private readyCallbacks;
+        preload(urls: string[]): void;
+        get(url: string): HTMLImageElement;
+        onReady(callback: {
+            (): void;
+        }): void;
+        isReady(): boolean;
     }
 }
 declare namespace ps {

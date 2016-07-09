@@ -1,5 +1,4 @@
 /// <reference path="animationframeprovider.ts" />
-/// <reference path="browseranimationframeprovider.ts" />
 /// <reference path="collision/collisiondetector.ts" />
 /// <reference path="collision/circularcollisiondetector.ts" />
 /// <reference path="collision/defertoentitycollisionresolver.ts" />
@@ -7,19 +6,11 @@
 /// <reference path="input/mouse.ts" />
 /// <reference path="stopwatch.ts" />
 /// <reference path="camera.ts" />
-/// <reference path="coordconverter.ts" />
-/// <reference path="resourcemanager.ts" />
-
-
 
 namespace ps {
     let c = collision;
 
-    export interface EngineExtension {
-        setEngine(engine: Engine): void;
-    }
-
-    export class HeadlessEngine implements Runnable {
+    export class Engine implements Runnable {
         debug: boolean = false;
         backgroundFillStyle: string = "black";
         collisionDetector: collision.CollisionDetector = new collision.CircularCollisionDetector();
@@ -29,17 +20,12 @@ namespace ps {
         
         protected isFullScreen: boolean = false;
         
-        private resourceManager: ResourceManager = new ResourceManager();
-        private resources: string[] = [];
-
         constructor(public res: Vector,
                     public canvas: HTMLCanvasElement,
                     public mouse: input.Mouse,
                     public keyboard: input.Keyboard,
                     public animator: AnimationFrameProvider,
                     public camera: Camera) {
-
-            this.camera.resourceManager = this.resourceManager;
 
             if (this.mouse) {
                 this.mouse.enable();
@@ -87,20 +73,10 @@ namespace ps {
             this.animator.animate(this);
         }
 
-        preloadResources(...resources: string[]): void {
-            this.resources = resources;
+        start() {
+            this.animator.animate(this);
         }
-
-        start(): void {
-            if (this.resources.length > 0) {
-                this.resourceManager.onReady(() => { this.animator.animate(this)});
-                this.resourceManager.preload(this.resources);
-            }
-            else {
-                this.animator.animate(this);
-            }
-        }
-
+        
         private checkCollisions(entities: Entity[]): void {
             let collisions: collision.Collision[] = this.collisionDetector.findCollisions(entities);
             this.collisionResolver.resolve(collisions);
@@ -114,22 +90,6 @@ namespace ps {
 
         private garbageCollect() {
             this.entities = this.entities.filter(e => !e.destroyed);
-        }
-    }
-
-    /**
-     * Default engine for running in-browser
-     */
-    export class Engine extends HeadlessEngine {
-        constructor(resolution: Vector, 
-                    sceneSize: Vector,  
-                    canvas: HTMLCanvasElement) {
-            super(resolution, 
-                  canvas, 
-                  new input.Mouse(canvas, new DefaultCoordConverter(resolution)), 
-                  new input.Keyboard(document, window), 
-                  new BrowserAnimationFrameProvider(),
-                  new Camera(canvas, new DefaultCoordConverter(resolution), sceneSize));
         }
     }
 }

@@ -37,14 +37,14 @@ namespace EngineTest {
     describe("An engine running a single main loop", () => {
         let mockCanvas: any;
         let animator: InMemoryAnimator;
-        let engine: ps.HeadlessEngine;
+        let engine: ps.Engine;
         let cameraMock: ps.Camera;
 
         beforeEach(() => {
             mockCanvas = jasmine.createSpyObj("HTMLCanvasElement", ["getContext"]);
             cameraMock = jasmine.createSpyObj("Camera", ["render"]);
             animator = new InMemoryAnimator(1);
-            engine = new ps.HeadlessEngine(new ps.Vector(100, 100), mockCanvas, null, null, animator, cameraMock);
+            engine = new ps.Engine(new ps.Vector(100, 100), mockCanvas, null, null, animator, cameraMock);
         });
 
         describe("with a registered entity", () => {

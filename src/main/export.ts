@@ -1,3 +1,4 @@
+/// <reference path="game.ts" />
 /// <reference path="engine.ts" />
 /// <reference path="entitywithsprites.ts" />
 /// <reference path="sprite.ts" />

@@ -4,15 +4,22 @@
 namespace ps {
     export class Camera {
         backgroundColor: string = "black";
-        resourceManager: ResourceManager;
 
         private canvas: HTMLCanvasElement;
         private ctx: CanvasRenderingContext2D;
 
-        constructor(canvas: HTMLCanvasElement, public coordConverter: CoordConverter, public sceneSize: Vector) {
+        constructor(canvas: HTMLCanvasElement, public resourceManager: ResourceManager, public coordConverter: CoordConverter, public sceneSize: Vector) {
             this.canvas = canvas;
             this.ctx = canvas.getContext("2d");
-         }
+        }
+        
+        //TODO implement here 
+        // function resizeCanvas(e) {
+        //     canvas.width = window.innerWidth;
+        //     canvas.height = window.innerWidth / aspectRatio;
+        //     engine.setResolution(new ps.Vector(canvas.width, canvas.height));
+        // }
+        // window.onresize = resizeCanvas;
 
         fillCircle(pos: Point, radius: number, color: string): void {
             this.fillArc(pos, 0, radius, 0, Math.PI * 2, false, color);
