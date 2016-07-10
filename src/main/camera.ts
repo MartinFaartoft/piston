@@ -10,8 +10,8 @@ namespace ps {
         constructor(public canvas: HTMLCanvasElement, 
                     public resourceManager: ResourceManager, 
                     public coordConverter: CoordConverter, 
-                    public sceneSize: Vector,
-                    public viewPort: Vector,
+                    public sceneSize: Vector, //size of scene / game world
+                    public viewPort: Vector, //width and height of camera viewport 
                     public pos: Point) { //lower left corner of camera in game coordinates
             this.canvas = canvas;
             this.ctx = canvas.getContext("2d");
@@ -34,7 +34,7 @@ namespace ps {
 
         fillArc(pos: Point, rotation: number, radius: number, startAngle: number, endAngle: number, counterClockWise: boolean, color: string) {
             let centerCC = this.toCameraCoords(pos); 
-            let scaledRadius = this.scale(radius);
+            let scaledRadius = this.scale(radius); 
 
             this.paintWhileRotated(centerCC, rotation, () => {
                 this.ctx.fillStyle = color;
@@ -59,7 +59,7 @@ namespace ps {
         drawLine(start: Point, end: Point, lineWidth: number, color: string): void {
             let startCC = this.toCameraCoords(start);
             let endCC = this.toCameraCoords(end);
-            
+
             let previousStroke = this.ctx.strokeStyle;
             let previousLineWidth = this.ctx.lineWidth;
             
@@ -89,20 +89,20 @@ namespace ps {
         }
 
         toGameCoords(p: Point): Point {
-            return this.coordConverter.toGameCoords(p, this.pos);
+            return this.coordConverter.toGameCoords(p, this.pos, this.viewPort);
         }
 
         toCameraCoords(p: Point): Point {
-            return this.coordConverter.toCameraCoords(p, this.pos);
+            return this.coordConverter.toCameraCoords(p, this.pos, this.viewPort);
         }
 
         private paintSpriteInternal(sprite: Sprite, pos: Point, size: number[], rotation: number): void {
             sprite.render(this.ctx, this.resourceManager, pos, size, rotation);
         }
 
+        //assumes that viewPort has same aspect ratio as canvas
         scale(n: number): number {
-            //assume camera shows entire scene and camera aspect ratio === scene aspect ratio
-            return n * this.canvas.width / this.sceneSize.x; 
+            return n * this.canvas.width / this.viewPort.x; 
         }
 
         render(scene: Scene): void {
@@ -110,7 +110,9 @@ namespace ps {
 
             for (let actor of scene.getActors()) {
                 actor.render(this, scene);
-            }            
+            }
+
+            console.log("camera position: ", this.pos);
         }
 
         toggleFullScreen(): void {

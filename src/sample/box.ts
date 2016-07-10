@@ -4,7 +4,7 @@ namespace SampleGame {
     export class Box extends ps.Actor {
         color: string = "blue";
         constructor() {
-            super(new ps.Point(200, 200));
+            super(new ps.Point(0, 0));
             this.vel = new ps.Vector(0, 0);
             this.rotationSpeed = 1;
         }

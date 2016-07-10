@@ -48,7 +48,17 @@ namespace VectorTest {
 
         it("should be convertible to a point", () => {
             expect(v.toPoint()).toEqual(new ps.Point(1, 1));
-        })
+        });
+
+        it("should not be the same instance after cloning", () => {
+            let orig = new Vector(0, 0);
+            let clone = orig.clone();
+
+            orig.x = 10;
+            orig.y = 10;
+
+            expect(clone).toEqual(new Vector(0, 0));
+        });
     });
 
     describe("vector dot product", () => {

@@ -9,25 +9,24 @@ namespace ps {
         mouse: input.Mouse;
         keyboard: input.Keyboard;
         camera: Camera;
-        
+
         private canvas: HTMLCanvasElement;
-        private resolution: Vector;
         private resourceManager: ResourceManager = new ResourceManager();
         private resources: string[] = [];
 
         constructor(canvas: HTMLCanvasElement = null, public scene: Scene = null) {
             this.canvas = canvas || this.createCanvas();
             
-            this.resolution = new Vector(this.canvas.width, this.canvas.height);
+            let resolution = new Vector(this.canvas.width, this.canvas.height);
 
-            this.scene = scene || new DefaultScene(this.resolution);
+            this.scene = scene || new DefaultScene(resolution.clone());
             this.scene.setGame(this);
 
             this.camera = new Camera(this.canvas, 
                                     this.resourceManager, 
-                                    new DefaultCoordConverter(this.resolution), 
+                                    new DefaultCoordConverter(resolution.clone()), 
                                     this.scene.getSize(),
-                                    this.resolution,
+                                    resolution.clone(),
                                     new Point(0, 0));
 
             this.mouse = new input.Mouse(this.camera);
@@ -54,8 +53,7 @@ namespace ps {
         }
 
         setResolution(resolution: Vector): void { //todo make internal to camera within resize logic
-            this.resolution = resolution;
-            this.engine.camera.coordConverter.setResolution(resolution);
+            this.camera.coordConverter.setResolution(resolution);
         }
 
         private createCanvas(): HTMLCanvasElement {

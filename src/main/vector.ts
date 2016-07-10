@@ -34,5 +34,9 @@ namespace ps {
         toPoint(): Point {
             return new Point(this.x, this.y);
         }
+
+        clone(): Vector {
+            return new Vector(this.x, this.y);
+        }
     }
 }

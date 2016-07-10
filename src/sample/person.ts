@@ -27,9 +27,7 @@ namespace SampleGame {
 
             super.update(dt, scene);
 
-            let mousePos = this.game.mouse.getPosition();
-
-            this.game.camera.centerOn(this.pos.add(mousePos).toVector().multiply(.5).toPoint());
+            this.game.camera.centerOn(this.pos);
         }
 
         render(camera: ps.Camera) {

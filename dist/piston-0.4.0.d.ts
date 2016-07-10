@@ -22,6 +22,7 @@ declare namespace ps {
         tangent(): Vector;
         dot(v: Vector): number;
         toPoint(): Point;
+        clone(): Vector;
     }
 }
 declare namespace ps {
@@ -77,9 +78,13 @@ declare namespace ps {
         constructor(x: number, y: number);
         add(v: Vector | Point): Point;
         subtract(p: Vector | Point): Point;
+        multiply(scalar: number): Point;
         distanceTo(p: Point): number;
         vectorTo(p: Point): Vector;
         toVector(): Vector;
+        changeCoordinateSystem(coordinateChanger: {
+            (p: Point): Point;
+        }): Point;
     }
 }
 declare namespace ps.input {
@@ -132,7 +137,6 @@ declare namespace ps {
         keyboard: input.Keyboard;
         camera: Camera;
         private canvas;
-        private resolution;
         private resourceManager;
         private resources;
         constructor(canvas?: HTMLCanvasElement, scene?: Scene);
@@ -193,16 +197,18 @@ declare namespace ps {
 }
 declare namespace ps {
     interface CoordConverter {
-        toCameraCoords(p: Point, cameraPosition: Point): Point;
-        toGameCoords(p: Point, cameraPosition: Point): Point;
+        toCameraCoords(p: Point, cameraPosition: Point, viewPort: Vector): Point;
+        toGameCoords(p: Point, cameraPosition: Point, viewPort: Vector): Point;
         setResolution(res: Vector): void;
     }
     class DefaultCoordConverter implements CoordConverter {
         resolution: Vector;
         constructor(resolution: Vector);
-        toCameraCoords(p: Point, cameraPosition: Point): Point;
-        toGameCoords(p: Point, cameraPosition: Point): Point;
+        toCameraCoords(p: Point, cameraPosition: Point, viewPort: Vector): Point;
+        toGameCoords(p: Point, cameraPosition: Point, viewPort: Vector): Point;
         setResolution(resolution: Vector): void;
+        private coordinateChanger(p);
+        private getScale(viewPort);
     }
 }
 declare namespace ps {

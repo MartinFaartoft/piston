@@ -37,7 +37,7 @@ module.exports = function (grunt) {
             },
             livereload: {
                 options: { livereload: true },
-                files: ['sample/game.js', 'dist/piston-0.4.0.js']
+                files: ['sample/samplegame.js', 'dist/piston-0.4.0.js']
             }
         },
 

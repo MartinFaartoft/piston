@@ -2,7 +2,7 @@
 
 namespace SampleGame {
     export class Background extends ps.Actor {
-        color: string = "white";
+        color: string = "pink";
         speed = 200;
         constructor() {
             super(new ps.Point(0, 0));
@@ -12,12 +12,12 @@ namespace SampleGame {
             let divisions = 10.0;
             for (let i = 0; i <= divisions; i++) {
                 let size = scene.getSize();
-                let x0 = scene.getSize().x / divisions * i;
-                camera.drawLine(new ps.Point(x0, 0), new ps.Point(x0, size.y), 1, this.color);
+                let x = size.x / divisions * i;
+                camera.drawLine(new ps.Point(x, 0), new ps.Point(x, size.y), 1, this.color);
 
-                let y0 = scene.getSize().y / divisions * i;
+                let y = size.y / divisions * i;
 
-                camera.drawLine(new ps.Point(0, y0), new ps.Point(size.x, y0), 1, this.color);
+                camera.drawLine(new ps.Point(0, y), new ps.Point(size.x, y), 1, this.color);
             }
         }
     }
