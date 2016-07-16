@@ -274,18 +274,26 @@ declare namespace ps {
     class Sprite {
         spriteSheetCoordinates: Point;
         spriteSize: number[];
-        frames: number[];
-        animationSpeed: number;
         url: string;
-        index: number;
-        constructor(spriteSheetCoordinates: Point, spriteSize: number[], frames: number[], animationSpeed: number, url: string);
-        update(dt: number): void;
+        constructor(spriteSheetCoordinates: Point, spriteSize: number[], url: string);
         render(ctx: CanvasRenderingContext2D, resourceManager: ResourceManager, pos: Point, size: number[], rotation: number): void;
+        update(dt: number): void;
+        protected getSpriteSheetCoordinates(): number[];
     }
 }
 declare namespace ps {
     abstract class ActorWithSprites extends Actor {
         sprites: Sprite[];
         update(dt: number, scene: Scene): void;
+    }
+}
+declare namespace ps {
+    class AnimatedSprite extends Sprite {
+        frames: number[];
+        animationSpeed: number;
+        index: number;
+        constructor(spriteSheetCoordinates: Point, spriteSize: number[], url: string, frames: number[], animationSpeed: number);
+        update(dt: number): void;
+        getSpriteSheetCoordinates(): number[];
     }
 }

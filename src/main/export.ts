@@ -2,6 +2,7 @@
 /// <reference path="engine.ts" />
 /// <reference path="actorwithsprites.ts" />
 /// <reference path="sprite.ts" />
+/// <reference path="animatedsprite.ts" />
 /// <reference path="collision/collisiondetector.ts" />
 /// <reference path="collision/collisionresolver.ts" />
 /// <reference path="collision/defertoactorcollisionresolver.ts" />

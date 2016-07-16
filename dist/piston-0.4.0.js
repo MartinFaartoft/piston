@@ -805,28 +805,15 @@ var ps;
 var ps;
 (function (ps) {
     var Sprite = (function () {
-        function Sprite(spriteSheetCoordinates, spriteSize, frames, animationSpeed, url) {
+        function Sprite(spriteSheetCoordinates, spriteSize, url) {
             this.spriteSheetCoordinates = spriteSheetCoordinates;
             this.spriteSize = spriteSize;
-            this.frames = frames;
-            this.animationSpeed = animationSpeed;
             this.url = url;
-            this.index = 0;
-            this.index = Math.random() * frames.length;
         }
-        Sprite.prototype.update = function (dt) {
-            this.index = this.index + this.animationSpeed * dt % this.frames.length;
-        };
         Sprite.prototype.render = function (ctx, resourceManager, pos, size, rotation) {
-            var frame = 0;
-            if (this.animationSpeed > 0) {
-                var idx = Math.floor(this.index);
-                frame = this.frames[idx % this.frames.length];
-            }
-            var sprite_x = this.spriteSheetCoordinates.x + frame * this.spriteSize[0];
-            var sprite_y = this.spriteSheetCoordinates.y;
+            var _a = this.getSpriteSheetCoordinates(), sprite_x = _a[0], sprite_y = _a[1];
             if (rotation === 0) {
-                ctx.drawImage(resourceManager.get(this.url), sprite_x, sprite_y, this.spriteSize[0], this.spriteSize[1], pos.x - size[0] / 2.0, pos.y - size[1] / 2.0, size[0], size[1]);
+                ctx.drawImage(resourceManager.get(this.url), sprite_x, sprite_y, this.spriteSize[0], this.spriteSize[1], pos.x - size[0] / 2, pos.y - size[1] / 2, size[0], size[1]);
             }
             else {
                 ctx.translate(pos.x, pos.y);
@@ -835,6 +822,10 @@ var ps;
                 ctx.rotate(-rotation);
                 ctx.translate(-pos.x, -pos.y);
             }
+        };
+        Sprite.prototype.update = function (dt) { };
+        Sprite.prototype.getSpriteSheetCoordinates = function () {
+            return [this.spriteSheetCoordinates.x, this.spriteSheetCoordinates.y];
         };
         return Sprite;
     }());
@@ -862,10 +853,42 @@ var ps;
     }(ps.Actor));
     ps.ActorWithSprites = ActorWithSprites;
 })(ps || (ps = {}));
+/// <reference path="resourcemanager.ts" />
+/// <reference path="point.ts" />
+/// <reference path="sprite.ts" />
+var ps;
+(function (ps) {
+    var AnimatedSprite = (function (_super) {
+        __extends(AnimatedSprite, _super);
+        function AnimatedSprite(spriteSheetCoordinates, spriteSize, url, frames, animationSpeed) {
+            _super.call(this, spriteSheetCoordinates, spriteSize, url);
+            this.frames = frames;
+            this.animationSpeed = animationSpeed;
+            this.index = 0;
+            this.index = Math.random() * frames.length;
+        }
+        AnimatedSprite.prototype.update = function (dt) {
+            this.index = this.index + this.animationSpeed * dt % this.frames.length;
+        };
+        AnimatedSprite.prototype.getSpriteSheetCoordinates = function () {
+            var frame = 0;
+            if (this.animationSpeed > 0) {
+                var idx = Math.floor(this.index);
+                frame = this.frames[idx % this.frames.length];
+            }
+            var sprite_x = this.spriteSheetCoordinates.x + frame * this.spriteSize[0];
+            var sprite_y = this.spriteSheetCoordinates.y;
+            return [sprite_x, sprite_y];
+        };
+        return AnimatedSprite;
+    }(ps.Sprite));
+    ps.AnimatedSprite = AnimatedSprite;
+})(ps || (ps = {}));
 /// <reference path="game.ts" />
 /// <reference path="engine.ts" />
 /// <reference path="actorwithsprites.ts" />
 /// <reference path="sprite.ts" />
+/// <reference path="animatedsprite.ts" />
 /// <reference path="collision/collisiondetector.ts" />
 /// <reference path="collision/collisionresolver.ts" />
 /// <reference path="collision/defertoactorcollisionresolver.ts" />

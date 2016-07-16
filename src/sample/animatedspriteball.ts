@@ -1,16 +1,16 @@
 /// <reference path="../../dist/piston-0.4.0.d.ts" />
 
 namespace SampleGame {
-    export class SpriteBall extends ps.ActorWithSprites {
+    export class AnimatedSpriteBall extends ps.ActorWithSprites {
         initialPos: ps.Point;
         constructor() {
-            super(new ps.Point(100, 150));
+            super(new ps.Point(100, 100));
             this.vel = new ps.Vector(10, 0);
             this.radius = 10;
             this.rotationSpeed = -1;
             this.initialPos = this.pos;
             
-            let ballSprite = new ps.Sprite(new ps.Point(0, 0), [10, 10], "assets/ball.png");
+            let ballSprite = new ps.AnimatedSprite(new ps.Point(0, 0), [10, 10], "assets/ball.png", [0, 1, 2], 0.9);
             this.sprites.push(ballSprite);
         }
 

@@ -1,6 +1,7 @@
 /// <reference path="../../dist/piston-0.4.0.d.ts" />
 /// <reference path="ball.ts" />
 /// <reference path="box.ts" />
+/// <reference path="animatedspriteball.ts" />
 /// <reference path="spriteball.ts" />
 /// <reference path="mouseball.ts" />
 /// <reference path="background.ts" />
@@ -21,7 +22,14 @@ namespace SampleGame {
     
     game.loadResources("assets/ball.png");
     game.mouse.setCustomCursor("assets/crosshairs.png", new ps.Point(10, 10));
-    game.scene.addActors(new Background(), box, new SpriteBall(), b1, b2, new MouseBall(), new Person());
+    game.scene.addActors(new Background(), 
+                         box, 
+                         new SpriteBall(),
+                         new AnimatedSpriteBall(), 
+                         b1, 
+                         b2, 
+                         new MouseBall(), 
+                         new Person());
     game.camera.viewPort = new ps.Vector(450, 450);
 
     game.mouse.addMouseMoveEventListener((pos) =>  {
