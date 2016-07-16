@@ -122,8 +122,6 @@ namespace ps.input {
             e.stopImmediatePropagation();
             e.preventDefault();
 
-            console.log(e.deltaY);
-
             for (let listener of this.mouseWheelListeners) {
                 listener(e.deltaX, e.deltaY);
             }

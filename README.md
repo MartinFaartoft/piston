@@ -8,11 +8,21 @@ A game engine for making 2D games using HTML5 Canvas
 
 ## Features
 * Collision detection
-* Sprite animation
+* Sprite painting and animation
+* Movable and zoomable camera
 * Reading input from keyboard and mouse
 * Resource loading (currently images) before game start
 
 ## Changelog
+
+### Version 0.5.0
+* Added support for mouse wheel input
+* Added Camera class that allows
+  * Moving and zooming the camera within a scene
+  * Toggling full-screen
+* Added Game class to simplify starting a new game
+* Renamed Entity to Actor
+* Added rotation and rotationSpeed to Actor base class
 
 ### Version 0.4.0
 * Added Support for mouse input and custom cursor graphics

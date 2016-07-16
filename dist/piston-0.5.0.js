@@ -301,7 +301,6 @@ var ps;
             Mouse.prototype.onMouseWheel = function (e) {
                 e.stopImmediatePropagation();
                 e.preventDefault();
-                console.log(e.deltaY);
                 for (var _i = 0, _a = this.mouseWheelListeners; _i < _a.length; _i++) {
                     var listener = _a[_i];
                     listener(e.deltaX, e.deltaY);
@@ -678,9 +677,13 @@ var ps;
             }
         };
         Camera.prototype.zoom = function (amount) {
+            if (this.viewPort.x + amount < 1) {
+                return;
+            }
             var aspectRatio = this.viewPort.x / this.viewPort.y;
             this.viewPort.x += amount;
             this.viewPort.y = this.viewPort.x / aspectRatio;
+            console.log("viewPort width: ", this.viewPort.x);
         };
         Camera.prototype.toggleFullScreen = function () {
             if (!document.webkitFullscreenElement) {
@@ -894,4 +897,4 @@ var ps;
 /// <reference path="collision/defertoactorcollisionresolver.ts" />
 /// <reference path="vector.ts" />
 /// <reference path="point.ts" /> 
-//# sourceMappingURL=piston-0.4.0.js.map
+//# sourceMappingURL=piston-0.5.0.js.map

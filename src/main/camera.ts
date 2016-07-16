@@ -114,9 +114,15 @@ namespace ps {
         }
 
         zoom(amount: number): void {
+            if (this.viewPort.x + amount < 1) {
+                return;
+            }
+
             let aspectRatio = this.viewPort.x / this.viewPort.y;
+
             this.viewPort.x += amount;
             this.viewPort.y = this.viewPort.x / aspectRatio;
+            console.log("viewPort width: ", this.viewPort.x);
         }
 
         toggleFullScreen(): void {
