@@ -7,8 +7,6 @@ namespace ps.input {
         isRightButtonDown: boolean = false;
         isMiddleButtonDown: boolean = false;
 
-        private camera: Camera;
-        private canvas: HTMLCanvasElement;
 
         private mouseMoveDelegate: any;
         private mouseMoveListeners: ((Point) => void)[] = [];
@@ -22,10 +20,7 @@ namespace ps.input {
         private mouseWheelDelegate: any;
         private mouseWheelListeners: ((deltaX: number, deltaY: number) => void)[] = [];
 
-        constructor(camera: Camera) {
-            this.camera = camera;
-            this.canvas = camera.canvas;
-            
+        constructor(private camera: Camera, private canvas: HTMLCanvasElement) {           
             this.mouseMoveDelegate = this.onMouseMove.bind(this);
             this.mouseDownDelegate = this.onMouseDown.bind(this);
             this.mouseUpDelegate = this.onMouseUp.bind(this);

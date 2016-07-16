@@ -20,13 +20,13 @@ namespace ps {
             //measure time taken since last frame was processed
             let dt = this.stopwatch.stop();
 
-            //remove all destroyed entities
+            //remove all destroyed actors
             this.scene.garbageCollect();
 
-            //update entities
+            //update actors
             this.scene.update(dt);
 
-            //detect and resolve any collisions between entities
+            //detect and resolve any collisions between actors
             this.checkCollisions(this.scene.getActors());
 
             //render the frame
@@ -43,8 +43,8 @@ namespace ps {
             this.animator.animate(this);
         }
         
-        private checkCollisions(entities: Actor[]): void {
-            let collisions: collision.Collision[] = this.collisionDetector.findCollisions(entities);
+        private checkCollisions(actors: Actor[]): void {
+            let collisions: collision.Collision[] = this.collisionDetector.findCollisions(actors);
             this.collisionResolver.resolve(collisions);
         }
     }

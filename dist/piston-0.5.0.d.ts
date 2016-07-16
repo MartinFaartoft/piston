@@ -32,7 +32,6 @@ declare namespace ps {
         getActors(): Actor[];
         garbageCollect(): void;
         getSize(): Vector;
-        addActors(...actors: Actor[]): void;
     }
 }
 declare namespace ps {
@@ -89,12 +88,12 @@ declare namespace ps {
 }
 declare namespace ps.input {
     class Mouse {
+        private camera;
+        private canvas;
         private positionOnCanvas;
         isLeftButtonDown: boolean;
         isRightButtonDown: boolean;
         isMiddleButtonDown: boolean;
-        private camera;
-        private canvas;
         private mouseMoveDelegate;
         private mouseMoveListeners;
         private mouseDownDelegate;
@@ -103,7 +102,7 @@ declare namespace ps.input {
         private mouseUpListeners;
         private mouseWheelDelegate;
         private mouseWheelListeners;
-        constructor(camera: Camera);
+        constructor(camera: Camera, canvas: HTMLCanvasElement);
         enable(): void;
         disable(): void;
         setCustomCursor(url: string, hotspot: Point): void;
@@ -146,7 +145,6 @@ declare namespace ps {
         constructor(canvas?: HTMLCanvasElement, scene?: Scene);
         start(): void;
         loadResources(...resources: string[]): void;
-        setResolution(resolution: Vector): void;
         private createCanvas();
         private getAspectRatio();
         private getMaxCanvasSize(windowWidth, windowHeight, aspectRatio);
@@ -159,21 +157,21 @@ declare namespace ps {
 }
 declare namespace ps.collision {
     class Collision {
-        entities: Actor[];
-        constructor(...entities: Actor[]);
+        actors: Actor[];
+        constructor(...actors: Actor[]);
     }
 }
 declare namespace ps.collision {
     interface CollisionDetector {
-        findCollisions(entities: Actor[]): Collision[];
+        findCollisions(actors: Actor[]): Collision[];
         collides(a: Actor, b: Actor): any;
     }
 }
 declare namespace ps.collision {
     class CircularCollisionDetector implements CollisionDetector {
-        findCollisions(entities: Actor[]): Collision[];
+        findCollisions(actors: Actor[]): Collision[];
         collides(a: Actor, b: Actor): boolean;
-        private getCollisionEnabledEntities(entities);
+        private getCollisionEnabledActors(actors);
     }
 }
 declare namespace ps.collision {
@@ -217,7 +215,7 @@ declare namespace ps {
 }
 declare namespace ps {
     class Camera {
-        canvas: HTMLCanvasElement;
+        private canvas;
         resourceManager: ResourceManager;
         coordConverter: CoordConverter;
         sceneSize: Vector;
@@ -225,6 +223,7 @@ declare namespace ps {
         pos: Point;
         backgroundColor: string;
         private ctx;
+        private oldCanvasSize;
         constructor(canvas: HTMLCanvasElement, resourceManager: ResourceManager, coordConverter: CoordConverter, sceneSize: Vector, viewPort: Vector, pos: Point);
         centerOn(p: Point): void;
         fillCircle(pos: Point, radius: number, color: string): void;
@@ -238,8 +237,10 @@ declare namespace ps {
         private paintSpriteInternal(sprite, pos, size, rotation);
         scale(n: number): number;
         render(scene: Scene): void;
+        private getAspectRatio();
         zoom(amount: number): void;
         toggleFullScreen(): void;
+        resizeCanvas(size: Vector): void;
         private clear();
         private paintWhileRotated(center, rotation, paintDelegate);
     }
@@ -255,7 +256,7 @@ declare namespace ps {
         constructor(animator: AnimationFrameProvider, camera: Camera, scene: Scene);
         run(): void;
         start(): void;
-        private checkCollisions(entities);
+        private checkCollisions(actors);
     }
 }
 declare namespace ps {

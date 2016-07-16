@@ -11,7 +11,5 @@ namespace ps {
         garbageCollect(): void;
 
         getSize(): Vector;
-
-        addActors(...actors: Actor[]): void
     }
 }

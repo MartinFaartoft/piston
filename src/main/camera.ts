@@ -6,8 +6,9 @@ namespace ps {
         backgroundColor: string = "black";
 
         private ctx: CanvasRenderingContext2D;
+        private oldCanvasSize: Vector;
 
-        constructor(public canvas: HTMLCanvasElement, 
+        constructor(private canvas: HTMLCanvasElement, 
                     public resourceManager: ResourceManager, 
                     public coordConverter: CoordConverter, 
                     public sceneSize: Vector, //size of scene / game world
@@ -16,14 +17,7 @@ namespace ps {
             this.canvas = canvas;
             this.ctx = canvas.getContext("2d");
         }
-        
-        //TODO implement here 
-        // function resizeCanvas(e) {
-        //     canvas.width = window.innerWidth;
-        //     canvas.height = window.innerWidth / aspectRatio;
-        //     engine.setResolution(new ps.Vector(canvas.width, canvas.height));
-        // }
-        // window.onresize = resizeCanvas;
+                
         centerOn(p: Point) { //gamepoint
             this.pos = p.subtract(this.viewPort.multiply(.5));
         }
@@ -113,25 +107,37 @@ namespace ps {
             }
         }
 
+        private getAspectRatio(): number {
+            return this.viewPort.x / this.viewPort.y;
+        }
+
         zoom(amount: number): void {
             if (this.viewPort.x + amount < 1) {
                 return;
             }
 
-            let aspectRatio = this.viewPort.x / this.viewPort.y;
+            let aspectRatio = this.getAspectRatio();
 
             this.viewPort.x += amount;
             this.viewPort.y = this.viewPort.x / aspectRatio;
-            console.log("viewPort width: ", this.viewPort.x);
         }
 
         toggleFullScreen(): void {
             if (!document.webkitFullscreenElement) {
+                this.oldCanvasSize = new Vector(this.canvas.width, this.canvas.height);
                 this.canvas.webkitRequestFullscreen();
+                this.resizeCanvas(new Vector(screen.width, screen.height));
             }
             else {
                 document.webkitExitFullscreen();
+                this.resizeCanvas(this.oldCanvasSize);
             }
+        }
+
+        resizeCanvas(size: Vector): void {
+            this.canvas.width = size.x;
+            this.canvas.height = size.y;
+            this.coordConverter.setResolution(size);
         }
 
         private clear(): void {

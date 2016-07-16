@@ -37,7 +37,7 @@ namespace EngineTest {
         render() { }
     }
 
-    class TestEntity extends ps.Actor {
+    class TestActor extends ps.Actor {
         render() { }
     }
 
@@ -46,7 +46,7 @@ namespace EngineTest {
         let animator: InMemoryAnimator;
         let engine: ps.Engine;
         let cameraMock: ps.Camera;
-        let scene: ps.Scene;
+        let scene: ps.DefaultScene;
         let timeElapsed = 123;
         let stopWatch = new FakeStopwatch(timeElapsed);
 
@@ -60,20 +60,20 @@ namespace EngineTest {
             engine.stopwatch = stopWatch;
         });
 
-        describe("with a registered entity", () => {
-            let mockEntity: any;
+        describe("with a registered actor", () => {
+            let mockActor: any;
 
             beforeEach(() => {
-                mockEntity = jasmine.createSpyObj("Entity", ["render", "update", "remove"]);
-                scene.addActors(mockEntity);
+                mockActor = jasmine.createSpyObj("Actor", ["render", "update", "remove"]);
+                scene.addActors(mockActor);
             });
 
-            it("should call update on a registered entity with correct parameters", () => {
+            it("should call update on a registered actor with correct parameters", () => {
                 //when
                 engine.start();
 
                 //then
-                expect(mockEntity.update).toHaveBeenCalledWith(timeElapsed, scene);
+                expect(mockActor.update).toHaveBeenCalledWith(timeElapsed, scene);
             });
 
             it("should call render on camera", () => {
@@ -84,19 +84,19 @@ namespace EngineTest {
                 expect(cameraMock.render).toHaveBeenCalledTimes(1);
             });
 
-            it("should not call update on a destroyed entity", () => {
+            it("should not call update on a destroyed actor", () => {
                 //given
-                mockEntity.destroyed = true;
+                mockActor.destroyed = true;
 
                 //when
                 engine.start();
 
                 //then
-                expect(mockEntity.update).not.toHaveBeenCalled();
+                expect(mockActor.update).not.toHaveBeenCalled();
             });
         });
 
-        describe("with multiple registered entities", () => {
+        describe("with multiple registered actors", () => {
             let b1: Ball, b2: Ball, b3: Ball;
             
             beforeEach(() => {
@@ -106,7 +106,7 @@ namespace EngineTest {
                 scene.addActors(b1, b2, b3);
             });
             
-            it("should check for collisions between all Collidable entities with collision detection enabled", () => {
+            it("should check for collisions between all Collidable actors with collision detection enabled", () => {
                 //given
                 spyOn(engine.collisionDetector, "collides");
                 
@@ -120,7 +120,7 @@ namespace EngineTest {
                 expect(engine.collisionDetector.collides).toHaveBeenCalledWith(b2, b3);
             });
 
-            it("should not check collisions with entities with collision detection disabled", () => {
+            it("should not check collisions with actors with collision detection disabled", () => {
                 //given
                 spyOn(engine.collisionDetector, "collides");
                 b3.isCollisionDetectionEnabled = false;
@@ -132,7 +132,7 @@ namespace EngineTest {
                 expect(engine.collisionDetector.collides).not.toHaveBeenCalledWith(b1, b3);
             });
 
-            it("should call collideWith on colliding entities", () => {
+            it("should call collideWith on colliding actors", () => {
                 //given
                 spyOn(b1, "collideWith");
                 spyOn(b2, "collideWith");
@@ -145,7 +145,7 @@ namespace EngineTest {
                 expect(b2.collideWith).toHaveBeenCalledWith(b1);
             });
 
-            it("should destroy colliding entities if destroyOnCollision is true", () => {
+            it("should destroy colliding actors if destroyOnCollision is true", () => {
                 //given
                 b1.destroyOnCollision = true;
                 

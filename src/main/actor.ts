@@ -16,10 +16,8 @@ namespace ps {
 
         game: Game;
 
-        //for now, all entities are round
+        //for now, all actors are round
         radius: number;
-        
-        
         
         constructor(public pos: Point) {}
 

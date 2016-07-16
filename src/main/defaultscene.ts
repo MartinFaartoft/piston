@@ -38,6 +38,10 @@ namespace ps {
 
         setGame(game: Game) {
             this.game = game;
+
+            for (let actor of this.getActors()) {
+                actor.game = this.game;
+            };
         }
     }
 }

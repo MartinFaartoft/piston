@@ -3,7 +3,7 @@
 
 namespace ps.collision {
     export interface CollisionDetector {
-        findCollisions(entities: Actor[]): Collision[];
+        findCollisions(actors: Actor[]): Collision[];
         collides(a: Actor, b: Actor);
     }   
 }

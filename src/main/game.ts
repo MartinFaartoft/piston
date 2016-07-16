@@ -29,7 +29,7 @@ namespace ps {
                                     resolution.clone(),
                                     new Point(0, 0));
 
-            this.mouse = new input.Mouse(this.camera);
+            this.mouse = new input.Mouse(this.camera, this.canvas);
             this.mouse.enable();
             
             this.keyboard = new input.Keyboard(document, window);
@@ -50,10 +50,6 @@ namespace ps {
 
         loadResources(...resources: string[]): void {
             this.resources = this.resources.concat(resources);
-        }
-
-        setResolution(resolution: Vector): void { //todo make internal to camera within resize logic
-            this.camera.coordConverter.setResolution(resolution);
         }
 
         private createCanvas(): HTMLCanvasElement {

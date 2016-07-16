@@ -163,6 +163,11 @@ var ps;
         };
         DefaultScene.prototype.setGame = function (game) {
             this.game = game;
+            for (var _i = 0, _a = this.getActors(); _i < _a.length; _i++) {
+                var actor = _a[_i];
+                actor.game = this.game;
+            }
+            ;
         };
         return DefaultScene;
     }());
@@ -206,7 +211,9 @@ var ps;
     var input;
     (function (input) {
         var Mouse = (function () {
-            function Mouse(camera) {
+            function Mouse(camera, canvas) {
+                this.camera = camera;
+                this.canvas = canvas;
                 this.positionOnCanvas = new ps.Point(0, 0);
                 this.isLeftButtonDown = false;
                 this.isRightButtonDown = false;
@@ -215,8 +222,6 @@ var ps;
                 this.mouseDownListeners = [];
                 this.mouseUpListeners = [];
                 this.mouseWheelListeners = [];
-                this.camera = camera;
-                this.canvas = camera.canvas;
                 this.mouseMoveDelegate = this.onMouseMove.bind(this);
                 this.mouseDownDelegate = this.onMouseDown.bind(this);
                 this.mouseUpDelegate = this.onMouseUp.bind(this);
@@ -398,7 +403,7 @@ var ps;
             this.scene = scene || new ps.DefaultScene(resolution.clone());
             this.scene.setGame(this);
             this.camera = new ps.Camera(this.canvas, this.resourceManager, new ps.DefaultCoordConverter(resolution.clone()), this.scene.getSize(), resolution.clone(), new ps.Point(0, 0));
-            this.mouse = new ps.input.Mouse(this.camera);
+            this.mouse = new ps.input.Mouse(this.camera, this.canvas);
             this.mouse.enable();
             this.keyboard = new ps.input.Keyboard(document, window);
             this.keyboard.enable();
@@ -420,9 +425,6 @@ var ps;
                 resources[_i - 0] = arguments[_i];
             }
             this.resources = this.resources.concat(resources);
-        };
-        Game.prototype.setResolution = function (resolution) {
-            this.camera.coordConverter.setResolution(resolution);
         };
         Game.prototype.createCanvas = function () {
             var canvas = document.createElement("canvas");
@@ -454,11 +456,11 @@ var ps;
     (function (collision) {
         var Collision = (function () {
             function Collision() {
-                var entities = [];
+                var actors = [];
                 for (var _i = 0; _i < arguments.length; _i++) {
-                    entities[_i - 0] = arguments[_i];
+                    actors[_i - 0] = arguments[_i];
                 }
-                this.entities = entities;
+                this.actors = actors;
             }
             return Collision;
         }());
@@ -476,8 +478,8 @@ var ps;
         var CircularCollisionDetector = (function () {
             function CircularCollisionDetector() {
             }
-            CircularCollisionDetector.prototype.findCollisions = function (entities) {
-                var collidables = this.getCollisionEnabledEntities(entities);
+            CircularCollisionDetector.prototype.findCollisions = function (actors) {
+                var collidables = this.getCollisionEnabledActors(actors);
                 var collisions = [];
                 for (var i = 0; i < collidables.length - 1; i++) {
                     for (var j = i + 1; j < collidables.length; j++) {
@@ -491,8 +493,8 @@ var ps;
             CircularCollisionDetector.prototype.collides = function (a, b) {
                 return a.pos.distanceTo(b.pos) < a.radius + b.radius;
             };
-            CircularCollisionDetector.prototype.getCollisionEnabledEntities = function (entities) {
-                return entities.filter(function (e) { return e.isCollisionDetectionEnabled; });
+            CircularCollisionDetector.prototype.getCollisionEnabledActors = function (actors) {
+                return actors.filter(function (e) { return e.isCollisionDetectionEnabled; });
             };
             return CircularCollisionDetector;
         }());
@@ -516,11 +518,11 @@ var ps;
                 }
             };
             DeferToActorCollisionResolver.prototype.resolveSingleCollision = function (collision) {
-                var entities = collision.entities;
-                for (var i = 0; i < entities.length - 1; i++) {
-                    for (var j = i + 1; j < entities.length; j++) {
-                        entities[i].collideWith(entities[j]);
-                        entities[j].collideWith(entities[i]);
+                var actors = collision.actors;
+                for (var i = 0; i < actors.length - 1; i++) {
+                    for (var j = i + 1; j < actors.length; j++) {
+                        actors[i].collideWith(actors[j]);
+                        actors[j].collideWith(actors[i]);
                     }
                 }
             };
@@ -595,13 +597,6 @@ var ps;
             this.canvas = canvas;
             this.ctx = canvas.getContext("2d");
         }
-        //TODO implement here 
-        // function resizeCanvas(e) {
-        //     canvas.width = window.innerWidth;
-        //     canvas.height = window.innerWidth / aspectRatio;
-        //     engine.setResolution(new ps.Vector(canvas.width, canvas.height));
-        // }
-        // window.onresize = resizeCanvas;
         Camera.prototype.centerOn = function (p) {
             this.pos = p.subtract(this.viewPort.multiply(.5));
         };
@@ -676,22 +671,32 @@ var ps;
                 actor.render(this, scene);
             }
         };
+        Camera.prototype.getAspectRatio = function () {
+            return this.viewPort.x / this.viewPort.y;
+        };
         Camera.prototype.zoom = function (amount) {
             if (this.viewPort.x + amount < 1) {
                 return;
             }
-            var aspectRatio = this.viewPort.x / this.viewPort.y;
+            var aspectRatio = this.getAspectRatio();
             this.viewPort.x += amount;
             this.viewPort.y = this.viewPort.x / aspectRatio;
-            console.log("viewPort width: ", this.viewPort.x);
         };
         Camera.prototype.toggleFullScreen = function () {
             if (!document.webkitFullscreenElement) {
+                this.oldCanvasSize = new ps.Vector(this.canvas.width, this.canvas.height);
                 this.canvas.webkitRequestFullscreen();
+                this.resizeCanvas(new ps.Vector(screen.width, screen.height));
             }
             else {
                 document.webkitExitFullscreen();
+                this.resizeCanvas(this.oldCanvasSize);
             }
+        };
+        Camera.prototype.resizeCanvas = function (size) {
+            this.canvas.width = size.x;
+            this.canvas.height = size.y;
+            this.coordConverter.setResolution(size);
         };
         Camera.prototype.clear = function () {
             this.ctx.fillStyle = this.backgroundColor;
@@ -730,11 +735,11 @@ var ps;
         Engine.prototype.run = function () {
             //measure time taken since last frame was processed
             var dt = this.stopwatch.stop();
-            //remove all destroyed entities
+            //remove all destroyed actors
             this.scene.garbageCollect();
-            //update entities
+            //update actors
             this.scene.update(dt);
-            //detect and resolve any collisions between entities
+            //detect and resolve any collisions between actors
             this.checkCollisions(this.scene.getActors());
             //render the frame
             this.camera.render(this.scene);
@@ -746,8 +751,8 @@ var ps;
         Engine.prototype.start = function () {
             this.animator.animate(this);
         };
-        Engine.prototype.checkCollisions = function (entities) {
-            var collisions = this.collisionDetector.findCollisions(entities);
+        Engine.prototype.checkCollisions = function (actors) {
+            var collisions = this.collisionDetector.findCollisions(actors);
             this.collisionResolver.resolve(collisions);
         };
         return Engine;

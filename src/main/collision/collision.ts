@@ -2,9 +2,9 @@
 
 namespace ps.collision {
     export class Collision {
-        entities: Actor[];
-        constructor(...entities: Actor[]) {
-            this.entities = entities;
+        actors: Actor[];
+        constructor(...actors: Actor[]) {
+            this.actors = actors;
         }
     }
 }

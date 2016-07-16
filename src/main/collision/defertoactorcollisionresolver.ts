@@ -11,12 +11,12 @@ namespace ps.collision {
         }
 
         private resolveSingleCollision(collision: Collision): void {
-            let entities: Actor[] = collision.entities;
+            let actors: Actor[] = collision.actors;
 
-            for (let i = 0; i < entities.length - 1; i++) {
-                for (let j = i + 1; j < entities.length; j++) {
-                    entities[i].collideWith(entities[j]);
-                    entities[j].collideWith(entities[i]);
+            for (let i = 0; i < actors.length - 1; i++) {
+                for (let j = i + 1; j < actors.length; j++) {
+                    actors[i].collideWith(actors[j]);
+                    actors[j].collideWith(actors[i]);
                 }
             }
         }
