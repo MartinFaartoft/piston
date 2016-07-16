@@ -101,6 +101,8 @@ declare namespace ps.input {
         private mouseDownListeners;
         private mouseUpDelegate;
         private mouseUpListeners;
+        private mouseWheelDelegate;
+        private mouseWheelListeners;
         constructor(camera: Camera);
         enable(): void;
         disable(): void;
@@ -112,6 +114,8 @@ declare namespace ps.input {
         private onMouseDown(e);
         addMouseUpEventListener(action: (Point, MouseEvent) => void): void;
         private onMouseUp(e);
+        addMouseWheelEventListener(action: (deltaX: number, deltaY: number) => void): void;
+        private onMouseWheel(e);
         private findPos(obj);
     }
 }
@@ -234,6 +238,7 @@ declare namespace ps {
         private paintSpriteInternal(sprite, pos, size, rotation);
         scale(n: number): number;
         render(scene: Scene): void;
+        zoom(amount: number): void;
         toggleFullScreen(): void;
         private clear();
         private paintWhileRotated(center, rotation, paintDelegate);

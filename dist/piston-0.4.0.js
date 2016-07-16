@@ -214,11 +214,13 @@ var ps;
                 this.mouseMoveListeners = [];
                 this.mouseDownListeners = [];
                 this.mouseUpListeners = [];
+                this.mouseWheelListeners = [];
                 this.camera = camera;
                 this.canvas = camera.canvas;
                 this.mouseMoveDelegate = this.onMouseMove.bind(this);
                 this.mouseDownDelegate = this.onMouseDown.bind(this);
                 this.mouseUpDelegate = this.onMouseUp.bind(this);
+                this.mouseWheelDelegate = this.onMouseWheel.bind(this);
             }
             Mouse.prototype.enable = function () {
                 //disable context menu on rightclick, to allow using mouse2
@@ -228,6 +230,7 @@ var ps;
                 this.canvas.addEventListener("mousemove", this.mouseMoveDelegate, false);
                 this.canvas.addEventListener("mousedown", this.mouseDownDelegate, false);
                 this.canvas.addEventListener("mouseup", this.mouseUpDelegate, false);
+                this.canvas.addEventListener("wheel", this.mouseWheelDelegate, false);
             };
             Mouse.prototype.disable = function () {
                 document.body.oncontextmenu = function (e) { return true; };
@@ -235,6 +238,7 @@ var ps;
                 this.canvas.removeEventListener("mousemove", this.mouseMoveDelegate, false);
                 this.canvas.removeEventListener("mousedown", this.mouseDownDelegate, false);
                 this.canvas.removeEventListener("mouseup", this.mouseUpDelegate, false);
+                this.canvas.removeEventListener("wheel", this.mouseWheelDelegate, false);
             };
             Mouse.prototype.setCustomCursor = function (url, hotspot) {
                 this.canvas.style.cursor = "url(" + url + ") " + hotspot.x + " " + hotspot.y + ", auto";
@@ -289,6 +293,18 @@ var ps;
                 for (var _i = 0, _a = this.mouseUpListeners; _i < _a.length; _i++) {
                     var listener = _a[_i];
                     listener(this.positionOnCanvas, e.button);
+                }
+            };
+            Mouse.prototype.addMouseWheelEventListener = function (action) {
+                this.mouseWheelListeners.push(action);
+            };
+            Mouse.prototype.onMouseWheel = function (e) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                console.log(e.deltaY);
+                for (var _i = 0, _a = this.mouseWheelListeners; _i < _a.length; _i++) {
+                    var listener = _a[_i];
+                    listener(e.deltaX, e.deltaY);
                 }
             };
             // Find out where an element is on the page
@@ -660,7 +676,11 @@ var ps;
                 var actor = _a[_i];
                 actor.render(this, scene);
             }
-            console.log("camera position: ", this.pos);
+        };
+        Camera.prototype.zoom = function (amount) {
+            var aspectRatio = this.viewPort.x / this.viewPort.y;
+            this.viewPort.x += amount;
+            this.viewPort.y = this.viewPort.x / aspectRatio;
         };
         Camera.prototype.toggleFullScreen = function () {
             if (!document.webkitFullscreenElement) {

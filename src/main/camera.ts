@@ -111,8 +111,12 @@ namespace ps {
             for (let actor of scene.getActors()) {
                 actor.render(this, scene);
             }
+        }
 
-            console.log("camera position: ", this.pos);
+        zoom(amount: number): void {
+            let aspectRatio = this.viewPort.x / this.viewPort.y;
+            this.viewPort.x += amount;
+            this.viewPort.y = this.viewPort.x / aspectRatio;
         }
 
         toggleFullScreen(): void {

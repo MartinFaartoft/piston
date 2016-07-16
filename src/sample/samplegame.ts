@@ -34,6 +34,11 @@ namespace SampleGame {
         }
     });
 
+    game.mouse.addMouseWheelEventListener((deltaX, deltaY) => {
+        game.camera.zoom(deltaY * .3);
+        console.log(deltaX, deltaY);
+    });
+
     game.mouse.addMouseUpEventListener((pos, button) =>  {
         if (button === 0) {
             box.color = "blue";

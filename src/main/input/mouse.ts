@@ -19,6 +19,9 @@ namespace ps.input {
         private mouseUpDelegate: any;
         private mouseUpListeners: ((p: Point, button: number) => void)[] = [];
 
+        private mouseWheelDelegate: any;
+        private mouseWheelListeners: ((deltaX: number, deltaY: number) => void)[] = [];
+
         constructor(camera: Camera) {
             this.camera = camera;
             this.canvas = camera.canvas;
@@ -26,6 +29,7 @@ namespace ps.input {
             this.mouseMoveDelegate = this.onMouseMove.bind(this);
             this.mouseDownDelegate = this.onMouseDown.bind(this);
             this.mouseUpDelegate = this.onMouseUp.bind(this);
+            this.mouseWheelDelegate = this.onMouseWheel.bind(this);
         }
 
         enable() {
@@ -38,6 +42,7 @@ namespace ps.input {
             this.canvas.addEventListener("mousemove", this.mouseMoveDelegate,  false);
             this.canvas.addEventListener("mousedown", this.mouseDownDelegate, false);
             this.canvas.addEventListener("mouseup", this.mouseUpDelegate, false);
+            this.canvas.addEventListener("wheel", this.mouseWheelDelegate, false);
         }
 
         disable() {
@@ -47,6 +52,7 @@ namespace ps.input {
             this.canvas.removeEventListener("mousemove", this.mouseMoveDelegate,  false);
             this.canvas.removeEventListener("mousedown", this.mouseDownDelegate, false);
             this.canvas.removeEventListener("mouseup", this.mouseUpDelegate, false);
+            this.canvas.removeEventListener("wheel", this.mouseWheelDelegate, false);
         }
 
         setCustomCursor(url: string, hotspot: Point) {
@@ -105,6 +111,21 @@ namespace ps.input {
 
             for (let listener of this.mouseUpListeners) {
                 listener(this.positionOnCanvas, e.button);
+            }
+        }
+
+        public addMouseWheelEventListener(action: (deltaX: number, deltaY: number) => void): void {
+            this.mouseWheelListeners.push(action);
+        }
+
+        private onMouseWheel(e: WheelEvent): void {
+            e.stopImmediatePropagation();
+            e.preventDefault();
+
+            console.log(e.deltaY);
+
+            for (let listener of this.mouseWheelListeners) {
+                listener(e.deltaX, e.deltaY);
             }
         }
 
