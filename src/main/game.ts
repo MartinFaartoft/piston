@@ -61,6 +61,10 @@ namespace ps {
             document.body.appendChild(canvas);
             document.body.style.margin = "0";
             
+            window.onresize = e => {
+                this.camera.resizeCanvas(this.getMaxCanvasSize(window.innerWidth, window.innerHeight, this.getAspectRatio()));
+            }
+
             return canvas;
         }
 

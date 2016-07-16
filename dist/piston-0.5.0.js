@@ -427,12 +427,16 @@ var ps;
             this.resources = this.resources.concat(resources);
         };
         Game.prototype.createCanvas = function () {
+            var _this = this;
             var canvas = document.createElement("canvas");
             var resolution = this.getMaxCanvasSize(window.innerWidth, window.innerHeight, this.getAspectRatio());
             canvas.width = resolution.x;
             canvas.height = resolution.y;
             document.body.appendChild(canvas);
             document.body.style.margin = "0";
+            window.onresize = function (e) {
+                _this.camera.resizeCanvas(_this.getMaxCanvasSize(window.innerWidth, window.innerHeight, _this.getAspectRatio()));
+            };
             return canvas;
         };
         Game.prototype.getAspectRatio = function () {
